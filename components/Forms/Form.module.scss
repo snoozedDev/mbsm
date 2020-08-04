@@ -1,0 +1,81 @@
+@import "../../style/nord.scss";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 20vw;
+  min-width: 300px;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.title {
+  color: $nord0;
+  font-family: "NotoSansJP";
+  font-weight: bold;
+  font-size: 2em;
+  background-color: $nord15;
+  padding: 5px 10px;
+  user-select: none;
+}
+
+.input {
+  border-radius: 0;
+  background-color: $nord2;
+  border: none;
+  color: $nord4;
+  padding: 10px;
+  font-size: 1.3em;
+  margin-top: 15px;
+  width: calc(100% - 20px);
+  transition: all 200ms ease-in-out;
+  &::placeholder {
+    color: $nord0;
+  }
+  &:active,
+  &:focus {
+    filter: brightness(120%);
+  }
+}
+
+.button {
+  font-weight: bold;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  font-size: 1.3em;
+  background-color: $nord8;
+  color: $nord1;
+  margin-top: 15px;
+  transition: all 200ms ease-in-out;
+  &:hover,
+  &:focus {
+    filter: brightness(120%);
+  }
+}
+
+.small_button {
+  font-size: 0.8em;
+  font-weight: unset;
+  padding: 5px;
+  padding-bottom: 0;
+  padding-right: 0;
+  color: $nord4;
+  margin-left: auto;
+  background-color: transparent;
+  margin-top: 8px;
+  text-decoration: underline;
+  opacity: 0.6;
+  &:hover,
+  &:focus {
+    opacity: 1;
+  }
+}
+
+.buttons_container {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: flex-end;
+}

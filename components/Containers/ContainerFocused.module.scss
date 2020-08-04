@@ -1,0 +1,23 @@
+@import "../../style/nord.scss";
+
+.container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $nord0;
+  padding: 10px;
+  max-height: calc(100% - 20px);
+  max-width: calc(100% - 20px);
+}
+
+.child_container {
+  object-fit: cover;
+  background-color: $nord0;
+  padding: 20px;
+  box-sizing: border-box;
+  max-height: inherit;
+  max-width: inherit;
+  border-radius: 0px;
+}

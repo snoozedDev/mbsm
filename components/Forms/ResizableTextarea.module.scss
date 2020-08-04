@@ -1,0 +1,23 @@
+@import "../../style/variables.scss";
+
+.textarea_container {
+  width: 100%;
+  position: relative;
+  > .bar {
+    transition: 150ms ease-in-out;
+    width: 0%;
+    background-color: $nord4;
+    opacity: 0;
+    height: 5px;
+    position: absolute;
+    left: 0px;
+    bottom: 1px;
+    > .bar_text {
+      right: 0px;
+      bottom: 0.5em;
+      font-size: 0.7em;
+      font-family: $font-bold;
+      position: absolute;
+    }
+  }
+}
