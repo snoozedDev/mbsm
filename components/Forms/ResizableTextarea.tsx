@@ -34,7 +34,7 @@ export const ResizableTextarea = ({
 }: ResizableTextareaProps) => {
   const [rows, setRows] = useState(minRows);
   const [height, setHeight] = useState(0);
-  const [lineHeight, setLineHeight] = useState(0);
+  const [oneLineHeight, setOneLineHeight] = useState(0);
   const textarea = useRef<any>();
   const verticalPadding = padding * 2;
 
@@ -48,8 +48,12 @@ export const ResizableTextarea = ({
   }, [height]);
 
   const calculateTextArea = (first = false) => {
-    if (first) setLineHeight(textarea.current.scrollHeight - verticalPadding);
+    const lineHeight =
+      oneLineHeight || textarea.current.scrollHeight - verticalPadding;
+    if (first)
+      setOneLineHeight(textarea.current.scrollHeight - verticalPadding);
     const rows = (textarea.current.scrollHeight - verticalPadding) / lineHeight;
+    console.log(rows, lineHeight);
     setHeight(
       rows < minRows
         ? lineHeight * minRows + verticalPadding

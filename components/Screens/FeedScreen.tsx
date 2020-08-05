@@ -155,7 +155,6 @@ const TextPostFormModal = ({ onHideModal }) => {
         setValue={setTitle}
         placeholder="TITLE (optional)"
         tabIndex={1}
-        textareaLineHeight={28}
         maxLength={72}
         disableNewLine
       />
@@ -166,7 +165,6 @@ const TextPostFormModal = ({ onHideModal }) => {
         setValue={setBody}
         maxRows={40}
         placeholder="BODY"
-        textareaLineHeight={22}
         tabIndex={2}
         maxLength={1024}
       />
@@ -180,7 +178,6 @@ const TextPostFormModal = ({ onHideModal }) => {
         placeholder="TAGS (separated by spaces)"
         tabIndex={2}
         maxLength={256}
-        textareaLineHeight={16}
         spellCheck={false}
         disableNewLine
       />

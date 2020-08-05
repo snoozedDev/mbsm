@@ -1,0 +1,17 @@
+{
+  "name": "sp22hmk-xebc9z",
+  "hash": "r7ludbDfgS+C4JW2zKrqQGcthkDgMhA0ZHw/kwbwLEY=",
+  "description": "API Lambda@Edge for Next CloudFront distribution",
+  "memory": 512,
+  "timeout": 10,
+  "code": "/home/ale/repos/mbsm-site/.serverless_nextjs/api-lambda",
+  "shims": [],
+  "handler": "index.handler",
+  "runtime": "nodejs12.x",
+  "env": {},
+  "role": {
+    "arn": "arn:aws:iam::416801341967:role/sp22hmk-zgtjtna"
+  },
+  "arn": "arn:aws:lambda:us-east-1:416801341967:function:sp22hmk-xebc9z",
+  "region": "us-east-1"
+}

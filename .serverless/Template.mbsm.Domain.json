@@ -1,0 +1,13 @@
+{
+  "region": "us-east-1",
+  "privateZone": false,
+  "domain": "mbsm.io",
+  "subdomains": [
+    {
+      "domain": "dev.mbsm.io",
+      "distributionId": "E1NBLWR498I2GZ",
+      "url": "https://d30thnhmye5jwf.cloudfront.net",
+      "type": "awsCloudFront"
+    }
+  ]
+}

@@ -7,7 +7,7 @@ import "../style/global.scss";
 import "../style/nord.scss";
 import "../style/preload.scss";
 
-export default function MyApp({ Component, pageProps }) {
+const App = ({ Component, pageProps }) => {
   useEffect(() => {
     document.body.className = "";
   }, []);
@@ -17,4 +17,6 @@ export default function MyApp({ Component, pageProps }) {
       <Component {...pageProps} />
     </Provider>
   );
-}
+};
+
+export default App;
