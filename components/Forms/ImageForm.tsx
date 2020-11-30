@@ -4,6 +4,7 @@ import * as R from "ramda";
 import React, { useState } from "react";
 import { ReactSortable, Sortable } from "react-sortablejs";
 import { generateId } from "../../utils/utils";
+import { Modal } from "../Containers/Modal";
 import css from "./ImageForm.module.scss";
 
 interface Vector {
@@ -16,8 +17,7 @@ interface ImageUI {
   url: string;
   mode: "fit" | "fill";
   size: Vector;
-  offset: Vector;
-  scale: number;
+  pointOfInterest: Vector;
 }
 
 interface Row {
@@ -27,12 +27,12 @@ interface Row {
 
 export const ImageForm = () => {
   const [rows, setRows] = useState<Row[]>([]);
-  const [fakeRow, setFakeRow] = useState<Row>({
-    id: "fake-row",
-    images: [],
-  });
+
   const [loading, setLoading] = useState(false);
   const [showFakeRows, setShowFakeRows] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [imageToEdit, setImageToEdit] = useState<string>(null);
+  const [rowToEdit, setRowToEdit] = useState<Row>(null);
 
   const currentImageAmount = [
     ...rows.map((row) => row.images.length),
@@ -59,11 +59,10 @@ export const ImageForm = () => {
                   y: image.getHeight(),
                 },
                 mode: "fill",
-                offset: {
+                pointOfInterest: {
                   x: 0,
                   y: 0,
                 },
-                scale: 1,
                 url: await image.getBase64Async(Jimp.MIME_PNG),
               };
               setRows(addToRows(imageView));
@@ -151,6 +150,13 @@ export const ImageForm = () => {
     return newRows;
   };
 
+  const onEditImage = (imageId: string) => {
+    const selectedRow = R.find((row) => {
+      return !!R.find((image) => image.id === imageId, row.images);
+    }, rows);
+    console.log(selectedRow);
+  };
+
   const shouldPut = (
     to: Sortable,
     _from: Sortable,
@@ -166,22 +172,31 @@ export const ImageForm = () => {
 
   return (
     <div className={css.image_form_container}>
+      <Modal
+        showModal={showEditModal}
+        onHideModal={() => setShowEditModal(false)}
+        renderModal={() => (
+          <EditRow row={rowToEdit} selectedImage={imageToEdit} />
+        )}
+      />
       {!loading && (
         <>
           {rows.map((row, i) =>
             [rows.length - 1, 0].includes(i) ? (
-              <ReactSortable
-                key={row.id}
-                className={cn(css.row, css.fake, showFakeRows && css.show)}
-                list={[]}
-                setList={(images) => setRows(updateRows(images, i))}
-                animation={150}
-                group={"rows-group"}
-                onStart={() => setShowFakeRows(true)}
-                onEnd={onDragEnd}
-              />
+              <div className={css.row_container}>
+                <ReactSortable
+                  key={row.id}
+                  className={cn(css.row, css.fake, showFakeRows && css.show)}
+                  list={[]}
+                  setList={(images) => setRows(updateRows(images, i))}
+                  animation={150}
+                  group={"rows-group"}
+                  onStart={() => setShowFakeRows(true)}
+                  onEnd={onDragEnd}
+                />
+              </div>
             ) : (
-              <>
+              <div className={css.row_container}>
                 <ReactSortable
                   key={row.id}
                   className={css.row}
@@ -195,9 +210,16 @@ export const ImageForm = () => {
                   onStart={() => setShowFakeRows(true)}
                   onEnd={onDragEnd}
                 >
-                  {row.images.map((image, index) => (
+                  {row.images.map((image, _index) => (
                     <div className={css.image_container} key={image.id}>
                       <div className={css.overlay} />
+                      <div
+                        className={css.edit_button}
+                        onClick={(_ev) => {
+                          onEditImage(image.id);
+                          setShowEditModal(true);
+                        }}
+                      />
                       <div
                         className={css.image}
                         style={{
@@ -209,7 +231,7 @@ export const ImageForm = () => {
                     </div>
                   ))}
                 </ReactSortable>
-              </>
+              </div>
             )
           )}
         </>
@@ -231,4 +253,13 @@ export const ImageForm = () => {
       )}
     </div>
   );
+};
+
+interface EditRowProps {
+  row: Row;
+  selectedImage: string;
+}
+
+const EditRow = ({ row }: EditRowProps) => {
+  return row ? <div></div> : null;
 };

@@ -35,6 +35,10 @@ const App = ({ Component, pageProps }) => {
     }, 500);
   };
 
+  const asd = () => {
+    console.log("heye")
+  } 
+
   return (
     <Provider store={store}>
       {fontsLoaded >= fonts.length ? (
