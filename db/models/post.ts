@@ -97,7 +97,6 @@ const getFullFeedForUser = (follower_id: string): Promise<TextPost[]> => {
       const sortedFeed = fullFeed.sort((a, b) =>
         moment(a.created_at).isBefore(b.created_at) ? 1 : -1
       );
-
       resolve(sortedFeed);
     } catch (e) {
       reject(e);

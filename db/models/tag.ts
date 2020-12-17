@@ -1,3 +1,5 @@
+import * as R from "ramda";
+import { TagUI } from "../../utils/types";
 import { kx } from "../knex";
 
 interface ITag {
@@ -8,7 +10,7 @@ interface ITag {
 const getByValue = (value: string): Promise<ITag> => {
   return new Promise(async (resolve, reject) => {
     try {
-      const [tag] = await kx("tags").where({ value });
+      const tag = await kx("tags").where({ value }).first();
       resolve(tag);
     } catch (e) {
       reject(e);
@@ -68,10 +70,39 @@ const relateToPostFromArray = (
   });
 };
 
+const search = (text: string, tagsToIgnore: string[]): Promise<TagUI[]> => {
+  return new Promise(async (resolve, reject) => {
+    const countedCharacters = R.countBy((c) => c, text.split(""));
+    const uniqueCharacters = R.keys(countedCharacters);
+    const rawQuery = uniqueCharacters
+      .map(
+        (char) =>
+          `(select count(*) - 1 from regexp_split_to_table("tags"."value", '${char}')) >= ${countedCharacters[char]}`
+      )
+      .join(" and ");
+    try {
+      const tags: TagUI[] = await kx
+        .select("tags.value as tag")
+        .count("* as occurrences")
+        .from("tags")
+        .where((q) =>
+          q.whereRaw(rawQuery).whereNotIn("tags.value", tagsToIgnore)
+        )
+        .innerJoin("posts_tags", "tags.id", "posts_tags.tag_id")
+        .groupBy("tag")
+        .orderBy("occurrences", "desc");
+      resolve(tags);
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
 export const Tag = {
   getByValue,
   createOrGet,
   createOrGetFromArray,
   relateToPost,
   relateToPostFromArray,
+  search,
 };

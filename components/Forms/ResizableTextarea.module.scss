@@ -11,13 +11,18 @@
     height: 5px;
     position: absolute;
     left: 0px;
-    bottom: 1px;
+    bottom: 0px;
+    z-index: 1;
     > .bar_text {
       right: 0px;
-      bottom: 0.5em;
+      bottom: -1.5em;
       font-size: 0.7em;
-      font-family: $font-bold;
+      background-color: inherit;
+      font-family: "NotoSansJP-Bold";
       position: absolute;
+      padding: 0.2em 0.5em;
+      box-sizing: border-box;
+      color: $nord0;
     }
   }
 }

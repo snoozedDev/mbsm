@@ -6,6 +6,7 @@ import {
   FeedResponse,
   LoginResponse,
   SignupResponse,
+  TagAutocompleteResponse,
   UserResponse,
 } from "./types";
 
@@ -23,6 +24,11 @@ export interface CreatePostForm {
   title: string;
   body: string;
   tags: string;
+}
+
+export interface AutocompleteForm {
+  text: string;
+  ignoreTags: string;
 }
 
 export const login = async (postData: LoginForm): Promise<LoginResponse> => {
@@ -79,5 +85,16 @@ export const uploadAvatar = async (
   formData: FormData
 ): Promise<AvatarResponse> => {
   const { data } = await axios.patch(`/api/auth/avatar`, formData);
+  return data;
+};
+
+export const autocompleteTag = async ({
+  text,
+  ignoreTags,
+}: AutocompleteForm): Promise<TagAutocompleteResponse> => {
+  console.log(ignoreTags);
+  const { data } = await axios.get(`/api/tag/autocomplete`, {
+    params: { text, ignoreTags },
+  });
   return data;
 };

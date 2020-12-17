@@ -1,0 +1,95 @@
+@import "../../style/variables.scss";
+
+.tag_form_container {
+  width: 100%;
+  padding: 4px;
+  padding-bottom: 0px;
+  background-color: $nord0;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  .single_tag {
+    flex: 0 1 auto;
+    display: flex;
+    padding: 2px 4px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    justify-content: space-between;
+    align-items: center;
+    background-color: $nord10;
+    .tag_text {
+      word-break: break-all;
+      font-family: $font-medium;
+      font-size: 0.8em;
+      color: $nord4;
+      margin-right: 10px;
+    }
+    .occurrances_button_container {
+      display: flex;
+      align-items: center;
+      .tag_occurrences {
+        font-size: 0.65em;
+        color: $nord4;
+      }
+      .remove_button {
+        margin-left: 5px;
+        background-color: transparent;
+        padding: 0;
+        border: none;
+        cursor: pointer;
+      }
+    }
+  }
+  .tag_input_container {
+    flex: 1 0;
+    display: flex;
+    padding: 1px;
+    margin: 0px 4px;
+    margin-bottom: 4px;
+    position: relative;
+    .suggested_tags_container {
+      position: absolute;
+      width: inherit;
+      top: 100%;
+      left: -8px;
+      margin-right: -8px;
+      display: flex;
+      flex-direction: column;
+      border: 8px solid $nord0;
+      border-top: none;
+      z-index: 1;
+      .single_option {
+        min-width: 150px;
+        word-break: break-all;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px;
+        color: $nord4;
+        background-color: $nord2;
+        font-family: $font-medium;
+        cursor: pointer;
+
+        &.highlighted {
+          background-color: $nord10;
+        }
+        .option_text {
+          font-size: 0.8em;
+        }
+        .option_occurrances {
+          font-size: 0.7em;
+        }
+      }
+    }
+    .tag_input {
+      width: 100%;
+      font-family: $font-regular;
+      font-size: 0.8em;
+      min-width: 150px;
+      background-color: $nord0;
+      color: $nord4;
+      border: none;
+    }
+  }
+}

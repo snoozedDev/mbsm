@@ -3,11 +3,7 @@ import { connect } from "react-redux";
 import { getUser } from "../../redux/actions/auth";
 import { RootState } from "../../redux/reducers";
 import { AuthState } from "../../redux/reducers/auth";
-import { CircleLoader } from "../Loading/CircleLoader";
-import css from "./AuthGate.module.scss";
-import { environment } from "../../utils/env";
-
-const { WEB_URL } = environment;
+import { ScreenLoader } from "../Common/ScreenLoader";
 
 interface AuthGateComponentProps {
   getUser?: typeof getUser;
@@ -37,18 +33,7 @@ const AuthGateComponent = ({
   }, [auth]);
 
   return !auth.fetched ? (
-    <>
-      <div className={css.gate_container}>
-        <span
-          style={{
-            color: "white",
-          }}
-        >
-          {WEB_URL}
-        </span>
-        <CircleLoader height={100} />
-      </div>
-    </>
+    <ScreenLoader />
   ) : children && auth.loggedIn ? (
     children
   ) : (

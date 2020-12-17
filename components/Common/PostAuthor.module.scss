@@ -4,10 +4,10 @@
   width: 100%;
   color: $nord6;
   letter-spacing: 0.02em;
-  cursor: pointer;
   .post_author_name {
     font-size: 0.9em;
-    font-family: $font-black;
+    font-family: $font-bold;
+    cursor: pointer;
   }
   .post_author_date {
     margin-left: 8px;
@@ -15,6 +15,7 @@
     font-family: $font-regular;
     opacity: 0.5;
     transition: 100ms ease-in-out;
+    cursor: pointer;
     &:hover {
       opacity: 0.8;
     }

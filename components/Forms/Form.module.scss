@@ -1,4 +1,4 @@
-@import "../../style/nord.scss";
+@import "../../style/variables.scss";
 
 .container {
   display: flex;
@@ -11,8 +11,7 @@
 
 .title {
   color: $nord0;
-  font-family: "NotoSansJP";
-  font-weight: bold;
+  font-family: $font-bold;
   font-size: 2em;
   background-color: $nord15;
   padding: 5px 10px;
@@ -39,7 +38,7 @@
 }
 
 .button {
-  font-weight: bold;
+  font-family: $font-bold;
   background-color: transparent;
   border: none;
   cursor: pointer;
@@ -56,8 +55,8 @@
 }
 
 .small_button {
+  font-family: $font-regular;
   font-size: 0.8em;
-  font-weight: unset;
   padding: 5px;
   padding-bottom: 0;
   padding-right: 0;

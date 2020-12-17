@@ -1,9 +1,9 @@
-import nc, { NextConnect } from "next-connect";
+import nc from "next-connect";
 import { User } from "../../../db/models/user";
 import { authMiddleware, renewTokenCookie } from "../../../utils/auth";
 import { ProfileResponse } from "../../../utils/types";
 
-const handler: NextConnect = nc()
+const handler = nc()
   .use(authMiddleware)
   .get(async (req: any, res) => {
     let response: ProfileResponse = {

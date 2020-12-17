@@ -39,6 +39,11 @@ export interface Image {
 
 export type Tag = string;
 
+export type TagUI = {
+  tag: Tag;
+  occurrences?: number;
+};
+
 export type PostType = "text" | "image";
 
 export interface Post {
@@ -78,6 +83,10 @@ export interface PostResponse extends APIResponse {
   post?: Post;
 }
 
+export interface TagAutocompleteResponse extends APIResponse {
+  tags?: TagUI[];
+}
+
 export interface FeedResponse extends APIResponse {
   feed?: TextPost[];
 }
@@ -89,3 +98,22 @@ export interface AvatarResponse extends APIResponse {
 export interface mbsmSession {
   username: string;
 }
+
+export type UIElementSize = "small" | "medium" | "large";
+export type NordColor =
+  | 0
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 11
+  | 12
+  | 13
+  | 14
+  | 15;
