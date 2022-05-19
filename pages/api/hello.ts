@@ -1,13 +1,13 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next'
+import type { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
+import { dbClient } from "../../db/prisma_client";
 
-type Data = {
-  name: string
-}
+const handler: NextApiHandler = async (_req, res) => {
+  // const result = await dbClient.users.create({
+  //   data: { status: "public", username: "asd" },
+  // });
 
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
-) {
-  res.status(200).json({ name: 'John Doe' })
-}
+  res.status(200).json({ name: "John Doe" });
+};
+
+export default handler;
