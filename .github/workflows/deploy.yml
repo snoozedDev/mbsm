@@ -10,14 +10,14 @@ jobs:
   my_first_job:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Print branch name
-        run: echo ${{ github.head_ref }}
+      - uses: actions/checkout@v3
+      - uses: volta-cli/action@v4
+      - run: yarn install
       - name: Git-Crypt Unlock
         uses: zemuldo/git-crypt-unlock@v2.0
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_KEY_GRIP: ${{ secrets.GPG_KEY_GRIP }}
           GPG_KEY_PASS: ${{ secrets.GPG_KEY_PASS }}
-      - run: cat env/.env.local
+      - run: yarn env:${GITHUB_REF##*/}
+      - run: cat .env.local
