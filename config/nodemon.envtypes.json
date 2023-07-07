@@ -1,0 +1,5 @@
+{
+  "exec": "ts-node -T scripts/setEnvTypes.ts",
+  "watch": [".env", "scripts/setEnvTypes.ts"],
+  "verbose": false
+}
