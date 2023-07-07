@@ -18,3 +18,4 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_KEY_GRIP: ${{ secrets.GPG_KEY_GRIP }}
           GPG_KEY_PASS: ${{ secrets.GPG_KEY_PASS }}
+      - run: cat env/.env.local
