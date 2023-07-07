@@ -12,21 +12,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - uses: web3j/substr-action@v1.2
-        with:
-          value: ${{ secrets.GPG_PRIVATE_KEY }}
-          start: "0"
-          length: "4"
-      - uses: web3j/substr-action@v1.2
-        with:
-          value: ${{ secrets.GPG_KEY_PASS }}
-          start: "0"
-          length: "4"
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v5
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_KEY_PASS }}
-          trust_level: 5
-      - name: List keys
-        run: gpg -K
+      - name: Git-Crypt Unlock
+        uses: zemuldo/git-crypt-unlock@v2.0
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_KEY_GRIP: ${{ secrets.GPG_KEY_GRIP }}
+          GPG_KEY_PASS: ${{ secrets.GPG_KEY_PASS }}
