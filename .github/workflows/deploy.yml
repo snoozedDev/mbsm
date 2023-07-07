@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Print branch name
+        run: echo ${{ github.head_ref }}
       - name: Git-Crypt Unlock
         uses: zemuldo/git-crypt-unlock@v2.0
         env:
