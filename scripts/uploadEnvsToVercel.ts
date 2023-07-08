@@ -1,6 +1,5 @@
-const main = async () => {
+const uploadEnvsToVercel = async () => {
   console.log("Uploading environment variables to Vercel...");
-  // get --token=value argument
   const tokenIndex = process.argv.findIndex((arg: string) =>
     arg.startsWith("--token=")
   );
@@ -19,7 +18,6 @@ const main = async () => {
 
   await Promise.all(
     nonEmpty.map(async (line: string) => {
-      // execute
       const [key, value] = line.split("=");
 
       console.log(`Uploading ${key} to Vercel...`);
@@ -33,19 +31,8 @@ const main = async () => {
       } else {
         console.log(`${key} uploaded to Vercel!`);
       }
-
-      // console.log(stdout);
-      // // console.log(stderr);
-
-      // if (stderr) {
-      //   console.log(`Error uploading ${key} to Vercel!`);
-      //   console.log(stderr.trim());
-      //   return;
-      // }
-
-      // console.log(`${key} uploaded to Vercel!`);
     })
   );
 };
 
-main();
+uploadEnvsToVercel();

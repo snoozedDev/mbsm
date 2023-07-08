@@ -1,6 +1,5 @@
-const main = async () => {
+const setEnvTypes = async () => {
   console.log("Generating environment variables types...");
-  // print files at root with fs
   const fs = require("fs");
   const path = require("path");
   const envPath = path.join(__dirname, "..", ".env");
@@ -29,4 +28,4 @@ declare global {
   console.log("Environment variables types set!");
 };
 
-main();
+setEnvTypes();
