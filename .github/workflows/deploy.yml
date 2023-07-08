@@ -6,18 +6,30 @@ on:
       - main
       - next
 
+env:
+  VERCEL_PROD: ${{  fromJSON('{"main":"--prod"}')[github.ref_name] || ''  }}
+
 jobs:
   my_first_job:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: volta-cli/action@v4
-      - run: yarn install
-      - name: Git-Crypt Unlock
+      - name: Install Dependencies
+        run: yarn install
+      - name: Unlock Environment Variables
         uses: zemuldo/git-crypt-unlock@v2.0
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_KEY_GRIP: ${{ secrets.GPG_KEY_GRIP }}
           GPG_KEY_PASS: ${{ secrets.GPG_KEY_PASS }}
-      - run: yarn env:${GITHUB_REF##*/}
-      - run: cat .env.local
+      - name: Set Environment Variables
+        run: yarn env:${GITHUB_REF##*/}
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Build Project Artifacts
+        run: vercel build ${{ env.VERCEL_PROD }} --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt ${{ env.VERCEL_PROD }} --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Update Vercel Environment Variables
+        run: yarn uploadEnvs --token=${{ secrets.VERCEL_TOKEN }}
