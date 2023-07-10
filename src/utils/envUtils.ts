@@ -11,3 +11,10 @@ export const getEnvAsInt = (key: keyof EnvVariablesType): number => {
     throw new Error(`Environment variable ${key} is not a number`);
   return parsed;
 };
+
+export const getEnvAsBool = (key: keyof EnvVariablesType): boolean => {
+  const value = getEnvAsStr(key);
+  if (value === "true") return true;
+  if (value === "false") return false;
+  throw new Error(`Environment variable ${key} is not a boolean`);
+};

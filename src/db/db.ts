@@ -1,12 +1,10 @@
-import { getEnvAsStr } from "@/utils/envUtils";
+import { getEnvAsBool, getEnvAsStr } from "@/utils/envUtils";
 import { connect as psConnect } from "@planetscale/database";
 import { drizzle as mysqlDrizzle } from "drizzle-orm/mysql2";
 import { drizzle as psDrizzle } from "drizzle-orm/planetscale-serverless";
 import mysql from "mysql2/promise";
 
-const usePS = getEnvAsStr("NODE_ENV") !== "development";
-
-const connection = usePS
+const connection = getEnvAsBool("IS_PROD")
   ? psConnect({
       host: getEnvAsStr("DB_HOST"),
       password: getEnvAsStr("DB_PASSWORD"),
