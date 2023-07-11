@@ -15,6 +15,4 @@ export const middleware = async (req: NextRequest) => {
   return NextResponse.next();
 };
 
-export const config: MiddlewareConfig = {
-  regions: ["server"],
-};
+export const config: MiddlewareConfig = {};
