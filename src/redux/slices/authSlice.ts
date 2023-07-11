@@ -1,6 +1,6 @@
-import { LoginVerifyData } from "@/pages/api/auth/login/verify";
-import { RegisterVerifyData } from "@/pages/api/auth/register/verify";
-import { AuthUserData } from "@/pages/api/auth/user";
+// import { LoginVerifyData } from "@/pages/api/auth/login/verify";
+// import { RegisterVerifyData } from "@/pages/api/auth/register/verify";
+// import { AuthUserData } from "@/pages/api/auth/user";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
 import {
@@ -32,10 +32,7 @@ export const authSlice = createSlice({
       state.loading = true;
       state.error = undefined;
     },
-    [loginUser.fulfilled.type]: (
-      state,
-      action: PayloadAction<Required<LoginVerifyData>>
-    ) => {
+    [loginUser.fulfilled.type]: (state, action: PayloadAction<any>) => {
       state.loading = false;
     },
     [loginUser.rejected.type]: (state, action) => {
@@ -45,10 +42,7 @@ export const authSlice = createSlice({
       state.loading = true;
       state.error = undefined;
     },
-    [registerUser.fulfilled.type]: (
-      state,
-      action: PayloadAction<Required<RegisterVerifyData>>
-    ) => {
+    [registerUser.fulfilled.type]: (state, action: PayloadAction<any>) => {
       state.loading = false;
     },
     [registerUser.rejected.type]: (state, action) => {
@@ -59,10 +53,7 @@ export const authSlice = createSlice({
       state.loading = true;
       state.error = undefined;
     },
-    [getUser.fulfilled.type]: (
-      state,
-      action: PayloadAction<Required<AuthUserData>>
-    ) => {
+    [getUser.fulfilled.type]: (state, action: PayloadAction<any>) => {
       state.loading = false;
       state.user = action.payload;
     },
