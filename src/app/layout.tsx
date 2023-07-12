@@ -1,10 +1,13 @@
+import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
+import { cn } from "@/lib/utils";
+import { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 
 const noto = Noto_Sans_JP({ subsets: ["latin"] });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "MBSM",
   description: "soon",
 };
@@ -16,9 +19,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={noto.className}>
+      <body
+        className={cn(
+          noto.className,
+          "min-h-screen bg-background font-sans antialiased"
+        )}
+      >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
+          <div className="relative flex min-h-screen flex-col">
+            <SiteHeader />
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>

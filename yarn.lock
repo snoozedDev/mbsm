@@ -823,6 +823,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/react-avatar@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@radix-ui/react-avatar@npm:1.0.3"
+  dependencies:
+    "@babel/runtime": ^7.13.10
+    "@radix-ui/react-context": 1.0.1
+    "@radix-ui/react-primitive": 1.0.3
+    "@radix-ui/react-use-callback-ref": 1.0.1
+    "@radix-ui/react-use-layout-effect": 1.0.1
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0
+    react-dom: ^16.8 || ^17.0 || ^18.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: defd6070ca89d64f46017943bc444ac73ca4711f710b8fcb7152f5fb84cb05f39e7944d372695720929fa666cf9bc65ce95725c5a29d81f9e51aba59aed42ca2
+  languageName: node
+  linkType: hard
+
 "@radix-ui/react-collapsible@npm:1.0.3":
   version: 1.0.3
   resolution: "@radix-ui/react-collapsible@npm:1.0.3"
@@ -4298,6 +4321,7 @@ __metadata:
   dependencies:
     "@planetscale/database": ^1.8.0
     "@radix-ui/react-accordion": ^1.1.2
+    "@radix-ui/react-avatar": ^1.0.3
     "@radix-ui/react-slot": ^1.0.2
     "@reduxjs/toolkit": ^1.9.5
     "@simplewebauthn/browser": ^7.2.0
@@ -4330,6 +4354,7 @@ __metadata:
     react: 18.2.0
     react-dom: 18.2.0
     react-redux: ^8.1.1
+    react-wrap-balancer: ^1.0.0
     request-ip: ^3.3.0
     shelljs: ^0.8.5
     tailwind-merge: ^1.13.2
@@ -5315,6 +5340,15 @@ __metadata:
     redux:
       optional: true
   checksum: 370676330727764d78f35e9c5a0ed0591d79482fe9b70fffcab4aa6bcccc6194e4f1ebd818b4b390351dea5557e70d3bd4d95d7a0ac9baa1f45d6bf2230ee713
+  languageName: node
+  linkType: hard
+
+"react-wrap-balancer@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "react-wrap-balancer@npm:1.0.0"
+  peerDependencies:
+    react: ">=16.8.0 || ^17.0.0 || ^18"
+  checksum: a3e263528b940e555894914d3a0d474cf60594578b4f2a34646d36ea5d9603f75270ec30ff1a7df3a9637cf014d6414c75a70abb82b0c4223bfbeda557ac19ca
   languageName: node
   linkType: hard
 

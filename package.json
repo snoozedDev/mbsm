@@ -16,6 +16,7 @@
   "dependencies": {
     "@planetscale/database": "^1.8.0",
     "@radix-ui/react-accordion": "^1.1.2",
+    "@radix-ui/react-avatar": "^1.0.3",
     "@radix-ui/react-slot": "^1.0.2",
     "@reduxjs/toolkit": "^1.9.5",
     "@simplewebauthn/browser": "^7.2.0",
@@ -44,6 +45,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-redux": "^8.1.1",
+    "react-wrap-balancer": "^1.0.0",
     "request-ip": "^3.3.0",
     "shelljs": "^0.8.5",
     "tailwind-merge": "^1.13.2",

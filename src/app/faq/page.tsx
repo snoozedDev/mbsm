@@ -4,7 +4,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { UserPing } from "@/components/user-ping";
 import React, { ReactNode } from "react";
+import { Balancer } from "react-wrap-balancer";
 
 const faq: {
   question: ReactNode;
@@ -76,13 +78,28 @@ const faq: {
     ),
   },
   {
+    question: '"omg the site is slow!!!"',
+    answer: (
+      <React.Fragment>
+        <p>
+          {`Maybe, you currently have `}
+          <span className="underline">
+            <UserPing />
+          </span>
+          {` ms ping to the server. I'm not focused on having a distributed
+          network of servers yet, so I'm not worried about it.`}
+        </p>
+      </React.Fragment>
+    ),
+  },
+  {
     question: "Fediverse?",
     answer: (
       <React.Fragment>
         <p>
           {`I like federated social media, but that's not my priority right now.
-          I'll probably add mastodon support in the future since I'd also like
-          to follow people from there and see their posts here.`}
+          I'll probably add mastodon support in the future since I'd like to
+          use my site as a feed for myself.`}
         </p>
       </React.Fragment>
     ),
@@ -104,14 +121,14 @@ const faq: {
 const FAQ = () => {
   return (
     <main className="flex flex-col items-center py-16 px-4">
-      <h1 className="text-2xl sm:text-3xl text-center">
-        Frequently Asked Questions
+      <h1 className="text-3xl text-center self-stretch">
+        <Balancer>Frequently Asked Questions</Balancer>
       </h1>
       <div className="max-w-lg w-full my-12">
         <Accordion type="single" collapsible className="w-full">
           {Object.entries(faq).map(([i, { question, answer }]) => (
             <AccordionItem key={i} value={`${i}`}>
-              <AccordionTrigger className="text-xl">
+              <AccordionTrigger className="text-xl text-left">
                 {question}
               </AccordionTrigger>
               <AccordionContent className="text-base">
