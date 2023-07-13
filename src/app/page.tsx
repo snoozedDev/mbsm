@@ -1,7 +1,7 @@
 export default function Home() {
   return (
-    <div className="flex self-center space-x-4 py-12 px-4 max-w-5xl w-full">
-      <span>hey</span>
-    </div>
+    <main className="flex min-h-screen flex-col items-center justify-between py-24 px-4">
+      <h1 className="text-3xl sm:text-7xl">not ready yet.</h1>
+    </main>
   );
 }
