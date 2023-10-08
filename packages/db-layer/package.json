@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@planetscale/database": "^1.11.0",
+    "@upstash/ratelimit": "^0.4.4",
+    "@upstash/redis": "^1.22.1",
     "drizzle-orm": "^0.28.6",
     "mysql2": "^3.6.1"
   },
