@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import { db } from "../db";
-import { schema } from "../schemaModels";
+import { db } from "../../db";
+import { schema } from "../../schemaModels";
 
 export const getUserInviteCodes = async (userId: bigint) =>
   db

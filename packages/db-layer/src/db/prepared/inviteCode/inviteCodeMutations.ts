@@ -1,6 +1,6 @@
 import { InviteCode } from "@mbsm/types";
-import { db } from "../db";
-import { schema } from "../schemaModels";
+import { db } from "../../db";
+import { schema } from "../../schemaModels";
 
 export const insertInviteCodes = async ({
   inviteCodes,

@@ -8,20 +8,22 @@
     "dist/**"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --external react",
-    "dev": "tsup src/index.ts --format esm,cjs --watch --dts --external react",
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "dev": "yarn build -- --watch",
     "lint": "eslint \"src/**/*.ts*\"",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
-    "typecheck": "tsc --noEmit --pretty true --extendedDiagnostics"
+    "db:push": "drizzle-kit push:mysql"
+  },
+  "dependencies": {
+    "@planetscale/database": "^1.11.0",
+    "drizzle-orm": "^0.28.6",
+    "mysql2": "^3.6.1"
   },
   "devDependencies": {
     "@mbsm/tsconfig": "workspace:*",
     "@mbsm/types": "workspace:*",
     "@mbsm/utils": "workspace:*",
-    "@planetscale/database": "^1.11.0",
-    "drizzle-orm": "^0.28.6",
     "eslint": "^8.51.0",
-    "mysql2": "^3.6.1",
     "tsup": "^7.2.0",
     "typescript": "^5.2.2"
   }
