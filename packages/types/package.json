@@ -1,0 +1,27 @@
+{
+  "name": "@mbsm/types",
+  "version": "1.0.0",
+  "description": "Types for mbsm",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --external react",
+    "dev": "yarn setEnv & tsup src/index.ts --format esm,cjs --watch --dts --external react",
+    "setEnv": "nodemon -q --config nodemon.envtypes.json",
+    "lint": "eslint \"src/**/*.ts*\"",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "typecheck": "tsc --noEmit --pretty true --extendedDiagnostics"
+  },
+  "devDependencies": {
+    "@mbsm/tsconfig": "workspace:*",
+    "eslint": "^8.51.0",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2",
+    "zod": "^3.22.4"
+  }
+}

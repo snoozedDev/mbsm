@@ -1,0 +1,28 @@
+{
+  "name": "@mbsm/db-layer",
+  "version": "1.0.0",
+  "description": "A database layer for mbsm",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --external react",
+    "dev": "tsup src/index.ts --format esm,cjs --watch --dts --external react",
+    "lint": "eslint \"src/**/*.ts*\"",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "typecheck": "tsc --noEmit --pretty true --extendedDiagnostics"
+  },
+  "devDependencies": {
+    "@mbsm/tsconfig": "workspace:*",
+    "@mbsm/types": "workspace:*",
+    "@mbsm/utils": "workspace:*",
+    "@planetscale/database": "^1.11.0",
+    "drizzle-orm": "^0.28.6",
+    "eslint": "^8.51.0",
+    "mysql2": "^3.6.1",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2"
+  }
+}

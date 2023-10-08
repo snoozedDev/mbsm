@@ -1,0 +1,26 @@
+{
+  "name": "@mbsm/utils",
+  "version": "1.0.0",
+  "description": "A collection of utility functions",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --external react",
+    "dev": "tsup src/index.ts --format esm,cjs --watch --dts --external react",
+    "lint": "eslint \"src/**/*.ts*\"",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "typecheck": "tsc --noEmit --pretty true --extendedDiagnostics"
+  },
+  "devDependencies": {
+    "@mbsm/tsconfig": "workspace:*",
+    "@mbsm/types": "workspace:*",
+    "@types/node": "^20.8.3",
+    "eslint": "^8.51.0",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2",
+    "zod": "^3.22.4"
+  }
+}
