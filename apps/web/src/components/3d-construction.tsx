@@ -32,11 +32,13 @@ const Chair = forwardRef(function Chair() {
   );
 });
 
-export const ThreeDConstruction = () => (
-  <div className="max-w-lg w-full h-96">
-    <Canvas flat camera={{ position: [5, 2, 5], fov: 55 }}>
-      <Chair />
-      <OrbitControls enablePan={false} enableZoom={false} />
-    </Canvas>
-  </div>
-);
+export const ThreeDConstruction = () => {
+  return (
+    <div className="max-w-lg w-full h-96">
+      <Canvas flat camera={{ position: [5, 2, 5], fov: 55 }}>
+        <Chair />
+        <OrbitControls enablePan={false} enableZoom={false} autoRotate />
+      </Canvas>
+    </div>
+  );
+};

@@ -113,7 +113,7 @@ importers:
         version: 7.2.0
       '@simplewebauthn/server':
         specifier: ^7.3.1
-        version: 7.3.1
+        version: 7.3.1(encoding@0.1.13)
       '@tanstack/query-sync-storage-persister':
         specifier: ^4.29.25
         version: 4.29.25
@@ -211,6 +211,9 @@ importers:
       autoprefixer:
         specifier: ^10.4.16
         version: 10.4.16(postcss@8.4.31)
+      encoding:
+        specifier: ^0.1.13
+        version: 0.1.13
       eslint:
         specifier: ^8
         version: 8.51.0
@@ -3863,7 +3866,7 @@ packages:
       '@types/node': 18.18.7
     dev: false
 
-  /@simplewebauthn/server@7.3.1:
+  /@simplewebauthn/server@7.3.1(encoding@0.1.13):
     resolution: {integrity: sha512-UFGS18DHudw+50IsdYHCc4C2mk+CZtXr5Ai0RIBV1z5GK25G/6kAXyBBAOmiJ3fB7B1AOvo0e+A6qFh2IBjDCQ==}
     engines: {node: '>=16.0.0'}
     dependencies:
@@ -3878,7 +3881,7 @@ packages:
       '@types/debug': 4.1.10
       '@types/node': 18.18.7
       cbor-x: 1.5.4
-      cross-fetch: 3.1.8
+      cross-fetch: 3.1.8(encoding@0.1.13)
       debug: 4.3.4
     transitivePeerDependencies:
       - encoding
@@ -5782,10 +5785,10 @@ packages:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
     dev: true
 
-  /cross-fetch@3.1.8:
+  /cross-fetch@3.1.8(encoding@0.1.13):
     resolution: {integrity: sha512-cvA+JwZoU0Xq+h6WkMvAUqPEYy92Obet6UdKLfW60qn99ftItKjB5T+BkyWOFWe2pUyfQ+IJHmpOTznqk1M6Kg==}
     dependencies:
-      node-fetch: 2.7.0
+      node-fetch: 2.7.0(encoding@0.1.13)
     transitivePeerDependencies:
       - encoding
     dev: false
@@ -6201,6 +6204,11 @@ packages:
     resolution: {integrity: sha512-TPJXq8JqFaVYm2CWmPvnP2Iyo4ZSM7/QKcSmuMLDObfpH5fi7RUGmd/rTDf+rut/saiDiQEeVTNgAmJEdAOx0w==}
     engines: {node: '>= 0.8'}
     dev: true
+
+  /encoding@0.1.13:
+    resolution: {integrity: sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==}
+    dependencies:
+      iconv-lite: 0.6.3
 
   /end-of-stream@1.4.4:
     resolution: {integrity: sha512-+uw1inIHVPQoaVuHzRyXd21icM+cnt4CzD5rW+NC1wjOUSTOs+Te7FOv7AhN7vS9x/oIyhLP5PR1H+phQAHu5Q==}
@@ -7341,7 +7349,6 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       safer-buffer: 2.1.2
-    dev: false
 
   /ieee754@1.1.13:
     resolution: {integrity: sha512-4vf7I2LYV/HaWerSo3XmlMkp5eZ83i+/CDluXi/IGTs/O1sejBNhTtnxzmRZfvOUqj7lZjqHkeTvpgSFDlWZTg==}
@@ -8489,7 +8496,7 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /node-fetch@2.7.0:
+  /node-fetch@2.7.0(encoding@0.1.13):
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
     engines: {node: 4.x || >=6.0.0}
     peerDependencies:
@@ -8498,6 +8505,7 @@ packages:
       encoding:
         optional: true
     dependencies:
+      encoding: 0.1.13
       whatwg-url: 5.0.0
     dev: false
 
