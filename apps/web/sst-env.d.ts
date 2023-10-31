@@ -1,0 +1,1 @@
+/// <reference path="../sst/.sst/types/index.ts" />

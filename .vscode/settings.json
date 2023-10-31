@@ -1,5 +1,10 @@
 {
-  "cSpell.words": [
-    "mbsm"
-  ]
+  "cSpell.words": ["mbsm"],
+  "[typescript][typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "always",
+      "source.fixAll": "always"
+    }
+  }
 }

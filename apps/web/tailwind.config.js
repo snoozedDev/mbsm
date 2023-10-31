@@ -4,12 +4,7 @@ module.exports = {
     hoverOnlyWhenSupported: true,
   },
   darkMode: ["class"],
-  content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
-  ],
+  content: ["./src/**/*.{ts,tsx}"],
   theme: {
     screens: {
       xs: "475px",
@@ -61,6 +56,9 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+      },
+      fontFamily: {
+        sans: ["var(--font-geist-sans)"],
       },
       borderRadius: {
         lg: "var(--radius)",

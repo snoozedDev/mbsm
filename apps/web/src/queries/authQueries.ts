@@ -1,8 +1,8 @@
 "use client";
 import { toast } from "@/components/ui/use-toast";
-import { InviteCode, Authenticator } from "@mbsm/types";
 import { codeFormSchema } from "@/lib/shemas/forms/codeFormSchema";
 import { routes } from "@/server/routers";
+import { Authenticator, InviteCode } from "@mbsm/types";
 import {
   startAuthentication,
   startRegistration,

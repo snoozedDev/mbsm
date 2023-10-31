@@ -22,3 +22,5 @@ export const GET = routeWithAuth({
     return response;
   },
 });
+
+export const dynamic = "force-dynamic";

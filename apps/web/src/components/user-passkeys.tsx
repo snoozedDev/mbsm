@@ -5,7 +5,7 @@ import {
   useUpdateAuthenticatorMutation,
   useUserSettingsQuery,
 } from "@/queries/userQueries";
-import { Authenticator } from "@/types/authenticatorTypes";
+import { Authenticator } from "@mbsm/types";
 import { motion } from "framer-motion";
 import { MoreHorizontal } from "lucide-react";
 import { DateTime } from "luxon";

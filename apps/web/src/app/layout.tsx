@@ -5,13 +5,13 @@ import { SiteHeader } from "@/components/site-header";
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 import { queryClient } from "@/queries/queryClient";
+import { store } from "@/redux/store";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Noto_Sans_JP } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import { Provider } from "react-redux";
 import "./globals.css";
-import { store } from "@/redux/store";
 
 const noto = Noto_Sans_JP({ subsets: ["latin"] });
 

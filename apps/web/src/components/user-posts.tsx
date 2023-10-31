@@ -15,8 +15,8 @@ import type {
   Post,
   Image as PostImage,
   TextPost,
-} from "@/types/postTypes";
-import { User } from "@/types/userTypes";
+  User,
+} from "@mbsm/types";
 import { DateTime } from "luxon";
 import Image from "next/image";
 import Link from "next/link";
@@ -93,7 +93,7 @@ const PostTag = ({ tag, user }: { tag: string; user: User }) => {
 const PostTags = ({ post, user }: { post: Post; user: User }) => {
   return post.tags ? (
     <ul className="flex flex-wrap text-sm text-muted-foreground/80">
-      {post.tags?.map((tag) => (
+      {post.tags.map((tag) => (
         <PostTag key={tag} user={user} tag={tag} />
       ))}
     </ul>

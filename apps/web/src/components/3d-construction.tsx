@@ -11,7 +11,7 @@ const Chair = forwardRef(function Chair() {
   const theme = useTheme();
 
   useEffect(() => {
-    gltf.scene.traverse((child) => {
+    gltf.scene.traverse((child: any) => {
       if (child instanceof THREE.Mesh) {
         const color = getComputedStyle(
           document.documentElement

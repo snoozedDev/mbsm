@@ -1,6 +1,6 @@
 "use client";
 import { useCurrentNsfwParam } from "@/hooks/useCurrentNsfwParam";
-import { User } from "@/types/userTypes";
+import { User } from "@mbsm/types";
 import { CalendarIcon, LinkIcon, TwitterIcon } from "lucide-react";
 import { DateTime } from "luxon";
 import Link from "next/link";

@@ -1,18 +1,25 @@
 {
   "private": true,
   "scripts": {
-    "build": "turbo run build",
+    "build": "dotenv -- turbo run build",
     "dev": "dotenv -- turbo run dev --no-cache --continue --concurrency 11",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "db:push": "dotenv -- drizzle-kit push:mysql"
+    "db:push": "dotenv -- drizzle-kit push:mysql",
+    "deploy": "dotenv -- sst deploy",
+    "docker:dev": "docker compose --env-file .env -f _infrastructure/docker-compose.yml up"
   },
   "devDependencies": {
+    "@tsconfig/node18": "^18.2.2",
+    "aws-cdk-lib": "2.95.1",
+    "constructs": "10.2.69",
     "dotenv-cli": "^7.3.0",
     "drizzle-kit": "^0.19.13",
     "eslint": "^8.48.0",
     "prettier": "^3.0.3",
-    "turbo": "latest"
+    "sst": "^2.28.1",
+    "turbo": "latest",
+    "typescript": "^5.2.2"
   },
   "name": "mbsm",
   "packageManager": "yarn@3.6.3",
