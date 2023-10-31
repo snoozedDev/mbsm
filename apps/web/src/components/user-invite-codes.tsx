@@ -1,6 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { useUserSettingsQuery } from "@/queries/userQueries";
+import { InviteCode } from "@mbsm/types";
 import { motion } from "framer-motion";
 import { AlertTriangle, EyeIcon, EyeOffIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -14,7 +15,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
-import { InviteCode } from "@mbsm/types";
 
 const Code = ({
   loading,
@@ -120,29 +120,6 @@ const Code = ({
   );
 };
 
-export const InviteCodesList = () => {
-  const { data, isLoading } = useUserSettingsQuery();
-  return isLoading
-    ? Array.from({ length: 5 }).map((_, i) => (
-        <li key={i} className="flex flex-1">
-          <Code loading />
-        </li>
-      ))
-    : data?.inviteCodes
-        .sort((a) => (a.redeemed ? 1 : -1))
-        .map((inviteCode, i) => (
-          <motion.li
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.2, delay: i * 0.05 }}
-            key={inviteCode.code}
-            className="flex flex-1"
-          >
-            <Code {...inviteCode} />
-          </motion.li>
-        ));
-};
-
 const WarningMessage = ({ message }: { message: string }) => (
   <div className="flex items-center bg-background text-warning border border-warning rounded-lg p-2 font-medium self-start relative pl-4 overflow-hidden">
     <div className="absolute left-0 top-0 bottom-0 w-2 bg-warning" />
@@ -153,6 +130,29 @@ const WarningMessage = ({ message }: { message: string }) => (
 
 export const UserInviteCodes = () => {
   const emailVerified = useIsEmailVerified();
+  const { data, isLoading } = useUserSettingsQuery();
+
+  const renderCodesList = () => {
+    return isLoading
+      ? Array.from({ length: 5 }).map((_, i) => (
+          <li key={i} className="flex flex-1">
+            <Code loading />
+          </li>
+        ))
+      : data?.inviteCodes
+          .sort((a) => (a.redeemed ? 1 : -1))
+          .map((inviteCode, i) => (
+            <motion.li
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2, delay: i * 0.05 }}
+              key={inviteCode.code}
+              className="flex flex-1"
+            >
+              <Code {...inviteCode} />
+            </motion.li>
+          )) || null;
+  };
 
   return (
     <Card className="flex flex-col overflow-hidden py-4 px-6">
@@ -164,7 +164,7 @@ export const UserInviteCodes = () => {
         <WarningMessage message="You must verify your email before you can have invite codes." />
       ) : (
         <ul className="space-y-2 flex flex-col items-stretch">
-          <InviteCodesList />
+          {renderCodesList()}
         </ul>
       )}
     </Card>

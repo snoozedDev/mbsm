@@ -22,17 +22,9 @@
     "typescript": "^5.2.2"
   },
   "name": "mbsm",
-  "packageManager": "yarn@3.6.3",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "packageManager": "pnpm@8.6.10",
   "volta": {
-    "node": "18.18.0",
-    "yarn": "3.6.3"
-  },
-  "engines": {
-    "node": ">=18.18.0",
-    "yarn": ">=3.6.3"
+    "node": "18.17.1",
+    "pnpm": "8.6.10"
   }
 }

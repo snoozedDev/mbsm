@@ -14,8 +14,9 @@ import { Provider } from "react-redux";
 import "./globals.css";
 
 const noto = Noto_Sans_JP({ subsets: ["latin"] });
+const IS_PROD = process.env.NODE_ENV === "production";
 
-if (process.env.NODE_ENV === "production") {
+if (IS_PROD) {
   console.log = () => {};
 }
 
@@ -50,9 +51,7 @@ export default function RootLayout({
               </div>
             </ThemeProvider>
           </Provider>
-          {process.env.NODE_ENV === "development" && (
-            <ReactQueryDevtools initialIsOpen={false} />
-          )}
+          {!IS_PROD && <ReactQueryDevtools initialIsOpen={false} />}
         </QueryClientProvider>
       </body>
     </html>
