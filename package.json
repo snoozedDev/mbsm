@@ -9,10 +9,8 @@
     "deploy": "dotenv -- sst deploy",
     "docker:dev": "docker compose --env-file .env -f _infrastructure/docker-compose.yml up"
   },
-  "dependencies": {
-    "dotenv-cli": "^7.3.0"
-  },
   "devDependencies": {
+    "dotenv-cli": "^7.3.0",
     "@tsconfig/node18": "^18.2.2",
     "aws-cdk-lib": "2.95.1",
     "constructs": "10.2.69",
