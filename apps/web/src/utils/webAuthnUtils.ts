@@ -1,3 +1,6 @@
+import { InferSelectModel, schema } from "@mbsm/db-layer";
+import { Authenticator } from "@mbsm/types";
+import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 import {
   generateAuthenticationOptions,
   generateRegistrationOptions,
@@ -8,9 +11,6 @@ import type {
   AuthenticationResponseJSON,
   RegistrationResponseJSON,
 } from "@simplewebauthn/typescript-types";
-import { Authenticator } from "@mbsm/types";
-import { InferSelectModel, schema } from "@mbsm/db-layer";
-import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 
 export const getWebAuthnResponseForRegistration = ({
   attRes,
@@ -24,7 +24,8 @@ export const getWebAuthnResponseForRegistration = ({
     expectedChallenge,
     expectedOrigin: getEnvAsStr("ORIGIN"),
     expectedRPID: getEnvAsStr("RP_ID"),
-    requireUserVerification: getEnvAsBool("IS_PROD"),
+    // TODO: investigate if we can use this
+    // requireUserVerification: getEnvAsBool("IS_PROD"),
   });
 
 export const getWebAuthnRegistrationOptions = ({
