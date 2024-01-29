@@ -24,8 +24,7 @@ export const getWebAuthnResponseForRegistration = ({
     expectedChallenge,
     expectedOrigin: getEnvAsStr("ORIGIN"),
     expectedRPID: getEnvAsStr("RP_ID"),
-    // TODO: investigate if we can use this
-    // requireUserVerification: getEnvAsBool("IS_PROD"),
+    requireUserVerification: getEnvAsBool("IS_PROD"),
   });
 
 export const getWebAuthnRegistrationOptions = ({
@@ -38,6 +37,9 @@ export const getWebAuthnRegistrationOptions = ({
   excludeCredentials?: Pick<Authenticator, "credentialId">[];
 }) =>
   generateRegistrationOptions({
+    authenticatorSelection: {
+      userVerification: getEnvAsBool("IS_PROD") ? "required" : "discouraged",
+    },
     rpName: getEnvAsStr("RP_NAME"),
     rpID: getEnvAsStr("RP_ID"),
     userID,

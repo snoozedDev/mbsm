@@ -31,10 +31,16 @@ export const POST = async (req: NextRequest) => {
     return new NextResponse("Forbidden", { status: 403 });
   }
 
-  const verification = await getWebAuthnResponseForRegistration({
-    attRes,
-    expectedChallenge: user.currentRegChallenge,
-  });
+  let verification;
+  try {
+    verification = await getWebAuthnResponseForRegistration({
+      attRes,
+      expectedChallenge: user.currentRegChallenge,
+    });
+  } catch (e) {
+    console.error(e);
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
 
   const { verified, registrationInfo } = verification;
 
