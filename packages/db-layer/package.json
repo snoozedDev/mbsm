@@ -17,13 +17,17 @@
     "@planetscale/database": "^1.11.0",
     "@upstash/ratelimit": "^0.4.4",
     "@upstash/redis": "1.24.1",
+    "@vercel/kv": "^1.0.1",
+    "@vercel/postgres": "^0.7.2",
     "drizzle-orm": "^0.28.6",
-    "mysql2": "^3.6.1"
+    "mysql2": "^3.6.1",
+    "postgres": "^3.4.3"
   },
   "devDependencies": {
     "@mbsm/tsconfig": "workspace:*",
     "@mbsm/types": "workspace:*",
     "@mbsm/utils": "workspace:*",
+    "drizzle-kit": "^0.19.13",
     "eslint": "^8.51.0",
     "tsup": "^7.2.0",
     "typescript": "^5.2.2"

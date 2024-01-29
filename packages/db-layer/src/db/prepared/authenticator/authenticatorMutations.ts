@@ -7,7 +7,7 @@ export const updateAuthenticatorName = async ({
   id,
 }: {
   name: string;
-  id: bigint;
+  id: number;
 }) =>
   db
     .update(schema.authenticator)

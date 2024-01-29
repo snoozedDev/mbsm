@@ -18,7 +18,7 @@ export const POST = routeWithAuth({
       body: { code },
     },
   }) => {
-    if (user.emailVerified === 1) return "OK";
+    if (user.emailVerified) return "OK";
 
     let storedCode = await getEmailVerificationCode({ userId: user.id });
 
@@ -36,7 +36,7 @@ export const POST = routeWithAuth({
     await Promise.all([
       db
         .update(schema.user)
-        .set({ emailVerified: 1 })
+        .set({ emailVerified: true })
         .where(eq(schema.user.id, user.id)),
       deleteEmailVerificationCode({ userId: user.id }),
     ]);

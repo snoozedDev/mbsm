@@ -30,6 +30,14 @@ const serverUsers: User[] = [
 const serverPosts: Post[] = [
   {
     type: "text",
+    id: "j_hJO_thNUhDlg92C63af",
+    authorId: "rakMvxar4_Cg",
+    body: "still working on this",
+    postedAt: "2024-01-22T15:10:46.000Z",
+    tags: ["tags", "are", "still", "cool"],
+  },
+  {
+    type: "text",
     id: "I7w7Ix0qU_zmBBJK",
     authorId: "rakMvxar4_Cg",
     body: "ban this",

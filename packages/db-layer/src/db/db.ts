@@ -1,26 +1,17 @@
 import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
-import { connect as psConnect } from "@planetscale/database";
-import { drizzle as mysqlDrizzle } from "drizzle-orm/mysql2";
-import { drizzle as psDrizzle } from "drizzle-orm/planetscale-serverless";
-import mysql from "mysql2/promise";
+import { VercelPool, sql as vercel } from "@vercel/postgres";
+import { drizzle as pgDrizzle } from "drizzle-orm/postgres-js";
+import { drizzle as vercelDrizzle } from "drizzle-orm/vercel-postgres";
+import postgres from "postgres";
 import { schema } from "./schemaModels";
 
-const connection = getEnvAsBool("IS_PROD")
-  ? psConnect({
-      host: getEnvAsStr("DB_HOST"),
-      password: getEnvAsStr("DB_PASSWORD"),
-      username: getEnvAsStr("DB_USER"),
-    })
-  : mysql.createPool({
-      host: getEnvAsStr("DB_HOST"),
-      password: getEnvAsStr("DB_PASSWORD"),
-      user: getEnvAsStr("DB_USER"),
-      database: getEnvAsStr("DB_DATABASE"),
-    });
+const IS_PROD = getEnvAsBool("IS_PROD");
 
-const isMySQLConnection = (connection: any): connection is mysql.Pool =>
-  "releaseConnection" in connection;
+const connection = IS_PROD ? vercel : postgres(getEnvAsStr("POSTGRES_URL"));
 
-export const db = isMySQLConnection(connection)
-  ? mysqlDrizzle(connection, { schema, mode: "default" })
-  : psDrizzle(connection, { schema });
+const isVercelConnection = (connection: any): connection is VercelPool =>
+  !("END" in connection);
+
+export const db = isVercelConnection(connection)
+  ? vercelDrizzle(connection, { schema })
+  : pgDrizzle(connection, { schema });

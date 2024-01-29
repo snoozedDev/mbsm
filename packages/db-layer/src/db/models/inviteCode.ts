@@ -1,16 +1,16 @@
 import { relations } from "drizzle-orm";
-import { bigint, mysqlTable, tinyint, varchar } from "drizzle-orm/mysql-core";
+import { boolean, integer, pgTable, varchar } from "drizzle-orm/pg-core";
 import { getIndexFor } from "../utils";
 import { user } from "./user";
 
-export const inviteCode = mysqlTable(
+export const inviteCode = pgTable(
   "invite_codes",
   {
     code: varchar("code", { length: 16 }).primaryKey(),
-    userId: bigint("user_id", { mode: "bigint" })
+    userId: integer("user_id")
       .references(() => user.id)
       .notNull(),
-    redeemed: tinyint("redeemed").notNull().default(0),
+    redeemed: boolean("redeemed").notNull().default(false),
   },
   (inviteCode) => ({
     ...getIndexFor(inviteCode.userId),
@@ -18,5 +18,8 @@ export const inviteCode = mysqlTable(
 );
 
 export const inviteCodeRelations = relations(inviteCode, ({ one }) => ({
-  user: one(user),
+  user: one(user, {
+    fields: [inviteCode.userId],
+    references: [user.id],
+  }),
 }));

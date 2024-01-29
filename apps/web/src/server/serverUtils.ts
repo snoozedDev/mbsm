@@ -1,8 +1,8 @@
+import { redis } from "@mbsm/db-layer";
+import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 import { customAlphabet } from "nanoid";
 import { NextResponse } from "next/server";
 import { resend } from "./email";
-import { redis } from "@mbsm/db-layer";
-import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 
 export const logAndReturnGenericError = (
   err: any,
@@ -26,20 +26,20 @@ export const wait = (ms: number) =>
 export const getEmailVerificationCode = async ({
   userId,
 }: {
-  userId: bigint;
+  userId: number;
 }) => redis.get<string | number>(`verification:${userId}`);
 
 export const deleteEmailVerificationCode = async ({
   userId,
 }: {
-  userId: bigint;
+  userId: number;
 }) => redis.del(`verification:${userId}`);
 
 export const generateEmailVerificationCodeAndSend = async ({
   userId,
   email,
 }: {
-  userId: bigint;
+  userId: number;
   email: string;
 }) => {
   const verificationCode = customAlphabet("0123456789", 6)();

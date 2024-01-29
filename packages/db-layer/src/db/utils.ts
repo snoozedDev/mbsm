@@ -1,18 +1,27 @@
+import { snakeToCamel } from "@mbsm/utils";
+import { sql } from "drizzle-orm";
 import {
-  AnyMySqlColumn,
+  AnyPgColumn,
   index,
   timestamp,
   uniqueIndex,
-} from "drizzle-orm/mysql-core";
-import { snakeToCamel } from "@mbsm/utils";
+} from "drizzle-orm/pg-core";
+
+const CURRENT_TIMESTAMP = sql`CURRENT_TIMESTAMP`;
 
 export const getTimestampColumns = () => ({
   deletedAt: timestamp("deleted_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+  createdAt: timestamp("created_at")
+    .default(CURRENT_TIMESTAMP)
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .default(CURRENT_TIMESTAMP)
+    .notNull()
+    .defaultNow(),
 });
 
-export const getIndexFor = (column: AnyMySqlColumn, unique?: boolean) => ({
+export const getIndexFor = (column: AnyPgColumn, unique?: boolean) => ({
   [snakeToCamel(column.name)]: (unique ? uniqueIndex : index)(
     `${column.name}_index`
   ).on(column),

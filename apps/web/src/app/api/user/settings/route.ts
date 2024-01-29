@@ -28,10 +28,10 @@ export const GET = routeWithAuth({
 
     let finalInviteCodes: InviteCode[] = inviteCodes.map((inviteCode) => ({
       code: inviteCode.code,
-      redeemed: inviteCode.redeemed === 1,
+      redeemed: inviteCode.redeemed,
     }));
 
-    if (finalInviteCodes.length === 0 && user.emailVerified === 1) {
+    if (finalInviteCodes.length === 0 && user.emailVerified) {
       finalInviteCodes = generateInviteCodes(5);
       try {
         await insertInviteCodes({

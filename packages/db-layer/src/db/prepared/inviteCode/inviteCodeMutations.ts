@@ -7,12 +7,12 @@ export const insertInviteCodes = async ({
   userId,
 }: {
   inviteCodes: InviteCode[];
-  userId: bigint;
+  userId: number;
 }) =>
   db.insert(schema.inviteCode).values(
     inviteCodes.map((input) => ({
       code: input.code,
-      redeemed: 0,
+      redeemed: false,
       userId,
     }))
   );

@@ -1,3 +1,3 @@
-import { Redis as Upstash } from "@upstash/redis";
+import { kv } from "@vercel/kv";
 
-export const redis = Upstash.fromEnv();
+export const redis = kv;

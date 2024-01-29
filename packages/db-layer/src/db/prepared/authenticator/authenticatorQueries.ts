@@ -1,6 +1,6 @@
 import { db } from "../../db";
 
-export const getAuthenticatorsForUser = async (userId: bigint) =>
+export const getAuthenticatorsForUser = async (userId: number) =>
   db.query.authenticator.findMany({
     where: (model, { eq, and, isNull }) =>
       and(eq(model.userId, userId), isNull(model.deletedAt)),

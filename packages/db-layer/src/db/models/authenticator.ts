@@ -1,28 +1,29 @@
 import { relations } from "drizzle-orm";
 import {
-  bigint,
-  mysqlTable,
+  boolean,
+  integer,
+  pgTable,
+  serial,
   text,
-  tinyint,
   varchar,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/pg-core";
 import { getIndexFor, getTimestampColumns } from "../utils";
 import { user } from "./user";
 
-export const authenticator = mysqlTable(
+export const authenticator = pgTable(
   "authenticator",
   {
-    id: bigint("id", { mode: "bigint" }).primaryKey().autoincrement(),
+    id: serial("id").primaryKey(),
     credentialId: varchar("credential_id", { length: 64 }).notNull(),
     credentialPublicKey: text("credential_public_key").notNull(),
-    counter: bigint("counter", { mode: "bigint" }).notNull(),
+    counter: integer("counter").notNull(),
     credentialDeviceType: varchar("credential_device_type", {
       length: 32,
     }).notNull(),
-    credentialBackedUp: tinyint("credential_backed_up").notNull(),
+    credentialBackedUp: boolean("credential_backed_up").notNull(),
     transports: varchar("transports", { length: 256 }).notNull(),
     name: varchar("name", { length: 64 }).notNull(),
-    userId: bigint("user_id", { mode: "bigint" })
+    userId: integer("user_id")
       .references(() => user.id)
       .notNull(),
     ...getTimestampColumns(),

@@ -1,16 +1,13 @@
+import { getEnvAsStr } from "@mbsm/utils";
 import "dotenv/config";
-import { getEnvAsInt, getEnvAsStr } from "@mbsm/utils";
 import type { Config } from "drizzle-kit";
 
 export default {
-  schema: "./packages/db-layer/src/db/schema.ts",
-  driver: "mysql2",
+  out: "packages/db-layer/migrations",
+  schema: "packages/db-layer/src/db/schema.ts",
+  driver: "pg",
   dbCredentials: {
-    host: getEnvAsStr("DB_HOST"),
-    password: getEnvAsStr("DB_PASSWORD"),
-    user: getEnvAsStr("DB_USER"),
-    database: getEnvAsStr("DB_DATABASE"),
-    port: getEnvAsInt("DB_PORT"),
+    connectionString: getEnvAsStr("POSTGRES_URL"),
   },
   verbose: true,
   strict: true,

@@ -67,16 +67,15 @@ export const PUT = routeWithAuth({
     const name = nanoid(16);
 
     await db.insert(schema.authenticator).values({
+      counter,
+      credentialBackedUp,
+      credentialDeviceType,
       credentialId,
       credentialPublicKey:
         Buffer.from(credentialPublicKey).toString("base64url"),
-      credentialBackedUp: credentialBackedUp ? 1 : 0,
-      credentialDeviceType,
-      counter: BigInt(counter),
-      userId: user.id,
-      transports: [].join(","),
       name,
-      createdAt: now,
+      transports: [].join(","),
+      userId: user.id,
     });
 
     const authenticator: Authenticator = {

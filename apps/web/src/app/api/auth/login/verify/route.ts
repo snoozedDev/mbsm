@@ -72,7 +72,7 @@ export const POST = async (req: NextRequest) => {
   await db
     .update(schema.authenticator)
     .set({
-      counter: BigInt(newCounter),
+      counter: newCounter,
     })
     .where(eq(schema.authenticator.credentialId, authenticator.credentialId));
 

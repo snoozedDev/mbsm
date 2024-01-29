@@ -1,26 +1,20 @@
 import { relations } from "drizzle-orm";
-import {
-  bigint,
-  mysqlEnum,
-  mysqlTable,
-  tinyint,
-  varchar,
-} from "drizzle-orm/mysql-core";
+import { boolean, pgEnum, pgTable, serial, varchar } from "drizzle-orm/pg-core";
 import { getIndexFor, getTimestampColumns } from "../utils";
 import { authenticator } from "./authenticator";
 
-export const user = mysqlTable(
+export const roleEnum = pgEnum("role", ["user", "mod", "admin", "foru"]);
+
+export const user = pgTable(
   "user",
   {
-    id: bigint("id", { mode: "bigint" }).primaryKey().autoincrement(),
+    id: serial("id").primaryKey(),
     nanoId: varchar("nano_id", { length: 12 }).notNull(),
     email: varchar("email", { length: 254 }).notNull(),
-    emailVerified: tinyint("email_verified").notNull().default(0),
-    protected: tinyint("protected").notNull().default(0),
+    emailVerified: boolean("email_verified").notNull().default(false),
+    protected: boolean("protected").notNull().default(false),
     currentRegChallenge: varchar("current_challenge", { length: 256 }),
-    role: mysqlEnum("role", ["user", "mod", "admin", "foru"])
-      .notNull()
-      .default("user"),
+    role: roleEnum("user").notNull(),
     ...getTimestampColumns(),
   },
   (user) => ({

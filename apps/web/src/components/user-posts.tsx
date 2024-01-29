@@ -200,12 +200,16 @@ const ImagePostContent = ({ post }: { post: ImagePost }) => {
 const TextPostContent = ({ post }: { post: TextPost }) => {
   return (
     <React.Fragment>
-      <CardHeader className="pb-0">
-        {post.title && <CardTitle>{post.title}</CardTitle>}
-      </CardHeader>
-      <CardContent className="mt-6">
-        {post.body && <p>{post.body}</p>}
-      </CardContent>
+      {post.title && (
+        <CardHeader className="pb-0">
+          <CardTitle>{post.title}</CardTitle>
+        </CardHeader>
+      )}
+      {post.body && (
+        <CardContent className="mt-6">
+          <p>{post.body}</p>
+        </CardContent>
+      )}
     </React.Fragment>
   );
 };

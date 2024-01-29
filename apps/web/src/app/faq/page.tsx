@@ -48,13 +48,13 @@ const faq: {
     ),
   },
   {
-    question: "Fediverse?",
+    question: "Fediverse/Mastodon?",
     answer: (
       <React.Fragment>
         <p>
           {`I like the idea of federated social media, but that's not my priority right now.
-          I may add mastodon support in the future since I'd personally like to
-          use my site as a feed.`}
+          The ActivityPub protocol is quite the effort to implement, so I'm not going to
+          bother with it for now.`}
         </p>
       </React.Fragment>
     ),
@@ -66,7 +66,7 @@ const faq: {
         <p>{`Get an invite code from someone who's already using the site.`}</p>
         <p>
           {`Please understand that allowing anyone to join would involve a lot of
-          technical work and moderation, so I'm not ready for that yet.`}
+          technical work, moderation and cost management.`}
         </p>
       </React.Fragment>
     ),

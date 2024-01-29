@@ -8,7 +8,7 @@ export const GET = routeWithAuth({
     console.log({ user });
     return {
       email: user.email,
-      emailVerified: user.emailVerified === 1,
+      emailVerified: user.emailVerified,
     };
   },
 });

@@ -28,8 +28,6 @@ export const UnverifiedEmailWarning = () => {
     emailVerification.mutate({ code: values.code });
   };
 
-  console.log(emailVerification.error);
-
   const submitting = emailVerification.isLoading;
 
   return emailVerified === false ? (

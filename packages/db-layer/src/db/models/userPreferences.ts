@@ -1,13 +1,13 @@
 import { UserPreferences } from "@mbsm/types";
 import { relations } from "drizzle-orm";
-import { bigint, json, mysqlTable } from "drizzle-orm/mysql-core";
+import { integer, json, pgTable } from "drizzle-orm/pg-core";
 import { getIndexFor } from "../utils";
 import { user } from "./user";
 
-export const userPreferences = mysqlTable(
+export const userPreferences = pgTable(
   "user_preferences",
   {
-    userId: bigint("user_id", { mode: "bigint" })
+    userId: integer("user_id")
       .references(() => user.id)
       .primaryKey(),
     data: json("data")
@@ -19,6 +19,12 @@ export const userPreferences = mysqlTable(
   })
 );
 
-export const userPreferencesRelations = relations(user, ({ one }) => ({
-  user: one(user),
-}));
+export const userPreferencesRelations = relations(
+  userPreferences,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [userPreferences.userId],
+      references: [user.id],
+    }),
+  })
+);

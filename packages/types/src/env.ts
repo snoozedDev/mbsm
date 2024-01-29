@@ -1,13 +1,17 @@
 const envVariables = [
   "IS_PROD",
-  "DB_HOST",
-  "DB_PORT",
-  "DB_DATABASE",
-  "DB_USER",
-  "DB_PASSWORD",
-  "DATABASE_URL",
-  "UPSTASH_REDIS_REST_URL",
-  "UPSTASH_REDIS_REST_TOKEN",
+  "POSTGRES_URL",
+  "POSTGRES_HOST",
+  "POSTGRES_PORT",
+  "POSTGRES_DATABASE",
+  "POSTGRES_USER",
+  "POSTGRES_PASSWORD",
+  "KV_URL",
+  "KV_REST_API_URL",
+  "KV_REST_API_TOKEN",
+  "KV_REST_API_READ_ONLY_TOKEN",
+  "BLOB_READ_WRITE_TOKEN",
+  "EDGE_CONFIG",
   "ORIGIN",
   "RP_NAME",
   "RP_ID",
@@ -16,7 +20,6 @@ const envVariables = [
   "RESEND_API_KEY",
   "DEV_VERIFICATION_CODE",
   "REUSABLE_INVITE_CODE",
-  "CRON_CODE",
 ] as const;
 
 type EnvVariablesType = {

@@ -41,6 +41,7 @@ export const POST = async (req: NextRequest) => {
       .where(eq(schema.user.id, existingUser.id));
   } else {
     await db.insert(schema.user).values({
+      role: "user",
       email,
       nanoId,
       currentRegChallenge: options.challenge,

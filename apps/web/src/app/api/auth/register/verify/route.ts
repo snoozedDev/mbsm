@@ -61,22 +61,20 @@ export const POST = async (req: NextRequest) => {
       credentialId: Buffer.from(credentialID).toString("base64url"),
       credentialPublicKey:
         Buffer.from(credentialPublicKey).toString("base64url"),
-      credentialBackedUp: credentialBackedUp ? 1 : 0,
+      credentialBackedUp,
       credentialDeviceType,
-      counter: BigInt(counter),
+      counter,
       userId: user.id,
       transports: [].join(","),
       name: nanoid(16),
     }),
     db
       .update(schema.user)
-      .set({ currentRegChallenge: null, protected: 1 })
+      .set({ currentRegChallenge: null, protected: true })
       .where(eq(schema.user.id, user.id)),
     db
       .update(schema.inviteCode)
-      .set({
-        redeemed: 1,
-      })
+      .set({ redeemed: true })
       .where(eq(schema.inviteCode.code, inviteCode)),
   ]);
 

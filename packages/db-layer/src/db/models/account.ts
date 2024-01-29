@@ -1,13 +1,13 @@
 import { relations } from "drizzle-orm";
-import { bigint, mysqlTable, varchar } from "drizzle-orm/mysql-core";
+import { integer, pgTable, serial, varchar } from "drizzle-orm/pg-core";
 import { getIndexFor, getTimestampColumns } from "../utils";
 import { user } from "./user";
 
-export const account = mysqlTable(
+export const account = pgTable(
   "account",
   {
-    id: bigint("id", { mode: "bigint" }).primaryKey().autoincrement(),
-    userId: bigint("user_id", { mode: "bigint" })
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
       .references(() => user.id)
       .notNull(),
     handle: varchar("handle", { length: 16 }).notNull(),
@@ -20,5 +20,8 @@ export const account = mysqlTable(
 );
 
 export const accountRelations = relations(account, ({ one }) => ({
-  user: one(user),
+  user: one(user, {
+    fields: [account.userId],
+    references: [user.id],
+  }),
 }));
