@@ -1,14 +1,14 @@
 import { Ratelimit, RatelimitConfig, redis } from "@mbsm/db-layer";
-import { NextRequest, NextResponse } from "next/server";
+import { headers } from "next/headers";
 
 const createRateLimiter = (opts: RatelimitConfig) => {
   const rateLimiter = new Ratelimit(opts);
 
-  const middleware = async (req: NextRequest) => {
-    const { headers } = req;
-    const ip = headers.get("cf-connecting-ip");
+  const middleware = async () => {
+    const headerStore = headers();
+    const ip = headerStore.get("cf-connecting-ip");
     const { success } = await rateLimiter.limit(ip || "_");
-    if (!success) return new NextResponse("Too many requests", { status: 429 });
+    if (!success) return new Error("Too many requests");
     return undefined;
   };
 

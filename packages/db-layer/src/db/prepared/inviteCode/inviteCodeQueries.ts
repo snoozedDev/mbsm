@@ -1,9 +1,12 @@
-import { eq } from "drizzle-orm";
 import { db } from "../../db";
-import { schema } from "../../schemaModels";
 
 export const getUserInviteCodes = async (userId: number) =>
-  db
-    .select()
-    .from(schema.inviteCode)
-    .where(eq(schema.inviteCode.userId, userId));
+  db.query.inviteCode.findMany({
+    where: (model, { eq, and }) => eq(model.userId, userId),
+  });
+
+export const getUnredeemedInviteCode = async (inviteCode: string) =>
+  db.query.inviteCode.findFirst({
+    where: (model, { eq, and }) =>
+      and(eq(model.code, inviteCode), eq(model.redeemed, false)),
+  });

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "under construction",
 };
 
-export default function Home() {
+export default async function Home() {
   return (
     <main className="flex flex-col items-center pt-12 md:pt-24 px-4">
       <h1 className="text-xl md:text-3xl font-medium text-center">

@@ -48,7 +48,7 @@ const AuthVerifyPage = () => {
     }
   }, [user, router, emailVerified]);
 
-  const loading = emailVerification.isLoading || emailVerified !== false;
+  const loading = emailVerification.isPending || emailVerified !== false;
 
   return (
     <div className="xs:max-w-md w-full self-center mt-16 p-4 relative">

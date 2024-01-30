@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "prebuild": "pnpm store prune --recursive",
-    "build": "dotenv -- turbo run build",
+    "build": "dotenv -- turbo run build --no-cache --continue --concurrency 11",
     "dev": "dotenv -- turbo run dev --no-cache --continue --concurrency 11",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

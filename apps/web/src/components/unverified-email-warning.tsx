@@ -28,7 +28,7 @@ export const UnverifiedEmailWarning = () => {
     emailVerification.mutate({ code: values.code });
   };
 
-  const submitting = emailVerification.isLoading;
+  const submitting = emailVerification.isPending;
 
   return emailVerified === false ? (
     <Form {...codeForm}>

@@ -1,20 +1,21 @@
 import { redis } from "@mbsm/db-layer";
 import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 import { customAlphabet } from "nanoid";
-import { NextResponse } from "next/server";
 import { resend } from "./email";
 
 export const logAndReturnGenericError = (
   err: any,
-  errorType?: "unauthorized"
+  errorType?: "unauthorized" | "badRequest"
 ) => {
   console.error("Error happened: ", err);
 
   switch (errorType) {
     case "unauthorized":
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new Error("Unauthorized");
+    case "badRequest":
+      return new Error("Bad Request");
     default:
-      return new NextResponse("Internal Server Error", { status: 500 });
+      return new Error("Internal Server Error");
   }
 };
 
@@ -47,7 +48,7 @@ export const generateEmailVerificationCodeAndSend = async ({
   if (getEnvAsBool("IS_PROD")) {
     await Promise.all([
       redis.set(`verification:${userId}`, verificationCode),
-      resend.sendEmail({
+      resend.emails.send({
         from: "noreply@mbsm.io",
         subject: "Verification code for MBSM",
         to: email,

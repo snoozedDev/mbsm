@@ -1,17 +1,12 @@
-import { routes } from "@/server/routers";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, useAuthenticatedQuery } from "./authQueries";
+import { renameAuthenticator } from "@/app/actions/authActions";
+import { getUserSettings } from "@/app/actions/userActions";
 import { Authenticator } from "@mbsm/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useUserSettingsQuery = () => {
-  return useAuthenticatedQuery({
+  return useQuery({
     queryKey: ["user", "settings"],
-    queryFn: async () => {
-      const res = await routes.userSettings.clientReq({
-        client: api,
-      });
-      return res.data;
-    },
+    queryFn: () => getUserSettings(),
     retry: false,
   });
 };
@@ -25,8 +20,9 @@ export const useUpdateAuthenticatorMutation = ({
   return useMutation({
     mutationKey: ["authenticator", "update", credentialId],
     mutationFn: async ({ name }: { name: string }) => {
-      const { data } = await api.patch(`/user/authenticator/${credentialId}`, {
-        name,
+      await renameAuthenticator({
+        credentialId,
+        newName: name,
       });
     },
     onSuccess: () => {
@@ -48,7 +44,9 @@ export const useUpdateAuthenticatorMutation = ({
     },
     onError: (err) => {
       console.log(err);
-      client.invalidateQueries(["user", "settings"]);
+      client.invalidateQueries({
+        queryKey: ["user", "settings"],
+      });
     },
   });
 };

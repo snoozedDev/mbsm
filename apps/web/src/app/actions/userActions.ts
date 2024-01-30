@@ -1,18 +1,18 @@
-import { routes } from "@/server/routers";
+"use server";
+
 import { logAndReturnGenericError } from "@/server/serverUtils";
 import { generateInviteCodes } from "@/utils/inviteCodeUtils";
-import { routeWithAuth } from "@/utils/tokenUtils";
 import {
   getAuthenticatorsForUser,
   getUserInviteCodes,
   insertInviteCodes,
 } from "@mbsm/db-layer";
 import { Authenticator, InviteCode } from "@mbsm/types";
+import { actionWithAuthContext } from "./actionUtils";
 
-export const GET = routeWithAuth({
+export const getUserSettings = actionWithAuthContext({
   authRequired: true,
-  routeValidator: routes.userSettings,
-  handler: async ({ req, user }) => {
+  action: async ({ user }) => {
     let [authenticators, inviteCodes] = await Promise.all([
       getAuthenticatorsForUser(user.id),
       getUserInviteCodes(user.id),

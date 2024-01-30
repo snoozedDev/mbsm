@@ -1,15 +1,14 @@
-"use client";
 import { QueryClient } from "@tanstack/react-query";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      networkMode: "offlineFirst",
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false,
       retry: 1,
       staleTime: 1000 * 5, // 5 seconds
-      cacheTime: 1000 * 20, // 20 seconds
     },
   },
 });

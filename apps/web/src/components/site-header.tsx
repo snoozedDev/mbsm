@@ -69,7 +69,7 @@ export const SiteHeader = () => {
     }
   };
 
-  const isLoading = authLoading || login.isLoading;
+  const isLoading = authLoading || login.isPending;
 
   return (
     <header className="supports-backdrop-blur:bg-background/80 sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur">

@@ -1,13 +1,14 @@
 import { ApiRoute, OkLiteralSchema } from "@/lib/validators/validatorUtils";
 import {
-  schema,
+  InferSelectModel,
   getUserByNanoId,
   redis,
-  InferSelectModel,
+  schema,
 } from "@mbsm/db-layer";
 import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 import jwt from "jsonwebtoken";
 import { nanoid } from "nanoid";
+import { cookies, headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodSchema, z } from "zod";
 import { getFormattedZodError, getZodTypeGuard } from "./zodUtils";
@@ -65,67 +66,58 @@ const decodeRefreshToken = (token: string): Token | undefined => {
   return undefined;
 };
 
-export const setAccessTokenCookie = (token: string, res: NextResponse) => {
-  res.cookies.set({
-    name: "accessToken",
-    value: token,
-    httpOnly: true,
-    path: "/api/",
-    maxAge: 60 * 15, // 15 minutes
-    expires: new Date(Date.now() + 1000 * 60 * 15), // 15 minutes
-    secure: getEnvAsBool("IS_PROD"),
-  });
-};
+export const getAccessTokenCookie = (token: string) => ({
+  name: "accessToken",
+  value: token,
+  httpOnly: true,
+  path: "/",
+  maxAge: 60 * 15, // 15 minutes
+  expires: new Date(Date.now() + 1000 * 60 * 15), // 15 minutes
+  secure: getEnvAsBool("IS_PROD"),
+});
 
 export const removeAccessTokenCookie = (res: NextResponse) => {
   res.cookies.set({
     name: "accessToken",
     value: "",
     httpOnly: true,
-    path: "/api/",
+    path: "/",
     maxAge: 0,
     secure: getEnvAsBool("IS_PROD"),
   });
 };
 
-export const setRefreshTokenCookie = (token: string, res: NextResponse) => {
-  res.cookies.set({
-    name: "refreshToken",
-    value: token,
-    httpOnly: true,
-    path: "/api/auth/refresh",
-    maxAge: 60 * 60 * 24 * 30, // 30 days
-    expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 30 days
-    secure: getEnvAsBool("IS_PROD"),
-  });
-};
+export const getRefreshTokenCookie = (token: string) => ({
+  name: "refreshToken",
+  value: token,
+  httpOnly: true,
+  path: "/",
+  maxAge: 60 * 60 * 24 * 30, // 30 days
+  expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 30 days
+  secure: getEnvAsBool("IS_PROD"),
+});
 
 export const removeRefreshTokenCookie = (res: NextResponse) => {
   res.cookies.set({
     name: "refreshToken",
     value: "",
     httpOnly: true,
-    path: "/api/auth/refresh",
+    path: "/",
     maxAge: 0,
     secure: getEnvAsBool("IS_PROD"),
   });
 };
 
-export const setUniqueIdentifierCookie = (
-  uniqueId: string,
-  res: NextResponse
-) => {
-  res.cookies.set({
-    name: "uniqueIdentifier",
-    value: uniqueId,
-    httpOnly: true,
-    path: "/",
-    // forever
-    maxAge: 60 * 60 * 24 * 30 * 12 * 10, // 10 years
-    expires: new Date(Date.now() + 60 * 60 * 24 * 30 * 12 * 10 * 1000), // 10 years
-    secure: getEnvAsBool("IS_PROD"),
-  });
-};
+export const getUniqueIdentifierCookie = (uniqueId: string) => ({
+  name: "uniqueIdentifier",
+  value: uniqueId,
+  httpOnly: true,
+  path: "/",
+  // forever
+  maxAge: 60 * 60 * 24 * 30 * 12 * 10, // 10 years
+  expires: new Date(Date.now() + 60 * 60 * 24 * 30 * 12 * 10 * 1000), // 10 years
+  secure: getEnvAsBool("IS_PROD"),
+});
 
 export const removeUniqueIdentifierCookie = (res: NextResponse) => {
   res.cookies.set({
@@ -148,13 +140,11 @@ export const decodeAccessToken = (token: string): Token | undefined => {
   return undefined;
 };
 
-export async function tokenRefresh(req: NextRequest) {
-  const authError = new NextResponse("Can't refresh. Invalid Token", {
-    status: 401,
-  });
-  const refreshToken = req.cookies.get("refreshToken")?.value;
-  const uniqueId = req.cookies.get("uniqueIdentifier")?.value;
-  const userAgent = req.headers.get("user-agent");
+export const refreshAndSetTokens = async () => {
+  const authError = new Error("Unauthorized");
+  const refreshToken = cookies().get("refreshToken")?.value;
+  const uniqueId = cookies().get("uniqueIdentifier")?.value;
+  const userAgent = headers().get("user-agent");
   if (!refreshToken || !uniqueId || !userAgent) throw authError;
   const tokenContents = decodeRefreshToken(refreshToken);
   if (!tokenContents) throw authError;
@@ -182,7 +172,7 @@ export async function tokenRefresh(req: NextRequest) {
         userNanoId: user.nanoId,
       },
       userAgent,
-    } as const;
+    } satisfies Token;
 
     const accessToken = generateAccessToken(token);
 
@@ -194,16 +184,15 @@ export async function tokenRefresh(req: NextRequest) {
       userNanoId: user.nanoId,
     });
 
-    return {
-      token,
-      accessToken,
-      newRefreshToken,
-    };
+    cookies().set(getAccessTokenCookie(accessToken));
+    cookies().set(getRefreshTokenCookie(newRefreshToken));
+
+    return { token };
   } catch (error) {
     console.log(error);
     throw error;
   }
-}
+};
 
 export const routeWithAuth =
   <
@@ -342,16 +331,12 @@ export const routeWithAuth =
     }
   };
 
-export const getResponseWithTokens = async ({
-  req,
-  user,
-}: {
-  req: NextRequest;
-  user: InferSelectModel<typeof schema.user>;
-}): Promise<NextResponse> => {
-  const userAgent = req.headers.get("user-agent");
+export const createAndSetAuthTokens = async (
+  user: InferSelectModel<typeof schema.user>
+) => {
+  const userAgent = headers().get("user-agent");
   if (!userAgent) throw new Error("No User Agent");
-  const currentUniqueId = req.cookies.get("uniqueIdentifier")?.value;
+  const currentUniqueId = cookies().get("uniqueIdentifier")?.value;
 
   const token = {
     level: "user",
@@ -374,13 +359,9 @@ export const getResponseWithTokens = async ({
     uniqueId,
   });
 
-  const response = new NextResponse();
-
-  setAccessTokenCookie(accessToken, response);
-  setRefreshTokenCookie(refreshToken, response);
-  setUniqueIdentifierCookie(uniqueId, response);
-
-  return response;
+  cookies().set(getAccessTokenCookie(accessToken));
+  cookies().set(getRefreshTokenCookie(refreshToken));
+  cookies().set(getUniqueIdentifierCookie(uniqueId));
 };
 
 export const deleteExpiredUserTokens = async ({
