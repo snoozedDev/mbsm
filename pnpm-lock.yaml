@@ -198,6 +198,9 @@ importers:
       '@mbsm/types':
         specifier: workspace:*
         version: link:../../packages/types
+      '@simplewebauthn/types':
+        specifier: 9.0.1
+        version: 9.0.1
       '@types/jsonwebtoken':
         specifier: ^9.0.2
         version: 9.0.2
@@ -3920,7 +3923,6 @@ packages:
 
   /@simplewebauthn/types@9.0.1:
     resolution: {integrity: sha512-tGSRP1QvsAvsJmnOlRQyw/mvK9gnPtjEc5fg2+m8n+QUa+D7rvrKkOYyfpy42GTs90X3RDOnqJgfHt+qO67/+w==}
-    dev: false
 
   /@smithy/abort-controller@1.1.0:
     resolution: {integrity: sha512-5imgGUlZL4dW4YWdMYAKLmal9ny/tlenM81QZY7xYyb76z9Z/QOg7oM5Ak9HQl8QfFTlGVWwcMXl+54jroRgEQ==}

@@ -63,6 +63,7 @@
     "three": "^0.155.0"
   },
   "devDependencies": {
+    "@simplewebauthn/types": "9.0.1",
     "@mbsm/types": "workspace:*",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/luxon": "^3.3.0",
