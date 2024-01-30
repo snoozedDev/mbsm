@@ -64,7 +64,7 @@ const SingleAuthenticator = ({
 
   const canDelete = (data?.authenticators ?? []).length > 1;
 
-  const { mutate: updateName, status } = useUpdateAuthenticatorMutation({
+  const { mutate: updateName, isPending } = useUpdateAuthenticatorMutation({
     credentialId: authenticator.credentialId,
   });
 
@@ -95,7 +95,7 @@ const SingleAuthenticator = ({
 
   const onDelete = useCallback(() => {}, []);
 
-  const isMutating = status === "loading";
+  const isMutating = isPending;
 
   const dateTime = authenticator
     ? DateTime.fromISO(authenticator?.addedAt)
@@ -234,11 +234,11 @@ const SingleAuthenticator = ({
 };
 
 export const UserPasskeys = () => {
-  const { data, status } = useUserSettingsQuery();
-  const { isLoading: addingAuthenticator, mutate: addAuthenticator } =
+  const { data, isPending } = useUserSettingsQuery();
+  const { isPending: addingAuthenticator, mutate: addAuthenticator } =
     useAddAuthenticatorMutation();
 
-  const isLoading = status === "loading";
+  const isLoading = isPending;
 
   return (
     <Card className="overflow-hidden">

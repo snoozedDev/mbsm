@@ -27,6 +27,10 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+// export const metadata: Metadata = {
+//   title: "Verify • MBSM",
+// };
+
 const AuthVerifyPage = () => {
   const [emailConcealed, setEmailConcealed] = useState(true);
   const user = useUserQuery();

@@ -9,12 +9,10 @@ type Props = {
 
 export const MainLayout = ({ children }: Props) => {
   return (
-    <QueryLayout>
-      <div className="flex min-h-screen flex-col">
-        <SiteHeader />
-        {children}
-        <Toaster />
-      </div>
-    </QueryLayout>
+    <div className="flex min-h-screen flex-col">
+      <SiteHeader />
+      {children}
+      <Toaster />
+    </div>
   );
 };

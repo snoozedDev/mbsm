@@ -56,7 +56,7 @@ export const SiteHeader = () => {
   };
 
   const onRegister = () => {
-    router.push("/auth/signup");
+    router.push("/auth/register");
   };
 
   const toggleTheme = () => {

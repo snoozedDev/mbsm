@@ -12,7 +12,12 @@ export const QueryLayout = ({ children }: { children: ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      {!IS_PROD && <ReactQueryDevtools initialIsOpen={false} />}
+      {!IS_PROD && (
+        <ReactQueryDevtools
+          initialIsOpen={false}
+          buttonPosition="bottom-left"
+        />
+      )}
     </QueryClientProvider>
   );
 };

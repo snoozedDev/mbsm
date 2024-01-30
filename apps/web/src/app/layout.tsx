@@ -14,7 +14,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className={cn("min-h-screen bg-background font-sans antialiased")}>
+      <body
+        suppressHydrationWarning={true}
+        className={cn("min-h-screen bg-background font-sans antialiased")}
+      >
         <RootLayout>
           <MainLayout>{children}</MainLayout>
         </RootLayout>

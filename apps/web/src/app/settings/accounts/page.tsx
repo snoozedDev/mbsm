@@ -4,12 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useUserQuery } from "@/queries/authQueries";
 
+// export const metadata: Metadata = {
+//   title: "Accounts • Settings • MBSM",
+// };
+
 const AccountsSettingsPage = () => {
-  const { data: user, isLoading } = useUserQuery();
+  const { isPending } = useUserQuery();
 
   return (
     <FadeFromBelow>
-      {isLoading ? (
+      {isPending ? (
         <h1>loading</h1>
       ) : (
         <Card>

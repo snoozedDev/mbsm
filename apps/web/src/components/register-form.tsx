@@ -1,16 +1,26 @@
 "use client";
 
-import { useIsEmailVerified } from "@/components/hooks/useIsEmailVerified";
-import { LoadingDots } from "@/components/loading-dots";
-import { Button } from "@/components/ui/button";
+import {
+  useIsLoggedIn,
+  useRegisterMutation,
+  useUserQuery,
+} from "@/queries/authQueries";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { getErrorMessage } from "@mbsm/utils";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@radix-ui/react-dialog";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { useIsEmailVerified } from "./hooks/useIsEmailVerified";
+import { Button } from "./ui/button";
+import { DialogHeader } from "./ui/dialog";
 import {
   Form,
   FormControl,
@@ -19,19 +29,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  useIsLoggedIn,
-  useRegisterMutation,
-  useUserQuery,
-} from "@/queries/authQueries";
-import { getErrorMessage } from "@/utils/stringUtils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+} from "./ui/form";
+import { Input } from "./ui/input";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -41,7 +40,7 @@ const formSchema = z.object({
     .length(16, "Invite code must be 16 characters long"),
 });
 
-const AuthSignupPage = () => {
+export const RegisterForm = ({}) => {
   const register = useRegisterMutation();
   const user = useUserQuery();
   const router = useRouter();
@@ -68,7 +67,7 @@ const AuthSignupPage = () => {
     }
   }, [loggedIn, router, emailVerified]);
 
-  const loading = register.isLoading || user.isLoading || loggedIn;
+  const loading = register.isPending || user.isLoading || loggedIn;
 
   return (
     <div className="xs:max-w-md w-full self-center mt-16 p-4 relative">
@@ -120,7 +119,7 @@ const AuthSignupPage = () => {
               disabled={loading}
               className="xs:mr-4 max-xs:mb-2"
             >
-              {loading ? <LoadingDots /> : "Sign up"}
+              {`Sign up`}
             </Button>
             <p className="text-foreground/60 text-sm">
               {`You'll be prompted for a `}
@@ -155,5 +154,3 @@ const AuthSignupPage = () => {
     </div>
   );
 };
-
-export default AuthSignupPage;

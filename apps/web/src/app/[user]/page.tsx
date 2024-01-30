@@ -1,6 +1,7 @@
 import { NsfwWarningScreen } from "@/components/nsfw-warning-screen";
 import { UserPosts } from "@/components/user-posts";
 import { fakeGetUser, fakeGetUserPosts } from "@/tmp/fakeFetch";
+import { getEnvAsStr } from "@mbsm/utils";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -25,6 +26,7 @@ export async function generateMetadata({
     return {
       title,
       description,
+      metadataBase: new URL(getEnvAsStr("ORIGIN")),
       openGraph: {
         title,
         description,
@@ -36,7 +38,7 @@ export async function generateMetadata({
   const title = user.displayName;
 
   return {
-    title,
+    title: `${title} • MBSM`,
     description,
     openGraph: {
       images: [user.avatar.url],
@@ -46,6 +48,7 @@ export async function generateMetadata({
       title,
       description,
     },
+    metadataBase: new URL(getEnvAsStr("ORIGIN")),
     twitter: {
       card: "summary",
       creator: user.links

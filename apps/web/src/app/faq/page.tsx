@@ -9,7 +9,7 @@ import React, { ReactNode } from "react";
 import { Balancer } from "react-wrap-balancer";
 
 export const metadata: Metadata = {
-  title: "FAQ",
+  title: "F.A.Q. • MBSM",
   description: "frequently asked questions",
 };
 

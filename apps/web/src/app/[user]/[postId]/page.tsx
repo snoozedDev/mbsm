@@ -41,7 +41,7 @@ export async function generateMetadata({
   const card = post.type === "image" ? "summary_large_image" : "summary";
 
   return {
-    title,
+    title: `${title} • MBSM`,
     description,
     openGraph: {
       images,
