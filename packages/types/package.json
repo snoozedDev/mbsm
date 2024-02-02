@@ -1,6 +1,7 @@
 {
   "name": "@mbsm/types",
-  "version": "1.0.0",
+  "version": "0.0.0",
+  "private": true,
   "description": "Types for mbsm",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -16,7 +17,7 @@
     "typecheck": "tsc --noEmit --pretty true --extendedDiagnostics"
   },
   "devDependencies": {
-    "@mbsm/tsconfig": "workspace:*",
+    "@mbsm/tsconfig": "*",
     "@types/node": "^20.8.3",
     "eslint": "^8.51.0",
     "nodemon": "^3.0.1",

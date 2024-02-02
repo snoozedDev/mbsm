@@ -1,6 +1,7 @@
 {
   "name": "@mbsm/utils",
-  "version": "1.0.0",
+  "version": "0.0.0",
+  "private": true,
   "description": "A collection of utility functions",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -15,8 +16,8 @@
     "typecheck": "tsc --noEmit --pretty true --extendedDiagnostics"
   },
   "devDependencies": {
-    "@mbsm/tsconfig": "workspace:*",
-    "@mbsm/types": "workspace:*",
+    "@mbsm/tsconfig": "*",
+    "@mbsm/types": "*",
     "@types/node": "^20.8.3",
     "eslint": "^8.51.0",
     "tsup": "^7.2.0",

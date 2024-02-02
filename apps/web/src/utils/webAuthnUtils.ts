@@ -10,7 +10,7 @@ import {
 import type {
   AuthenticationResponseJSON,
   RegistrationResponseJSON,
-} from "@simplewebauthn/typescript-types";
+} from "@simplewebauthn/types";
 
 export const getWebAuthnResponseForRegistration = ({
   attRes,
