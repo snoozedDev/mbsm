@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useIsDesktop } from "./hooks/isDesktop";
 import { useIsEmailVerified } from "./hooks/useIsEmailVerified";
 import { Button } from "./ui/button";
 import {
@@ -22,6 +23,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "./ui/drawer";
 import {
   Form,
   FormControl,
@@ -47,6 +56,7 @@ export const RegisterForm = ({}) => {
   const router = useRouter();
   const loggedIn = useIsLoggedIn();
   const emailVerified = useIsEmailVerified();
+  const isDesktop = useIsDesktop();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,6 +79,82 @@ export const RegisterForm = ({}) => {
   }, [loggedIn, router, emailVerified]);
 
   const loading = register.isPending || user.isLoading || loggedIn;
+
+  const renderPasskeyDescription = () => (
+    <>
+      <p>
+        {`A Passkey is just another way to authenticate yourself. Just like passwords and
+              email confirmations, it's a way to prove that you are who you say you are. For your
+              primary Passkey, I recommend using your phone.`}
+      </p>
+      <br />
+      <p>
+        You can read more about it in{" "}
+        <Button
+          asChild
+          variant="link"
+          className="p-0 h-auto text-current hover:text-foreground underline"
+        >
+          <Link
+            target="_blank"
+            href={
+              "https://www.keepersecurity.com/resources/glossary/what-is-a-passkey/"
+            }
+          >
+            this Keeper article.
+          </Link>
+        </Button>
+      </p>
+    </>
+  );
+
+  const renderInviteCodeDialog = () => {
+    if (isDesktop) {
+      return (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="link"
+              className="p-0 h-auto text-current hover:text-foreground underline"
+            >
+              <span>passkey.</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="mb-4">Passkey?</DialogTitle>
+              <DialogDescription>
+                {renderPasskeyDescription()}
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      );
+    } else {
+      return (
+        <Drawer>
+          <DrawerTrigger asChild>
+            <Button
+              variant="link"
+              className="p-0 h-auto text-current hover:text-foreground underline"
+            >
+              <span>passkey.</span>
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent className="h-1/2">
+            <DrawerHeader className="my-8 ">
+              <DrawerTitle className="mb-4 text-2xl text-center">
+                Passkey?
+              </DrawerTitle>
+              <DrawerDescription className="text-base text-center">
+                {renderPasskeyDescription()}
+              </DrawerDescription>
+            </DrawerHeader>
+          </DrawerContent>
+        </Drawer>
+      );
+    }
+  };
 
   return (
     <div className="xs:max-w-md w-full self-center mt-16 p-4 relative">
@@ -124,46 +210,7 @@ export const RegisterForm = ({}) => {
             </Button>
             <p className="text-foreground/60 text-sm">
               {`You'll be prompted for a `}
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="link"
-                    className="p-0 h-auto text-current hover:text-foreground underline"
-                  >
-                    <span>passkey.</span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="mb-4">Passkey?</DialogTitle>
-                    <DialogDescription>
-                      <p>
-                        {`A Passkey is just another way to authenticate yourself. Just like passwords and
-                      email confirmations, it's a way to prove that you are who you say you are. For your
-                      primary Passkey, I recommend using your phone.`}
-                      </p>
-                      <br />
-                      <p>
-                        You can read more about it in{" "}
-                        <Button
-                          asChild
-                          variant="link"
-                          className="p-0 h-auto text-current hover:text-foreground underline"
-                        >
-                          <Link
-                            target="_blank"
-                            href={
-                              "https://www.keepersecurity.com/resources/glossary/what-is-a-passkey/"
-                            }
-                          >
-                            this Keeper article.
-                          </Link>
-                        </Button>
-                      </p>
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
+              {renderInviteCodeDialog()}
             </p>
           </div>
         </form>

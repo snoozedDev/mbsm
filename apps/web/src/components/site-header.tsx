@@ -64,7 +64,7 @@ export const SiteHeader = () => {
         <h1 className="text-xl font-bold select-none max-sm:hidden mr-4">
           MBSM
         </h1>
-        <NavigationMenu>
+        <NavigationMenu className="max-xs:hidden">
           <NavigationMenuList className="space-x-4 px-4 font-medium">
             {navigation.map(({ name, href }, i) => (
               <NavigationMenuItem
