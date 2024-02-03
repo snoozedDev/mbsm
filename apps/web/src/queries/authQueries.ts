@@ -10,7 +10,6 @@ import {
   verifyNewAuthenticator,
   verifyRegister,
 } from "@/app/actions/authActions";
-import { toast } from "@/components/ui/use-toast";
 import { codeFormSchema } from "@/lib/shemas/forms/codeFormSchema";
 import { Authenticator, InviteCode } from "@mbsm/types";
 import {
@@ -19,6 +18,7 @@ import {
 } from "@simplewebauthn/browser";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { z } from "zod";
 
 export const useUserQuery = () => {
@@ -36,9 +36,7 @@ export const useLogoutMutation = () => {
     mutationKey: ["logout"],
     mutationFn: logout,
     onSuccess: () => {
-      toast({
-        description: "You have been logged out.",
-      });
+      toast("You have been logged out.");
       client.resetQueries({ queryKey: ["user"] });
       router.push("/");
     },
@@ -75,8 +73,7 @@ export const useLoginMutation = () => {
       return verRes;
     },
     onError: (err) => {
-      toast({
-        title: "Login failed",
+      toast("Login failed", {
         description: err instanceof Error ? err.message : "Unknown error",
       });
     },
@@ -163,8 +160,7 @@ export const useAddAuthenticatorMutation = () => {
       return verifyRes.authenticator;
     },
     onError: (err) => {
-      toast({
-        title: "Failed to add authenticator",
+      toast("Failed to add authenticator", {
         description: err instanceof Error ? err.message : "Unknown error",
       });
     },
@@ -196,9 +192,7 @@ export const useEmailVerificationMutation = () => {
       client.resetQueries({
         queryKey: ["user"],
       });
-      toast({
-        description: "Your email has been verified.",
-      });
+      toast("Your email has been verified.");
     },
   });
 };

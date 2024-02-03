@@ -8,7 +8,7 @@ import type { ComponentProps } from "react";
 import { QueryLayout } from "./query-layout";
 import { SiteHeader } from "./site-header";
 import { ThemeSwitcher } from "./theme-switcher";
-import { Toaster } from "./ui/toaster";
+import { Toaster } from "./ui/sonner";
 
 type Props = {
   children: React.ReactNode;
