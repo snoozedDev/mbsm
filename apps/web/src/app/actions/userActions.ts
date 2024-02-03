@@ -8,6 +8,7 @@ import {
   insertInviteCodes,
 } from "@mbsm/db-layer";
 import { Authenticator, InviteCode } from "@mbsm/types";
+import { cookies } from "next/headers";
 import { getAuthContext } from "./actionUtils";
 import { ActionResponse } from "./authActions";
 
@@ -17,7 +18,7 @@ export const getUserSettings = async (): Promise<
     inviteCodes: InviteCode[];
   }>
 > => {
-  const authRes = await getAuthContext();
+  const authRes = await getAuthContext(cookies());
   if (!authRes.success) return authRes;
   const { user } = authRes;
 

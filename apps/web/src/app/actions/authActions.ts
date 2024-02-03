@@ -55,18 +55,15 @@ export const logout = async () => {
   cookieStore.delete("refreshToken");
 };
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export const getUserInfo = async (): Promise<
   ActionResponse<{
     email: string;
     emailVerified: boolean;
   }>
 > => {
-  const authRes = await getAuthContext();
+  const authRes = await getAuthContext(cookies());
   if (!authRes.success) return authRes;
   const { user } = authRes;
-  console.log({ authRes });
   return {
     success: true,
     email: user.email,
@@ -276,7 +273,7 @@ export const getNewAuthenticatorOptions = async (): Promise<
     options: PublicKeyCredentialCreationOptionsJSON;
   }>
 > => {
-  const authRes = await getAuthContext();
+  const authRes = await getAuthContext(cookies());
   if (!authRes.success) return authRes;
   const { user } = authRes;
 
@@ -304,7 +301,7 @@ export const verifyNewAuthenticator = async ({
     authenticator: Authenticator;
   }>
 > => {
-  const authRes = await getAuthContext();
+  const authRes = await getAuthContext(cookies());
   if (!authRes.success) return authRes;
   const { user } = authRes;
 
@@ -371,7 +368,7 @@ export const verifyEmail = async ({
 }: {
   code: string;
 }): Promise<ActionResponse> => {
-  const authRes = await getAuthContext();
+  const authRes = await getAuthContext(cookies());
   if (!authRes.success) return authRes;
   const { user } = authRes;
 
@@ -413,7 +410,7 @@ export const renameAuthenticator = async ({
   newName: string;
   credentialId: string;
 }): Promise<ActionResponse> => {
-  const authRes = await getAuthContext();
+  const authRes = await getAuthContext(cookies());
   if (!authRes.success) return authRes;
   const { user } = authRes;
 
