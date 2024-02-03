@@ -1,6 +1,5 @@
 import { renameAuthenticator } from "@/app/actions/authActions";
 import { getUserSettings } from "@/app/actions/userActions";
-import { Authenticator } from "@mbsm/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useUserSettingsQuery = () => {
@@ -26,24 +25,11 @@ export const useUpdateAuthenticatorMutation = ({
       });
     },
     onSuccess: () => {
-      client.setQueryData(
-        ["user", "settings"],
-        (oldData: any, { name }: any) =>
-          oldData
-            ? {
-                ...oldData,
-                authenticators: oldData.authenticators?.map(
-                  (a: Authenticator) => {
-                    if (a.credentialId === credentialId) return { ...a, name };
-                    return a;
-                  }
-                ),
-              }
-            : oldData
-      );
+      client.invalidateQueries({
+        queryKey: ["user", "settings"],
+      });
     },
-    onError: (err) => {
-      console.log(err);
+    onError: () => {
       client.invalidateQueries({
         queryKey: ["user", "settings"],
       });
