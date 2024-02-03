@@ -1,3 +1,4 @@
+import { ErrorResponse } from "@/app/actions/authActions";
 import { redis } from "@mbsm/db-layer";
 import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 import { customAlphabet } from "nanoid";
@@ -5,17 +6,31 @@ import { resend } from "./email";
 
 export const logAndReturnGenericError = (
   err: any,
-  errorType?: "unauthorized" | "badRequest"
-) => {
+  errorType?: "unauthorized" | "badRequest" | "internal"
+): ErrorResponse => {
   console.error("Error happened: ", err);
 
   switch (errorType) {
     case "unauthorized":
-      return new Error("Unauthorized");
+      return {
+        success: false,
+        error: "Unauthorized",
+      };
     case "badRequest":
-      return new Error("Bad Request");
+      return {
+        success: false,
+        error: "Bad Request",
+      };
+    case "internal":
+      return {
+        success: false,
+        error: "Internal Server Error",
+      };
     default:
-      return new Error("Internal Server Error");
+      return {
+        success: false,
+        error: "Unknown Error",
+      };
   }
 };
 

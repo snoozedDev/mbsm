@@ -7,20 +7,21 @@ import {
 } from "@/queries/authQueries";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getErrorMessage } from "@mbsm/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-} from "@radix-ui/react-dialog";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useIsEmailVerified } from "./hooks/useIsEmailVerified";
 import { Button } from "./ui/button";
-import { DialogHeader } from "./ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import {
   Form,
   FormControl,
@@ -124,10 +125,9 @@ export const RegisterForm = ({}) => {
             <p className="text-foreground/60 text-sm">
               {`You'll be prompted for a `}
               <Dialog>
-                <DialogTrigger>
+                <DialogTrigger asChild>
                   <Button
                     variant="link"
-                    asChild
                     className="p-0 h-auto text-current hover:text-foreground underline"
                   >
                     <span>passkey.</span>
@@ -135,9 +135,31 @@ export const RegisterForm = ({}) => {
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Passkeys</DialogTitle>
+                    <DialogTitle className="mb-4">Passkey?</DialogTitle>
                     <DialogDescription>
-                      Fill with more info later.
+                      <p>
+                        {`A Passkey is just another way to authenticate yourself. Just like passwords and
+                      email confirmations, it's a way to prove that you are who you say you are. For your
+                      primary Passkey, I recommend using your phone.`}
+                      </p>
+                      <br />
+                      <p>
+                        You can read more about it in{" "}
+                        <Button
+                          asChild
+                          variant="link"
+                          className="p-0 h-auto text-current hover:text-foreground underline"
+                        >
+                          <Link
+                            target="_blank"
+                            href={
+                              "https://www.keepersecurity.com/resources/glossary/what-is-a-passkey/"
+                            }
+                          >
+                            this Keeper article.
+                          </Link>
+                        </Button>
+                      </p>
                     </DialogDescription>
                   </DialogHeader>
                 </DialogContent>

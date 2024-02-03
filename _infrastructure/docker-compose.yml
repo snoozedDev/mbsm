@@ -32,16 +32,5 @@ services:
       SRH_CONNECTION_STRING: "redis://redis:6379"
     networks:
       - mbsm
-  nginx:
-    container_name: mbsm_nginx
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/ssl:/ssl/
-    networks:
-      - mbsm
 networks:
   mbsm:

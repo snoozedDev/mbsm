@@ -17,6 +17,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { FadeFromBelow } from "./containers/fade-from-below";
 import { LoadingDots } from "./loading-dots";
 import {
   AlertDialog,
@@ -62,8 +63,6 @@ const SingleAuthenticator = ({
   const [name, setName] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const canDelete = (data?.authenticators ?? []).length > 1;
-
   const { mutate: updateName, isPending } = useUpdateAuthenticatorMutation({
     credentialId: authenticator.credentialId,
   });
@@ -81,10 +80,6 @@ const SingleAuthenticator = ({
     [authenticator, name, updateName]
   );
 
-  const onEdit = () => {
-    setEditing((v) => !v);
-  };
-
   useEffect(() => {
     if (editing && inputRef.current) {
       setTimeout(() => {
@@ -94,6 +89,14 @@ const SingleAuthenticator = ({
   }, [editing, inputRef]);
 
   const onDelete = useCallback(() => {}, []);
+
+  if (!data?.success) return null;
+
+  const canDelete = (data?.authenticators ?? []).length > 1;
+
+  const onEdit = () => {
+    setEditing((v) => !v);
+  };
 
   const isMutating = isPending;
 
@@ -234,61 +237,62 @@ const SingleAuthenticator = ({
 };
 
 export const UserPasskeys = () => {
-  const { data, isPending } = useUserSettingsQuery();
+  const { isPending, data } = useUserSettingsQuery();
   const { isPending: addingAuthenticator, mutate: addAuthenticator } =
     useAddAuthenticatorMutation();
 
-  const isLoading = isPending;
-
   return (
-    <Card className="overflow-hidden">
-      <div className="py-4 px-6">
-        <h3 className="text-2xl font-medium tracking-wide">Passkeys</h3>
-        <p className="text-sm text-muted-foreground mt-2 mb-4">
-          These are individual passkeys that you have set up for your accounts.
-        </p>
-        <ul className="flex flex-col items-stretch">
-          {isLoading
-            ? Array.from({ length: 3 }).map((_, i) => (
-                <Fragment key={i}>
-                  <li key={i} className="flex flex-1">
-                    <SingleAuthenticatorSkeleton />
-                  </li>
-                  {i !== 2 && <Separator />}
-                </Fragment>
-              ))
-            : data?.authenticators
-            ? data.authenticators
-                .sort(
-                  (a, b) =>
-                    DateTime.fromISO(b.addedAt).toMillis() -
-                    DateTime.fromISO(a.addedAt).toMillis()
-                )
-                .map((authenticator, i) => (
-                  <Fragment key={authenticator.credentialId}>
-                    <motion.li
-                      key={authenticator.credentialId}
-                      exit={{ opacity: 0, x: -10 }}
-                      className="flex flex-1"
-                    >
-                      <SingleAuthenticator authenticator={authenticator} />
-                    </motion.li>
-                    {i !== data.authenticators.length - 1 && <Separator />}
+    <FadeFromBelow>
+      <Card className="overflow-hidden">
+        <div className="py-4 px-6">
+          <h3 className="text-2xl font-medium tracking-wide">Passkeys</h3>
+          <p className="text-sm text-muted-foreground mt-2 mb-4">
+            These are individual passkeys that you have set up for your
+            accounts.
+          </p>
+          <ul className="flex flex-col items-stretch">
+            {isPending
+              ? Array.from({ length: 3 }).map((_, i) => (
+                  <Fragment key={i}>
+                    <li key={i} className="flex flex-1">
+                      <SingleAuthenticatorSkeleton />
+                    </li>
+                    {i !== 2 && <Separator />}
                   </Fragment>
                 ))
-            : null}
-        </ul>
-      </div>
+              : data?.success
+                ? data.authenticators
+                    .sort(
+                      (a, b) =>
+                        DateTime.fromISO(b.addedAt).toMillis() -
+                        DateTime.fromISO(a.addedAt).toMillis()
+                    )
+                    .map((authenticator, i) => (
+                      <Fragment key={authenticator.credentialId}>
+                        <motion.li
+                          key={authenticator.credentialId}
+                          exit={{ opacity: 0, x: -10 }}
+                          className="flex flex-1"
+                        >
+                          <SingleAuthenticator authenticator={authenticator} />
+                        </motion.li>
+                        {i !== data.authenticators.length - 1 && <Separator />}
+                      </Fragment>
+                    ))
+                : null}
+          </ul>
+        </div>
 
-      <div className="bg-muted/50 py-2 px-4 flex flex-row-reverse">
-        <Button
-          disabled={addingAuthenticator || isLoading}
-          className="h-9 my-2"
-          onClick={() => addAuthenticator()}
-        >
-          {addingAuthenticator ? <LoadingDots /> : "Add New"}
-        </Button>
-      </div>
-    </Card>
+        <div className="bg-muted/50 py-2 px-4 flex flex-row-reverse">
+          <Button
+            disabled={addingAuthenticator || isPending}
+            className="h-9 my-2"
+            onClick={() => addAuthenticator()}
+          >
+            {addingAuthenticator ? <LoadingDots /> : "Add New"}
+          </Button>
+        </div>
+      </Card>
+    </FadeFromBelow>
   );
 };

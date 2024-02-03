@@ -4,7 +4,7 @@ import { useUserSettingsQuery } from "@/queries/userQueries";
 import { InviteCode } from "@mbsm/types";
 import { motion } from "framer-motion";
 import { AlertTriangle, EyeIcon, EyeOffIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useIsEmailVerified } from "./hooks/useIsEmailVerified";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
@@ -104,8 +104,8 @@ const Code = ({
                 {redeemed
                   ? "This code has been redeemed."
                   : copied
-                  ? "Copied!"
-                  : "Click to copy."}
+                    ? "Copied!"
+                    : "Click to copy."}
               </p>
             </TooltipContent>
           </Tooltip>
@@ -130,29 +130,39 @@ const WarningMessage = ({ message }: { message: string }) => (
 
 export const UserInviteCodes = () => {
   const emailVerified = useIsEmailVerified();
-  const { data, isLoading } = useUserSettingsQuery();
+  const { isLoading, data } = useUserSettingsQuery();
 
-  const renderCodesList = () => {
-    return isLoading
-      ? Array.from({ length: 5 }).map((_, i) => (
-          <li key={i} className="flex flex-1">
-            <Code loading />
-          </li>
-        ))
-      : data?.inviteCodes
-          .sort((a) => (a.redeemed ? 1 : -1))
-          .map((inviteCode, i) => (
-            <motion.li
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2, delay: i * 0.05 }}
-              key={inviteCode.code}
-              className="flex flex-1"
-            >
-              <Code {...inviteCode} />
-            </motion.li>
-          )) || null;
-  };
+  console.log({ data });
+
+  const renderCodesList = useCallback(() => {
+    if (isLoading || !data) {
+      return Array.from({ length: 5 }).map((_, i) => (
+        <li key={i} className="flex flex-1">
+          <Code loading />
+        </li>
+      ));
+    }
+
+    if (!data || !data.success) {
+      return null;
+    }
+
+    return (
+      data.inviteCodes
+        .sort((a) => (a.redeemed ? 1 : -1))
+        .map((inviteCode, i) => (
+          <motion.li
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.2, delay: i * 0.05 }}
+            key={inviteCode.code}
+            className="flex flex-1"
+          >
+            <Code {...inviteCode} />
+          </motion.li>
+        )) || null
+    );
+  }, [isLoading, data]);
 
   return (
     <Card className="flex flex-col overflow-hidden py-4 px-6">

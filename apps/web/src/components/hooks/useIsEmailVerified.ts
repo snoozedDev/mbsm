@@ -2,5 +2,8 @@ import { useUserQuery } from "@/queries/authQueries";
 
 export const useIsEmailVerified = () => {
   const { data, isLoading } = useUserQuery();
-  return isLoading || !data ? undefined : data.emailVerified;
+  if (isLoading) return false;
+  if (!data) return false;
+  if (data.success === false) return false;
+  return data.emailVerified;
 };

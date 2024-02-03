@@ -28,9 +28,25 @@ import {
 } from "@mbsm/db-layer";
 import { Authenticator } from "@mbsm/types";
 import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
+import {
+  PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON,
+} from "@simplewebauthn/types";
 import { nanoid } from "nanoid";
 import { cookies, headers } from "next/headers";
-import { actionWithAuthContext } from "./actionUtils";
+import { getAuthContext } from "./actionUtils";
+
+export type SuccessResponse = { success: true };
+export type ErrorResponse = { success: false; error: string };
+export type ActionResponse<T = undefined> =
+  | (SuccessResponse & (T extends undefined ? {} : T))
+  | ErrorResponse;
+
+export const isActionResponseWithData = <T>(
+  res: ActionResponse<T>
+): res is SuccessResponse & { data: T } => {
+  return res.success && "data" in res;
+};
 
 export const logout = async () => {
   const cookieStore = cookies();
@@ -39,21 +55,35 @@ export const logout = async () => {
   cookieStore.delete("refreshToken");
 };
 
-export const getUserInfo = actionWithAuthContext({
-  authRequired: true,
-  action: async ({ user }) => {
-    return {
-      email: user.email,
-      emailVerified: user.emailVerified,
-    };
-  },
-});
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const login = async () => {
+export const getUserInfo = async (): Promise<
+  ActionResponse<{
+    email: string;
+    emailVerified: boolean;
+  }>
+> => {
+  const authRes = await getAuthContext();
+  if (!authRes.success) return authRes;
+  const { user } = authRes;
+  console.log({ authRes });
+  return {
+    success: true,
+    email: user.email,
+    emailVerified: user.emailVerified,
+  };
+};
+
+export const login = async (): Promise<
+  ActionResponse<{
+    options: PublicKeyCredentialRequestOptionsJSON;
+  }>
+> => {
   const limitRes = await loginLimiter.middleware();
+  console.log({ limitRes });
   if (limitRes) throw limitRes;
   const options = await getWebAuthnLoginOptions();
-  return { options };
+  return { success: true, options };
 };
 
 export const register = async ({
@@ -62,26 +92,30 @@ export const register = async ({
 }: {
   email: string;
   inviteCode: string;
-}) => {
+}): Promise<
+  ActionResponse<{
+    options: PublicKeyCredentialCreationOptionsJSON;
+  }>
+> => {
   const limitRes = await registerLimiter.middleware();
-  if (limitRes) throw limitRes;
+  if (limitRes) return limitRes;
 
   if (!inviteCode || !email) {
-    throw logAndReturnGenericError(
+    return logAndReturnGenericError(
       "Missing invite code or email",
       "badRequest"
     );
   }
 
   const inviteCodeError = await validateInviteCode(inviteCode);
-  if (inviteCodeError) throw inviteCodeError;
+  if (inviteCodeError) return inviteCodeError;
 
   const nanoId = nanoid(12);
 
   const existingUser = await getUserByEmail(email);
 
   if (existingUser && existingUser.protected) {
-    throw logAndReturnGenericError("User already exists", "badRequest");
+    return logAndReturnGenericError("User already exists", "badRequest");
   }
 
   const options = await getWebAuthnRegistrationOptions({
@@ -105,21 +139,21 @@ export const register = async ({
     });
   }
 
-  return { options };
+  return { success: true, options };
 };
 
-export const verifyLogin = async (attRes: any) => {
+export const verifyLogin = async (attRes: any): Promise<ActionResponse> => {
   const limitRes = await loginLimiter.middleware();
-  if (limitRes) throw limitRes;
+  if (limitRes) return limitRes;
   const userAgent = headers().get("user-agent");
   if (!userAgent) {
-    throw logAndReturnGenericError("No user agent found", "unauthorized");
+    return logAndReturnGenericError("No user agent found", "unauthorized");
   }
 
   const result = await getAuthenticatorAndUserByCredentialId(attRes.id);
 
   if (!result) {
-    throw logAndReturnGenericError("No authenticator found", "unauthorized");
+    return logAndReturnGenericError("No authenticator found", "unauthorized");
   }
 
   const { user, ...authenticator } = result;
@@ -134,7 +168,7 @@ export const verifyLogin = async (attRes: any) => {
   const { verified, authenticationInfo } = verification;
 
   if (!verified || !authenticationInfo) {
-    throw logAndReturnGenericError(
+    return logAndReturnGenericError(
       "WebAuthn Verification failed",
       "unauthorized"
     );
@@ -148,6 +182,8 @@ export const verifyLogin = async (attRes: any) => {
   });
 
   await createAndSetAuthTokens(user);
+
+  return { success: true };
 };
 
 export const verifyRegister = async ({
@@ -158,12 +194,12 @@ export const verifyRegister = async ({
   attRes: any;
   email: string;
   inviteCode: string;
-}) => {
+}): Promise<ActionResponse> => {
   const limitRes = await registerLimiter.middleware();
   if (limitRes) return limitRes;
   const userAgent = headers().get("user-agent");
   if (!userAgent)
-    throw logAndReturnGenericError("No user agent found", "badRequest");
+    return logAndReturnGenericError("No user agent found", "badRequest");
 
   const inviteCodeError = await validateInviteCode(inviteCode);
   if (inviteCodeError) return inviteCodeError;
@@ -171,11 +207,11 @@ export const verifyRegister = async ({
   const user = await getUserByEmail(email);
 
   if (!user?.currentRegChallenge) {
-    throw logAndReturnGenericError("No user found", "unauthorized");
+    return logAndReturnGenericError("No user found", "unauthorized");
   }
 
   if (user.protected) {
-    throw logAndReturnGenericError("User already exists", "unauthorized");
+    return logAndReturnGenericError("User already exists", "unauthorized");
   }
 
   let verification;
@@ -185,12 +221,12 @@ export const verifyRegister = async ({
       expectedChallenge: user.currentRegChallenge,
     });
   } catch (e) {
-    throw logAndReturnGenericError(e, "unauthorized");
+    return logAndReturnGenericError(e, "unauthorized");
   }
 
   const { verified, registrationInfo } = verification;
 
-  if (!verified) throw logAndReturnGenericError("Verification failed");
+  if (!verified) return logAndReturnGenericError("Verification failed");
 
   const {
     credentialPublicKey,
@@ -231,143 +267,166 @@ export const verifyRegister = async ({
       },
     }),
   ]);
+
+  return { success: true };
 };
 
-export const getNewAuthenticatorOptions = actionWithAuthContext({
-  authRequired: true,
-  action: async ({ user }) => {
-    const options = await getWebAuthnRegistrationOptions({
-      userID: user.nanoId,
-      userName: user.email,
-    });
+export const getNewAuthenticatorOptions = async (): Promise<
+  ActionResponse<{
+    options: PublicKeyCredentialCreationOptionsJSON;
+  }>
+> => {
+  const authRes = await getAuthContext();
+  if (!authRes.success) return authRes;
+  const { user } = authRes;
 
-    await updateUser({
-      id: user.id,
-      fields: {
-        currentRegChallenge: options.challenge,
-      },
-    });
+  const options = await getWebAuthnRegistrationOptions({
+    userID: user.nanoId,
+    userName: user.email,
+  });
 
-    return { options };
-  },
-});
+  await updateUser({
+    id: user.id,
+    fields: {
+      currentRegChallenge: options.challenge,
+    },
+  });
 
-export const verifyNewAuthenticator = actionWithAuthContext<
-  { attRes: any },
-  { authenticator: Authenticator }
->({
-  authRequired: true,
-  action: async ({ user, params }) => {
-    if (!user.currentRegChallenge)
-      throw logAndReturnGenericError("User has no challenge", "unauthorized");
+  return { success: true, options };
+};
 
-    const verification = await getWebAuthnResponseForRegistration({
-      attRes: params.attRes,
-      expectedChallenge: user.currentRegChallenge,
-    });
+export const verifyNewAuthenticator = async ({
+  attRes,
+}: {
+  attRes: any;
+}): Promise<
+  ActionResponse<{
+    authenticator: Authenticator;
+  }>
+> => {
+  const authRes = await getAuthContext();
+  if (!authRes.success) return authRes;
+  const { user } = authRes;
 
-    const { verified, registrationInfo } = verification;
+  if (!user.currentRegChallenge)
+    return logAndReturnGenericError("User has no challenge", "unauthorized");
 
-    if (!verified || !registrationInfo) {
-      throw logAndReturnGenericError("Verification failed", "unauthorized");
-    }
+  const verification = await getWebAuthnResponseForRegistration({
+    attRes,
+    expectedChallenge: user.currentRegChallenge,
+  });
 
-    const {
-      credentialPublicKey,
-      credentialID,
+  const { verified, registrationInfo } = verification;
+
+  if (!verified || !registrationInfo) {
+    return logAndReturnGenericError("Verification failed", "unauthorized");
+  }
+
+  const {
+    credentialPublicKey,
+    credentialID,
+    counter,
+    credentialBackedUp,
+    credentialDeviceType,
+  } = registrationInfo;
+
+  const now = new Date();
+  const credentialId = Buffer.from(credentialID).toString("base64url");
+  const name = nanoid(16);
+
+  await Promise.all([
+    insertAuthenticator({
       counter,
       credentialBackedUp,
       credentialDeviceType,
-    } = registrationInfo;
-
-    const now = new Date();
-    const credentialId = Buffer.from(credentialID).toString("base64url");
-    const name = nanoid(16);
-
-    await Promise.all([
-      insertAuthenticator({
-        counter,
-        credentialBackedUp,
-        credentialDeviceType,
-        credentialId,
-        credentialPublicKey:
-          Buffer.from(credentialPublicKey).toString("base64url"),
-        name,
-        transports: [].join(","),
-        userId: user.id,
-      }),
-      updateUser({
-        id: user.id,
-        fields: {
-          currentRegChallenge: null,
-        },
-      }),
-    ]);
-
-    const authenticator: Authenticator = {
-      addedAt: now.toUTCString(),
       credentialId,
+      credentialPublicKey:
+        Buffer.from(credentialPublicKey).toString("base64url"),
       name,
-    };
+      transports: [].join(","),
+      userId: user.id,
+    }),
+    updateUser({
+      id: user.id,
+      fields: {
+        currentRegChallenge: null,
+      },
+    }),
+  ]);
 
-    return {
-      authenticator,
-    };
-  },
-});
+  const authenticator: Authenticator = {
+    addedAt: now.toUTCString(),
+    credentialId,
+    name,
+  };
 
-export const verifyEmail = actionWithAuthContext<{ code: string }>({
-  authRequired: true,
-  action: async ({ user, params }) => {
-    if (user.emailVerified) return;
+  return {
+    success: true,
+    authenticator,
+  };
+};
 
-    const { code } = params;
+export const verifyEmail = async ({
+  code,
+}: {
+  code: string;
+}): Promise<ActionResponse> => {
+  const authRes = await getAuthContext();
+  if (!authRes.success) return authRes;
+  const { user } = authRes;
 
-    let storedCode = await getEmailVerificationCode({ userId: user.id });
+  if (user.emailVerified) return { success: true };
 
-    if (
-      !getEnvAsBool("IS_PROD") &&
-      code === getEnvAsStr("DEV_VERIFICATION_CODE")
-    ) {
-      storedCode = code;
-    }
+  let storedCode = await getEmailVerificationCode({ userId: user.id });
 
-    if (code !== storedCode?.toString()) {
-      throw logAndReturnGenericError(
-        "Verification code is invalid",
-        "badRequest"
-      );
-    }
+  if (
+    !getEnvAsBool("IS_PROD") &&
+    code === getEnvAsStr("DEV_VERIFICATION_CODE")
+  ) {
+    storedCode = code;
+  }
 
-    await Promise.all([
-      updateUser({
-        id: user.id,
-        fields: {
-          emailVerified: true,
-        },
-      }),
-      deleteEmailVerificationCode({ userId: user.id }),
-    ]);
-  },
-});
+  if (code !== storedCode?.toString()) {
+    return logAndReturnGenericError(
+      "Verification code is invalid",
+      "badRequest"
+    );
+  }
 
-export const renameAuthenticator = actionWithAuthContext<{
+  await Promise.all([
+    updateUser({
+      id: user.id,
+      fields: {
+        emailVerified: true,
+      },
+    }),
+    deleteEmailVerificationCode({ userId: user.id }),
+  ]);
+
+  return { success: true };
+};
+
+export const renameAuthenticator = async ({
+  credentialId,
+  newName,
+}: {
   newName: string;
   credentialId: string;
-}>({
-  authRequired: true,
-  action: async ({ user, params }) => {
-    const { newName, credentialId } = params;
+}): Promise<ActionResponse> => {
+  const authRes = await getAuthContext();
+  if (!authRes.success) return authRes;
+  const { user } = authRes;
 
-    const authenticator = await getAuthenticatorByCredentialId(credentialId);
+  const authenticator = await getAuthenticatorByCredentialId(credentialId);
 
-    if (authenticator?.userId !== user.id) {
-      throw logAndReturnGenericError("Unauthorized", "unauthorized");
-    }
+  if (authenticator?.userId !== user.id || !authenticator) {
+    throw logAndReturnGenericError("Unauthorized", "unauthorized");
+  }
 
-    await updateAuthenticator({
-      fields: { name: newName },
-      id: authenticator.id,
-    });
-  },
-});
+  await updateAuthenticator({
+    fields: { name: newName },
+    id: authenticator.id,
+  });
+
+  return { success: true };
+};

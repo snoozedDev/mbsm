@@ -149,13 +149,18 @@ export const refreshAndSetTokens = async () => {
   const tokenContents = decodeRefreshToken(refreshToken);
   if (!tokenContents) throw authError;
   try {
+    console.log("1", { tokenContents });
+    console.log("refresh:" + tokenContents.user.userNanoId);
     const userTokens = await redis.hgetall<Record<string, string>>(
       "refresh:" + tokenContents.user.userNanoId
     );
+    console.log("2");
+
     if (!userTokens) throw authError;
     const redisRToken = userTokens[uniqueId];
     if (redisRToken !== refreshToken) throw authError;
 
+    console.log("3");
     await deleteExpiredUserTokens({
       userNanoId: tokenContents.user.userNanoId,
       tokens: userTokens,
@@ -163,6 +168,7 @@ export const refreshAndSetTokens = async () => {
 
     const user = await getUserByNanoId(tokenContents.user.userNanoId);
 
+    console.log("4");
     if (!user) throw authError;
 
     const token = {
@@ -174,22 +180,27 @@ export const refreshAndSetTokens = async () => {
       userAgent,
     } satisfies Token;
 
+    console.log("5");
     const accessToken = generateAccessToken(token);
 
+    console.log("6");
     const newRefreshToken = generateRefreshToken(token);
 
+    console.log("7");
     await addToList({
       refresher: newRefreshToken,
       uniqueId,
       userNanoId: user.nanoId,
     });
+    console.log("8");
 
     cookies().set(getAccessTokenCookie(accessToken));
+    console.log("9");
     cookies().set(getRefreshTokenCookie(newRefreshToken));
 
     return { token };
   } catch (error) {
-    console.log(error);
+    console.log("refreshAndSetTokens", error);
     throw error;
   }
 };

@@ -47,8 +47,8 @@ export const useLogoutMutation = () => {
 };
 
 export const useIsLoggedIn = () => {
-  const { status } = useUserQuery();
-  return status === "success";
+  const { status, data } = useUserQuery();
+  return status === "success" && data.success === true;
 };
 
 export const useLoginMutation = () => {
@@ -56,7 +56,9 @@ export const useLoginMutation = () => {
 
   const requestLogin = useMutation({
     mutationFn: async () => {
-      const { options } = await login();
+      const optRes = await login();
+      if (!optRes.success) throw new Error(optRes.error);
+      const { options } = optRes;
       let attRes;
       try {
         attRes = await startAuthentication(options);
@@ -68,10 +70,9 @@ export const useLoginMutation = () => {
         }
         throw err;
       }
-      await verifyLogin(attRes);
-      return {
-        success: true,
-      };
+      const verRes = await verifyLogin(attRes);
+      if (!verRes.success) throw new Error(verRes.error);
+      return verRes;
     },
     onError: (err) => {
       toast({
@@ -98,10 +99,12 @@ export const useRegisterMutation = () => {
       email: string;
       inviteCode: string;
     }) => {
-      const { options } = await register({
+      const optRes = await register({
         email,
         inviteCode,
       });
+      if (!optRes.success) throw new Error(optRes.error);
+      const { options } = optRes;
 
       let attRes;
       try {
@@ -115,15 +118,14 @@ export const useRegisterMutation = () => {
         throw err;
       }
 
-      await verifyRegister({
+      const verRes = await verifyRegister({
         attRes,
         email,
         inviteCode,
       });
+      if (!verRes.success) throw new Error(verRes.error);
 
-      return {
-        success: true,
-      };
+      return verRes;
     },
     onSuccess: () => {
       client.invalidateQueries({
@@ -140,8 +142,10 @@ export const useAddAuthenticatorMutation = () => {
 
   const requestLogin = useMutation({
     mutationFn: async () => {
-      const { options } = await getNewAuthenticatorOptions();
+      const optRes = await getNewAuthenticatorOptions();
+      if (!optRes.success) throw new Error(optRes.error);
 
+      const { options } = optRes;
       let attRes;
       try {
         attRes = await startRegistration(options);
@@ -153,9 +157,10 @@ export const useAddAuthenticatorMutation = () => {
         }
         throw err;
       }
-      const { authenticator } = await verifyNewAuthenticator({ attRes });
+      const verifyRes = await verifyNewAuthenticator({ attRes });
+      if (!verifyRes.success) throw new Error(verifyRes.error);
 
-      return authenticator;
+      return verifyRes.authenticator;
     },
     onError: (err) => {
       toast({

@@ -1,15 +1,18 @@
 import { Ratelimit, RatelimitConfig, redis } from "@mbsm/db-layer";
 import { headers } from "next/headers";
+import { logAndReturnGenericError } from "./serverUtils";
 
 const createRateLimiter = (opts: RatelimitConfig) => {
   const rateLimiter = new Ratelimit(opts);
 
   const middleware = async () => {
     const headerStore = headers();
-    const ip = headerStore.get("cf-connecting-ip");
-    const { success } = await rateLimiter.limit(ip || "_");
-    if (!success) return new Error("Too many requests");
-    return undefined;
+    console.log("headerStore", headerStore);
+    const ip = headerStore.get("cf-connecting-ip") || "_";
+    const { success } = await rateLimiter.limit(ip);
+    console.log("success", success);
+    if (success) return undefined;
+    return logAndReturnGenericError("Rate limit exceeded", "unauthorized");
   };
 
   return { rateLimiter, middleware };

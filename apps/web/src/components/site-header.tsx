@@ -7,11 +7,9 @@ import {
   useUserQuery,
 } from "@/queries/authQueries";
 import { AlertTriangle, SettingsIcon } from "lucide-react";
-import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useIsEmailVerified } from "./hooks/useIsEmailVerified";
-import { LoadingDots } from "./loading-dots";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -45,7 +43,6 @@ export const SiteHeader = () => {
   const { mutate: logOut } = useLogoutMutation();
   const isLoggedIn = useIsLoggedIn();
   const router = useRouter();
-  const { setTheme, theme, systemTheme } = useTheme();
 
   const emailVerified = useIsEmailVerified();
 
@@ -57,16 +54,6 @@ export const SiteHeader = () => {
 
   const onRegister = () => {
     router.push("/auth/register");
-  };
-
-  const toggleTheme = () => {
-    if (theme === "dark") {
-      setTheme("light");
-    } else if (theme === "light") {
-      setTheme("dark");
-    } else if (theme === "system") {
-      setTheme(systemTheme === "dark" ? "light" : "dark");
-    }
   };
 
   const isLoading = authLoading || login.isPending;
@@ -129,9 +116,6 @@ export const SiteHeader = () => {
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              {/* <button onClick={toggleTheme} className="hover:cursor-pointer">
-                <ToggleLeftIcon />
-              </button> */}
               <DropdownMenuItem asChild>
                 <Link href={"/settings/user"} className="hover:cursor-pointer">
                   Settings
@@ -147,8 +131,6 @@ export const SiteHeader = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        ) : isLoading ? (
-          <LoadingDots className="mx-4" />
         ) : (
           <div className="flex items-center space-x-4">
             <Button onClick={onLogin} variant="outline">

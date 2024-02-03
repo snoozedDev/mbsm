@@ -1,10 +1,9 @@
-"use client";
-import { store } from "@/redux/store";
-import { ThemeProvider } from "next-themes";
 import NextTopLoader from "nextjs-toploader";
 import { ReactNode } from "react";
-import { Provider } from "react-redux";
 import { QueryLayout } from "./query-layout";
+import { StoreProvider } from "./store-provider";
+import { NextThemeProvider } from "./theme-provider";
+import { TooltipProvider } from "./ui/tooltip";
 
 export const RootLayout = ({ children }: { children: ReactNode }) => {
   return (
@@ -14,11 +13,13 @@ export const RootLayout = ({ children }: { children: ReactNode }) => {
         color="hsl(var(--muted-foreground))"
         height={1}
       />
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <QueryLayout>
-          <Provider store={store}>{children}</Provider>
-        </QueryLayout>
-      </ThemeProvider>
+      <NextThemeProvider>
+        <TooltipProvider>
+          <QueryLayout>
+            <StoreProvider>{children}</StoreProvider>
+          </QueryLayout>
+        </TooltipProvider>
+      </NextThemeProvider>
     </>
   );
 };

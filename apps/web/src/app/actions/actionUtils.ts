@@ -8,53 +8,32 @@ import {
 } from "@/utils/tokenUtils";
 import { InferSelectModel, getUserByNanoId, schema } from "@mbsm/db-layer";
 import { cookies } from "next/headers";
+import { ActionResponse } from "./authActions";
 
-export const actionWithAuthContext =
-  <
-    P = undefined,
-    R = void,
-    A extends boolean = true,
-    U = A extends true ? InferSelectModel<typeof schema.user> : undefined,
-    T = A extends true ? Token : undefined,
-  >({
-    action,
-    authRequired,
-  }: {
-    action: (params: { token: T; user: U; params: P }) => Promise<R>;
-    authRequired: A;
-  }) =>
-  async (params?: P) => {
+export const getAuthContext = async (): Promise<
+  ActionResponse<{
+    token: Token;
+    user: InferSelectModel<typeof schema.user>;
+  }>
+> => {
+  try {
     const accessToken = cookies().get("accessToken");
-    let tokenContents;
+    const tokenContents = accessToken
+      ? decodeAccessToken(accessToken.value)
+      : (await refreshAndSetTokens()).token;
 
-    if (authRequired && !accessToken) {
-      const { token } = await refreshAndSetTokens();
-      tokenContents = token;
-    }
+    if (!tokenContents) throw "No token found.";
 
-    if (accessToken && !tokenContents)
-      tokenContents = decodeAccessToken(accessToken?.value || "");
+    const user = await getUserByNanoId(tokenContents.user.userNanoId);
+    if (!user) throw "No user found for token. This should never happen.";
 
-    if (authRequired && !tokenContents) {
-      const { token } = await refreshAndSetTokens();
-      tokenContents = token;
-    }
-
-    let user;
-
-    if (tokenContents)
-      user = await getUserByNanoId(tokenContents.user.userNanoId);
-
-    if (authRequired && !user)
-      throw logAndReturnGenericError("No user found", "unauthorized");
-
-    if (authRequired) {
-      tokenContents;
-    }
-
-    return await action({
-      token: tokenContents as T,
-      user: user as U,
-      params: params as P,
-    });
-  };
+    console.log({ user, tokenContents });
+    return {
+      success: true,
+      token: tokenContents,
+      user: user,
+    };
+  } catch (e) {
+    return logAndReturnGenericError(e, "unauthorized");
+  }
+};

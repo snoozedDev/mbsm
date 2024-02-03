@@ -8,7 +8,11 @@ const IS_PROD = process.env.NODE_ENV === "production";
 
 if (IS_PROD) console.log = () => {};
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning className={GeistSans.variable}>
       <head>

@@ -1,17 +1,12 @@
-"use client";
-import { FadeFromBelow } from "@/components/containers/fade-from-below";
 import { UserPasskeys } from "@/components/user-passkeys";
+import { Metadata } from "next";
 
-// export const metadata: Metadata = {
-//   title: "Security • Settings • MBSM",
-// };
+export const metadata: Metadata = {
+  title: "Security • Settings • MBSM",
+};
 
 const SecuritySettingsPage = () => {
-  return (
-    <FadeFromBelow>
-      <UserPasskeys />
-    </FadeFromBelow>
-  );
+  return <UserPasskeys />;
 };
 
 export default SecuritySettingsPage;
