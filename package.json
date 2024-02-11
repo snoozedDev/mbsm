@@ -9,10 +9,10 @@
     "db:push": "dotenv -- drizzle-kit push:pg"
   },
   "devDependencies": {
-    "@mbsm/utils": "*",
-    "drizzle-kit": "^0.19.13",
-    "dotenv-cli": "^7.3.0",
+    "@mbsm/utils": "workspace:*",
     "@tsconfig/node18": "^18.2.2",
+    "dotenv-cli": "^7.3.0",
+    "drizzle-kit": "^0.19.13",
     "eslint": "^8.48.0",
     "prettier": "^3.0.3",
     "sst": "^2.28.1",
@@ -20,12 +20,17 @@
     "typescript": "^5.2.2"
   },
   "name": "mbsm",
-  "packageManager": "bun@1.0.25",
   "volta": {
-    "node": "18.17.1"
+    "node": "18.17.1",
+    "pnpm": "8.15.1"
   },
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "next": "14.0.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  }
 }

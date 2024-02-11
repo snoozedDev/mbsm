@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
-    "dev": "pnpm build -- --watch",
+    "dev": "pnpm build --watch",
     "lint": "eslint \"src/**/*.ts*\"",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
@@ -23,9 +23,9 @@
     "postgres": "3.4.3"
   },
   "devDependencies": {
-    "@mbsm/tsconfig": "*",
-    "@mbsm/types": "*",
-    "@mbsm/utils": "*",
+    "@mbsm/tsconfig": "workspace:*",
+    "@mbsm/types": "workspace:*",
+    "@mbsm/utils": "workspace:*",
     "drizzle-kit": "0.20.14",
     "eslint": "8.51.0",
     "tsup": "8.0.1",

@@ -1,14 +1,12 @@
 import { Ratelimit, RatelimitConfig, redis } from "@mbsm/db-layer";
-import { headers } from "next/headers";
+import { NextRequest } from "next/server";
 import { logAndReturnGenericError } from "./serverUtils";
 
 const createRateLimiter = (opts: RatelimitConfig) => {
   const rateLimiter = new Ratelimit(opts);
 
-  const middleware = async () => {
-    const headerStore = headers();
-    console.log("headerStore", headerStore);
-    const ip = headerStore.get("cf-connecting-ip") || "_";
+  const middleware = async (req: NextRequest) => {
+    const ip = req.headers.get("cf-connecting-ip") || "_";
     const { success } = await rateLimiter.limit(ip);
     console.log("success", success);
     if (success) return undefined;

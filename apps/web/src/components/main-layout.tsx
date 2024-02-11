@@ -1,4 +1,4 @@
-import { getUserInfo } from "@/app/actions/authActions";
+import { apiClient } from "@/utils/api";
 import {
   HydrationBoundary,
   QueryClient,
@@ -18,8 +18,8 @@ export const MainLayout = async ({ children }: Props) => {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ["user"],
-    queryFn: () => getUserInfo(),
+    queryKey: ["user", "me"],
+    queryFn: () => apiClient.get("/user/me"),
     retry: false,
   });
 

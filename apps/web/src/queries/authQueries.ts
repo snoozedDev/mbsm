@@ -1,40 +1,19 @@
 "use client";
-import {
-  getNewAuthenticatorOptions,
-  getUserInfo,
-  login,
-  logout,
-  register,
-  verifyEmail,
-  verifyLogin,
-  verifyNewAuthenticator,
-  verifyRegister,
-} from "@/app/actions/authActions";
+
 import { codeFormSchema } from "@/lib/shemas/forms/codeFormSchema";
-import { Authenticator, InviteCode } from "@mbsm/types";
-import {
-  startAuthentication,
-  startRegistration,
-} from "@simplewebauthn/browser";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "@/utils/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { z } from "zod";
-
-export const useUserQuery = () => {
-  return useQuery({
-    queryKey: ["user"],
-    queryFn: () => getUserInfo(),
-    retry: false,
-  });
-};
+import { useUserMeQuery } from "./userQueries";
 
 export const useLogoutMutation = () => {
   const router = useRouter();
   const client = useQueryClient();
   return useMutation({
     mutationKey: ["logout"],
-    mutationFn: logout,
+    mutationFn: async () => {}, //logout,
     onSuccess: () => {
       toast("You have been logged out.");
       client.resetQueries({ queryKey: ["user"] });
@@ -45,7 +24,7 @@ export const useLogoutMutation = () => {
 };
 
 export const useIsLoggedIn = () => {
-  const { status, data } = useUserQuery();
+  const { status, data } = useUserMeQuery();
   return status === "success" && data.success === true;
 };
 
@@ -54,8 +33,8 @@ export const useLoginMutation = () => {
 
   const requestLogin = useMutation({
     mutationFn: async () => {
-      const optRes = await login();
-      if (!optRes.success) throw new Error(optRes.error);
+      const optRes = await apiClient.get("/login");
+      if (!optRes) throw optRes;
       const { options } = optRes;
       let attRes;
       try {
@@ -96,33 +75,30 @@ export const useRegisterMutation = () => {
       email: string;
       inviteCode: string;
     }) => {
-      const optRes = await register({
-        email,
-        inviteCode,
-      });
-      if (!optRes.success) throw new Error(optRes.error);
-      const { options } = optRes;
-
-      let attRes;
-      try {
-        attRes = await startRegistration(options);
-      } catch (err) {
-        if (err instanceof Error && "name" in err) {
-          if (err.name === "NotAllowedError") {
-            throw new Error("You denied the request for passkey.");
-          }
-        }
-        throw err;
-      }
-
-      const verRes = await verifyRegister({
-        attRes,
-        email,
-        inviteCode,
-      });
-      if (!verRes.success) throw new Error(verRes.error);
-
-      return verRes;
+      // const optRes = await register({
+      //   email,
+      //   inviteCode,
+      // });
+      // if (!optRes.success) throw new Error(optRes.error);
+      // const { options } = optRes;
+      // let attRes;
+      // try {
+      //   attRes = await startRegistration(options);
+      // } catch (err) {
+      //   if (err instanceof Error && "name" in err) {
+      //     if (err.name === "NotAllowedError") {
+      //       throw new Error("You denied the request for passkey.");
+      //     }
+      //   }
+      //   throw err;
+      // }
+      // const verRes = await verifyRegister({
+      //   attRes,
+      //   email,
+      //   inviteCode,
+      // });
+      // if (!verRes.success) throw new Error(verRes.error);
+      // return verRes;
     },
     onSuccess: () => {
       client.invalidateQueries({
@@ -139,25 +115,23 @@ export const useAddAuthenticatorMutation = () => {
 
   const requestLogin = useMutation({
     mutationFn: async () => {
-      const optRes = await getNewAuthenticatorOptions();
-      if (!optRes.success) throw new Error(optRes.error);
-
-      const { options } = optRes;
-      let attRes;
-      try {
-        attRes = await startRegistration(options);
-      } catch (err) {
-        if (err instanceof Error && "name" in err) {
-          if (err.name === "NotAllowedError") {
-            throw new Error("You denied the request for passkey.");
-          }
-        }
-        throw err;
-      }
-      const verifyRes = await verifyNewAuthenticator({ attRes });
-      if (!verifyRes.success) throw new Error(verifyRes.error);
-
-      return verifyRes.authenticator;
+      // const optRes = await getNewAuthenticatorOptions();
+      // if (!optRes.success) throw new Error(optRes.error);
+      // const { options } = optRes;
+      // let attRes;
+      // try {
+      //   attRes = await startRegistration(options);
+      // } catch (err) {
+      //   if (err instanceof Error && "name" in err) {
+      //     if (err.name === "NotAllowedError") {
+      //       throw new Error("You denied the request for passkey.");
+      //     }
+      //   }
+      //   throw err;
+      // }
+      // const verifyRes = await verifyNewAuthenticator({ attRes });
+      // if (!verifyRes.success) throw new Error(verifyRes.error);
+      // return verifyRes.authenticator;
     },
     onError: (err) => {
       toast("Failed to add authenticator", {
@@ -165,17 +139,17 @@ export const useAddAuthenticatorMutation = () => {
       });
     },
     onSuccess: (newAuthenticator) => {
-      client.setQueryData<{
-        authenticators: Authenticator[];
-        inviteCodes: InviteCode[];
-      }>(["user", "settings"], (old) =>
-        old
-          ? {
-              ...old,
-              authenticators: [newAuthenticator, ...old.authenticators],
-            }
-          : old
-      );
+      // client.setQueryData<{
+      //   authenticators: Authenticator[];
+      //   inviteCodes: InviteCode[];
+      // }>(["user", "settings"], (old) =>
+      // old
+      //   ? {
+      //       ...old,
+      //       authenticators: [newAuthenticator, ...old.authenticators],
+      //     }
+      //   : old
+      // );
     },
   });
 
@@ -187,7 +161,7 @@ export const useEmailVerificationMutation = () => {
 
   return useMutation({
     mutationKey: ["user", "emailVerification"],
-    mutationFn: (body: z.infer<typeof codeFormSchema>) => verifyEmail(body),
+    mutationFn: async (body: z.infer<typeof codeFormSchema>) => ({}), //verifyEmail(body),
     onSuccess: () => {
       client.resetQueries({
         queryKey: ["user"],

@@ -11,3 +11,6 @@ export const getZodTypeGuard =
       return false;
     }
   };
+
+export const getFormattedZodError = (error: z.ZodError) =>
+  error.issues.map((i) => i.message).join(", ");

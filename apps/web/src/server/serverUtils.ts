@@ -1,36 +1,24 @@
-import { ErrorResponse } from "@/app/actions/authActions";
 import { redis } from "@mbsm/db-layer";
 import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 import { customAlphabet } from "nanoid";
+import { NextResponse } from "next/server";
 import { resend } from "./email";
 
 export const logAndReturnGenericError = (
   err: any,
   errorType?: "unauthorized" | "badRequest" | "internal"
-): ErrorResponse => {
+): NextResponse => {
   console.error("Error happened: ", err);
 
   switch (errorType) {
     case "unauthorized":
-      return {
-        success: false,
-        error: "Unauthorized",
-      };
+      return new NextResponse("Unauthorized", { status: 401 });
     case "badRequest":
-      return {
-        success: false,
-        error: "Bad Request",
-      };
+      return new NextResponse("Bad Request", { status: 400 });
     case "internal":
-      return {
-        success: false,
-        error: "Internal Server Error",
-      };
+      return new NextResponse("Internal Server Error", { status: 500 });
     default:
-      return {
-        success: false,
-        error: "Unknown Error",
-      };
+      return new NextResponse("Internal Server Error", { status: 500 });
   }
 };
 

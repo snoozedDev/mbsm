@@ -4,8 +4,8 @@ import {
   useIsLoggedIn,
   useLoginMutation,
   useLogoutMutation,
-  useUserQuery,
 } from "@/queries/authQueries";
+import { useUserMeQuery } from "@/queries/userQueries";
 import { AlertTriangle, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -39,7 +39,7 @@ const navigation = [
 export const SiteHeader = () => {
   const pathname = usePathname();
   const login = useLoginMutation();
-  const { data: user, isLoading: authLoading } = useUserQuery();
+  const { data: user, isLoading: authLoading } = useUserMeQuery();
   const { mutate: logOut } = useLogoutMutation();
   const isLoggedIn = useIsLoggedIn();
   const router = useRouter();
@@ -64,6 +64,7 @@ export const SiteHeader = () => {
         <h1 className="text-xl font-bold select-none max-sm:hidden mr-4">
           MBSM
         </h1>
+        {JSON.stringify({ user })}
         <NavigationMenu className="max-xs:hidden">
           <NavigationMenuList className="space-x-4 px-4 font-medium">
             {navigation.map(({ name, href }, i) => (

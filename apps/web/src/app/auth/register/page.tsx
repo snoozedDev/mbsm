@@ -1,4 +1,4 @@
-import { getUserInfo } from "@/app/actions/authActions";
+import { getUserInfo } from "@/actions/authActions";
 import { RegisterForm } from "@/components/register-form";
 import { queryClient } from "@/queries/queryClient";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";

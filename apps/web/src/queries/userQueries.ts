@@ -1,11 +1,20 @@
-import { renameAuthenticator } from "@/app/actions/authActions";
-import { getUserSettings } from "@/app/actions/userActions";
+// import { renameAuthenticator } from "@/actions/authActions";
+// import { getUserSettings } from "@/actions/userActions";
+import { apiClient } from "@/utils/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+export const useUserMeQuery = () => {
+  return useQuery({
+    queryKey: ["user", "me"],
+    queryFn: () => apiClient.get("/user/me"),
+    retry: false,
+  });
+};
 
 export const useUserSettingsQuery = () => {
   return useQuery({
     queryKey: ["user", "settings"],
-    queryFn: () => getUserSettings(),
+    queryFn: () => ({}), //getUserSettings(),
     retry: false,
   });
 };
@@ -19,10 +28,10 @@ export const useUpdateAuthenticatorMutation = ({
   return useMutation({
     mutationKey: ["authenticator", "update", credentialId],
     mutationFn: async ({ name }: { name: string }) => {
-      await renameAuthenticator({
-        credentialId,
-        newName: name,
-      });
+      // await renameAuthenticator({
+      //   credentialId,
+      //   newName: name,
+      // });
     },
     onSuccess: () => {
       client.invalidateQueries({
