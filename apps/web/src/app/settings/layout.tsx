@@ -2,14 +2,22 @@
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UnverifiedEmailWarning } from "@/components/unverified-email-warning";
+import { useIsLoggedIn } from "@/queries/authQueries";
 import { AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const settingPages = ["User", "Security", "Accounts"];
 
 const SettingsPage = ({ children }: { children: React.ReactNode }) => {
+  const { isLoggedIn, isPending } = useIsLoggedIn();
+  const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    if (!isLoggedIn && !isPending) router.push("/");
+  }, [isLoggedIn, isPending, router]);
 
   return (
     <div className="flex flex-col self-center p-4 max-w-5xl w-full">

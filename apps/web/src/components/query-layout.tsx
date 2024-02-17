@@ -26,7 +26,10 @@ export const QueryLayout = ({ children }: { children: ReactNode }) => {
     <QueryClientProvider client={queryClient}>
       {children}
       {!IS_PROD && (
-        <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-right" />
+        <ReactQueryDevtools
+          initialIsOpen={false}
+          buttonPosition="bottom-left"
+        />
       )}
     </QueryClientProvider>
   );

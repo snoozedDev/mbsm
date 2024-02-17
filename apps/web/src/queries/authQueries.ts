@@ -1,11 +1,14 @@
 "use client";
 
-import { codeFormSchema } from "@/lib/shemas/forms/codeFormSchema";
 import { apiClient } from "@/utils/api";
+import { PostAuthSignupBody } from "@mbsm/types";
+import {
+  startAuthentication,
+  startRegistration,
+} from "@simplewebauthn/browser";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { z } from "zod";
 import { useUserMeQuery } from "./userQueries";
 
 export const useLogoutMutation = () => {
@@ -13,19 +16,21 @@ export const useLogoutMutation = () => {
   const client = useQueryClient();
   return useMutation({
     mutationKey: ["logout"],
-    mutationFn: async () => {}, //logout,
-    onSuccess: () => {
-      toast("You have been logged out.");
-      client.resetQueries({ queryKey: ["user"] });
-      router.push("/");
+    mutationFn: apiClient.get.authLogout, //logout,
+    onSuccess: ({ success }) => {
+      if (success) {
+        toast("You have been logged out.");
+        client.resetQueries({ queryKey: ["user"] });
+        router.push("/");
+      }
     },
     retry: false,
   });
 };
 
 export const useIsLoggedIn = () => {
-  const { status, data } = useUserMeQuery();
-  return status === "success" && data.success === true;
+  const { isPending, data } = useUserMeQuery();
+  return { isPending, isLoggedIn: !isPending && Boolean(data?.success) };
 };
 
 export const useLoginMutation = () => {
@@ -33,12 +38,11 @@ export const useLoginMutation = () => {
 
   const requestLogin = useMutation({
     mutationFn: async () => {
-      const optRes = await apiClient.get("/login");
-      if (!optRes) throw optRes;
-      const { options } = optRes;
+      const optRes = await apiClient.get.authLogin();
+      if (!optRes.success) throw optRes.error;
       let attRes;
       try {
-        attRes = await startAuthentication(options);
+        attRes = await startAuthentication(optRes.options);
       } catch (err) {
         if (err instanceof Error && "name" in err) {
           if (err.name === "NotAllowedError") {
@@ -47,7 +51,7 @@ export const useLoginMutation = () => {
         }
         throw err;
       }
-      const verRes = await verifyLogin(attRes);
+      const verRes = await apiClient.post.authLoginVerify({ attRes });
       if (!verRes.success) throw new Error(verRes.error);
       return verRes;
     },
@@ -67,38 +71,32 @@ export const useLoginMutation = () => {
 export const useRegisterMutation = () => {
   const client = useQueryClient();
 
-  const requestLogin = useMutation({
-    mutationFn: async ({
-      email,
-      inviteCode,
-    }: {
-      email: string;
-      inviteCode: string;
-    }) => {
-      // const optRes = await register({
-      //   email,
-      //   inviteCode,
-      // });
-      // if (!optRes.success) throw new Error(optRes.error);
-      // const { options } = optRes;
-      // let attRes;
-      // try {
-      //   attRes = await startRegistration(options);
-      // } catch (err) {
-      //   if (err instanceof Error && "name" in err) {
-      //     if (err.name === "NotAllowedError") {
-      //       throw new Error("You denied the request for passkey.");
-      //     }
-      //   }
-      //   throw err;
-      // }
-      // const verRes = await verifyRegister({
-      //   attRes,
-      //   email,
-      //   inviteCode,
-      // });
-      // if (!verRes.success) throw new Error(verRes.error);
-      // return verRes;
+  return useMutation({
+    mutationFn: async ({ email, inviteCode }: PostAuthSignupBody) => {
+      const optRes = await apiClient.post.authSignup({
+        email,
+        inviteCode,
+      });
+      if (!optRes.success) throw new Error(optRes.error);
+      const { options } = optRes;
+      let attRes;
+      try {
+        attRes = await startRegistration(options);
+      } catch (err) {
+        if (err instanceof Error && "name" in err) {
+          if (err.name === "NotAllowedError") {
+            throw new Error("You denied the request for passkey.");
+          }
+        }
+        throw err;
+      }
+      const verRes = await apiClient.post.authSignupVerify({
+        attRes,
+        email,
+        inviteCode,
+      });
+      if (!verRes.success) throw new Error(verRes.error);
+      return verRes;
     },
     onSuccess: () => {
       client.invalidateQueries({
@@ -106,8 +104,6 @@ export const useRegisterMutation = () => {
       });
     },
   });
-
-  return requestLogin;
 };
 
 export const useAddAuthenticatorMutation = () => {
@@ -154,19 +150,4 @@ export const useAddAuthenticatorMutation = () => {
   });
 
   return requestLogin;
-};
-
-export const useEmailVerificationMutation = () => {
-  const client = useQueryClient();
-
-  return useMutation({
-    mutationKey: ["user", "emailVerification"],
-    mutationFn: async (body: z.infer<typeof codeFormSchema>) => ({}), //verifyEmail(body),
-    onSuccess: () => {
-      client.resetQueries({
-        queryKey: ["user"],
-      });
-      toast("Your email has been verified.");
-    },
-  });
 };

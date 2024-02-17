@@ -1,10 +1,15 @@
 import {
+  EmailVerificationCodeForm,
   EmptyResponseSchema,
-  PostLoginVerifyBodySchema,
-  UserMeResponseSchema,
+  GetAuthLoginResponseSchema,
+  GetUserMeResponseSchema,
+  GetUserSettingsResponseSchema,
+  PostAuthLoginVerifyBody,
+  PostAuthSignupBody,
+  PostAuthSignupResponseSchema,
+  PostAuthSignupVerifyBody,
 } from "@mbsm/types";
 import axios, { AxiosRequestConfig } from "axios";
-import { z } from "zod";
 
 export const api = axios.create({
   baseURL: "/api",
@@ -77,87 +82,48 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-// api.interceptors.response.use(
-//   (res) => res,
-//   async (err) => {
-//     if (err.response?.status === 401) {
-//       if (isRefreshing) {
-//         return new Promise((resolve, reject) => {
-//           const interval = setInterval(() => {
-//             if (!isRefreshing) {
-//               clearInterval(interval);
-//               resolve(api.request(err.config));
-//             }
-//           }, 100);
-//         });
-//       }
-//       isRefreshing = true;
-//       const refresh = await axios.get("/api/auth/refresh", {
-//         withCredentials: true,
-//         validateStatus: () => true,
-//       });
-//       isRefreshing = false;
-//       if (refresh.status === 200) {
-//         return api.request(err.config);
-//       } else {
-//         throw new Error("Unauthorized");
-//       }
-//     }
-//     throw err;
-//   }
-// );
-
-type RouteConfig = {
-  returnSchema?: z.ZodType<any, any, any>;
-  bodySchema?: z.ZodType<any, any, any>;
-};
-
-const routes = ["/user/me", "/login", "/login/verify"] as const;
-
-type Route = (typeof routes)[number];
-
-const getRouteMap = {
-  "/user/me": {
-    bodySchema: z.object({}),
-    returnSchema: UserMeResponseSchema,
-  },
-  "/login": {
-    bodySchema: z.object({}),
-    returnSchema: z.object({}),
-  },
-} satisfies Partial<Record<Route, RouteConfig>>;
-
-const postRouteMap = {
-  "/login/verify": {
-    bodySchema: PostLoginVerifyBodySchema,
-    returnSchema: z.object({}),
-  },
-} satisfies Partial<Record<Route, RouteConfig>>;
-
 class ApiClient {
-  async get<
-    T extends keyof typeof getRouteMap,
-    R extends (typeof getRouteMap)[T]["returnSchema"],
-  >(route: T): Promise<z.infer<R>> {
-    const routeConfig = getRouteMap[route];
-    if (!routeConfig) throw new Error("Route not found");
-    const res = await api.get<T>(route);
-    const returnSchema = routeConfig.returnSchema ?? EmptyResponseSchema;
-    return returnSchema.parse(res.data);
-  }
-
-  async post<
-    T extends keyof typeof postRouteMap,
-    R extends (typeof postRouteMap)[T]["returnSchema"],
-    B extends (typeof postRouteMap)[T]["bodySchema"],
-  >(route: T, body: z.infer<B>): Promise<z.infer<R>> {
-    const routeConfig = postRouteMap[route];
-    if (!routeConfig) throw new Error("Route not found");
-    const res = await api.post<T>(route, body);
-    const returnSchema = routeConfig.returnSchema ?? EmptyResponseSchema;
-    return returnSchema.parse(res.data);
-  }
+  get = {
+    userMe: async () => {
+      const response = await api.get("/user/me");
+      return GetUserMeResponseSchema.parse(response.data);
+    },
+    userSettings: async () => {
+      const response = await api.get("/user/settings");
+      return GetUserSettingsResponseSchema.parse(response.data);
+    },
+    authLogin: async () => {
+      const response = await api.get("/auth/login");
+      console.log({ GetAuthLoginResponseSchema });
+      return GetAuthLoginResponseSchema.parse(response.data);
+    },
+    authRefresh: async () => {
+      const response = await api.get("/auth/refresh");
+      return EmptyResponseSchema.parse(response.data);
+    },
+    authLogout: async () => {
+      const response = await api.get("/auth/logout");
+      return EmptyResponseSchema.parse(response.data);
+    },
+  };
+  post = {
+    authSignup: async (body: PostAuthSignupBody) => {
+      const response = await api.post("/auth/signup", body);
+      return PostAuthSignupResponseSchema.parse(response.data);
+    },
+    authSignupVerify: async (body: PostAuthSignupVerifyBody) => {
+      const response = await api.post("/auth/signup/verify", body);
+      return EmptyResponseSchema.parse(response.data);
+    },
+    authLoginVerify: async (body: PostAuthLoginVerifyBody) => {
+      const response = await api.post("/auth/login/verify", body);
+      return EmptyResponseSchema.parse(response.data);
+    },
+    userEmailVerify: async (body: EmailVerificationCodeForm) => {
+      const response = await api.post("/user/email/verify", body);
+      return EmptyResponseSchema.parse(response.data);
+    },
+  };
 }
 
 export const apiClient = new ApiClient();

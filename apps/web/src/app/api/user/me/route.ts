@@ -1,32 +1,22 @@
-import { decodeAccessToken, refreshAndSetTokens } from "@/utils/tokenUtils";
-import { getUserByNanoId } from "@mbsm/db-layer";
-import { UserMeResponse } from "@mbsm/types";
+import { authMiddleware, logAndReturnGenericError } from "@/server/serverUtils";
+import { getUserById } from "@mbsm/db-layer";
+import { GetUserMeResponse } from "@mbsm/types";
 import { NextRequest, NextResponse } from "next/server";
 
 const getUserMe = async (
   req: NextRequest
-): Promise<NextResponse<UserMeResponse>> => {
-  const res = new NextResponse();
-  try {
-    const accessToken = req.cookies.get("accessToken")?.value;
-    const tokenContents = accessToken
-      ? decodeAccessToken(accessToken)
-      : (await refreshAndSetTokens(req, res)).token;
+): Promise<NextResponse<GetUserMeResponse>> => {
+  const authRes = authMiddleware(req, true);
+  if (authRes instanceof NextResponse) return authRes;
+  const user = await getUserById(authRes.session.user.id);
 
-    if (!tokenContents) throw "No token found.";
+  if (!user) return logAndReturnGenericError("User not found", "unauthorized");
 
-    const user = await getUserByNanoId(tokenContents.user.userNanoId);
-    if (!user) throw "No user found for token. This should never happen.";
-
-    return NextResponse.json({
-      success: true,
-      email: user.email,
-      emailVerified: user.emailVerified,
-    });
-  } catch (e) {
-    console.log("getUserMe", e);
-    return new NextResponse("Unauthorized", { status: 401 });
-  }
+  return NextResponse.json({
+    success: true,
+    email: user.email,
+    emailVerified: user.emailVerified,
+  });
 };
 
 export { getUserMe as GET };

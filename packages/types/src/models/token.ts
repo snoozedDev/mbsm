@@ -4,7 +4,7 @@ import { getZodTypeGuard } from "../zodUtils";
 export const TokenSchema = z.object({
   user: z.object({
     username: z.string(),
-    userNanoId: z.string(),
+    id: z.number(),
   }),
   userAgent: z.string(),
   level: z.union([z.literal("user"), z.literal("admin")]),

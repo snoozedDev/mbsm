@@ -21,17 +21,17 @@ import {
 } from "@/components/ui/tooltip";
 import {
   useEmailVerificationMutation,
-  useUserQuery,
-} from "@/queries/authQueries";
+  useUserMeQuery,
+} from "@/queries/userQueries";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export const EmailVerification = () => {
   const [emailConcealed, setEmailConcealed] = useState(true);
-  const user = useUserQuery();
+  const user = useUserMeQuery();
   const router = useRouter();
   const emailVerification = useEmailVerificationMutation();
-  const emailVerified = useIsEmailVerified();
+  const { emailVerified } = useIsEmailVerified();
 
   const codeForm = useVerificationCodeForm();
 

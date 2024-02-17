@@ -1,5 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
+import { useIsLoggedIn } from "@/queries/authQueries";
 import { useUserSettingsQuery } from "@/queries/userQueries";
 import { InviteCode } from "@mbsm/types";
 import { motion } from "framer-motion";
@@ -104,8 +105,8 @@ const Code = ({
                 {redeemed
                   ? "This code has been redeemed."
                   : copied
-                    ? "Copied!"
-                    : "Click to copy."}
+                  ? "Copied!"
+                  : "Click to copy."}
               </p>
             </TooltipContent>
           </Tooltip>
@@ -129,10 +130,13 @@ const WarningMessage = ({ message }: { message: string }) => (
 );
 
 export const UserInviteCodes = () => {
-  const emailVerified = useIsEmailVerified();
-  const { isLoading, data } = useUserSettingsQuery();
+  const { isLoggedIn } = useIsLoggedIn();
+  const { isPending: isEmailVerificationPending, emailVerified } =
+    useIsEmailVerified();
+  const { isLoading: userSettingsLoading, data } = useUserSettingsQuery();
 
-  console.log({ data });
+  const isLoading =
+    userSettingsLoading || !isLoggedIn || isEmailVerificationPending;
 
   const renderCodesList = useCallback(() => {
     if (isLoading || !data) {
@@ -170,7 +174,7 @@ export const UserInviteCodes = () => {
       <p className="text-sm text-muted-foreground mt-2 mb-4">
         Your friends can use these to join.
       </p>
-      {emailVerified === false ? (
+      {emailVerified === false && !isLoading ? (
         <WarningMessage message="You must verify your email before you can have invite codes." />
       ) : (
         <ul className="space-y-2 flex flex-col items-stretch">

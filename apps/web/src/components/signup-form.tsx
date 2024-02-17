@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  useIsLoggedIn,
-  useRegisterMutation,
-  useUserQuery,
-} from "@/queries/authQueries";
+import { useIsLoggedIn, useRegisterMutation } from "@/queries/authQueries";
+import { useUserMeQuery } from "@/queries/userQueries";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getErrorMessage } from "@mbsm/utils";
 import Link from "next/link";
@@ -50,12 +47,12 @@ const formSchema = z.object({
     .length(16, "Invite code must be 16 characters long"),
 });
 
-export const RegisterForm = ({}) => {
+export const SignupForm = ({}) => {
   const register = useRegisterMutation();
-  const user = useUserQuery();
+  const user = useUserMeQuery();
   const router = useRouter();
-  const loggedIn = useIsLoggedIn();
-  const emailVerified = useIsEmailVerified();
+  const { isLoggedIn } = useIsLoggedIn();
+  const { emailVerified } = useIsEmailVerified();
   const isDesktop = useIsDesktop();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -73,12 +70,12 @@ export const RegisterForm = ({}) => {
   useEffect(() => {
     if (emailVerified === true) {
       router.push("/settings/user");
-    } else if (loggedIn) {
+    } else if (isLoggedIn) {
       router.push("/auth/verify");
     }
-  }, [loggedIn, router, emailVerified]);
+  }, [isLoggedIn, router, emailVerified]);
 
-  const loading = register.isPending || user.isLoading || loggedIn;
+  const loading = register.isPending || user.isLoading || isLoggedIn;
 
   const renderPasskeyDescription = () => (
     <>

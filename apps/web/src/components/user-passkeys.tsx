@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { useAddAuthenticatorMutation } from "@/queries/authQueries";
 import {
   useUpdateAuthenticatorMutation,
+  useUserMeQuery,
   useUserSettingsQuery,
 } from "@/queries/userQueries";
 import { Authenticator } from "@mbsm/types";
@@ -237,9 +238,12 @@ const SingleAuthenticator = ({
 };
 
 export const UserPasskeys = () => {
-  const { isPending, data } = useUserSettingsQuery();
+  const { isPending: isUserMePending } = useUserMeQuery();
+  const { isPending: isUserSettingsPending, data } = useUserSettingsQuery();
   const { isPending: addingAuthenticator, mutate: addAuthenticator } =
     useAddAuthenticatorMutation();
+
+  const isPending = isUserMePending || isUserSettingsPending;
 
   return (
     <FadeFromBelow>
@@ -261,25 +265,25 @@ export const UserPasskeys = () => {
                   </Fragment>
                 ))
               : data?.success
-                ? data.authenticators
-                    .sort(
-                      (a, b) =>
-                        DateTime.fromISO(b.addedAt).toMillis() -
-                        DateTime.fromISO(a.addedAt).toMillis()
-                    )
-                    .map((authenticator, i) => (
-                      <Fragment key={authenticator.credentialId}>
-                        <motion.li
-                          key={authenticator.credentialId}
-                          exit={{ opacity: 0, x: -10 }}
-                          className="flex flex-1"
-                        >
-                          <SingleAuthenticator authenticator={authenticator} />
-                        </motion.li>
-                        {i !== data.authenticators.length - 1 && <Separator />}
-                      </Fragment>
-                    ))
-                : null}
+              ? data.authenticators
+                  .sort(
+                    (a, b) =>
+                      DateTime.fromISO(b.addedAt).toMillis() -
+                      DateTime.fromISO(a.addedAt).toMillis()
+                  )
+                  .map((authenticator, i) => (
+                    <Fragment key={authenticator.credentialId}>
+                      <motion.li
+                        key={authenticator.credentialId}
+                        exit={{ opacity: 0, x: -10 }}
+                        className="flex flex-1"
+                      >
+                        <SingleAuthenticator authenticator={authenticator} />
+                      </motion.li>
+                      {i !== data.authenticators.length - 1 && <Separator />}
+                    </Fragment>
+                  ))
+              : null}
           </ul>
         </div>
 

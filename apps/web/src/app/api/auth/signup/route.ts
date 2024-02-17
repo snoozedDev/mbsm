@@ -1,20 +1,25 @@
 import { validateInviteCode } from "@/server/inviteCodeUtils";
 import { registerLimiter } from "@/server/rateLimit";
+import { logAndReturnGenericError } from "@/server/serverUtils";
 import { getWebAuthnRegistrationOptions } from "@/utils/webAuthnUtils";
 import { db, getUserByEmail, schema } from "@mbsm/db-layer";
+import { PostAuthSignupResponse, isPostAuthSignupBody } from "@mbsm/types";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 
-export const POST = async (req: NextRequest) => {
+export const POST = async (
+  req: NextRequest
+): Promise<NextResponse<PostAuthSignupResponse>> => {
   const limitRes = await registerLimiter.middleware(req);
   if (limitRes) return limitRes;
 
-  const { email, inviteCode } = await req.json();
-
-  if (!inviteCode || !email) {
+  const body = await req.json();
+  if (!isPostAuthSignupBody(body)) {
     return new NextResponse("Bad Request", { status: 400 });
   }
+
+  const { email, inviteCode } = body;
 
   const inviteCodeResponse = await validateInviteCode(inviteCode);
   if (inviteCodeResponse) return inviteCodeResponse;
@@ -24,10 +29,10 @@ export const POST = async (req: NextRequest) => {
   const existingUser = await getUserByEmail(email);
 
   if (existingUser && existingUser.protected) {
-    return new NextResponse("Email already exists", { status: 409 });
+    return logAndReturnGenericError("User already registered", "unauthorized");
   }
 
-  const options = getWebAuthnRegistrationOptions({
+  const options = await getWebAuthnRegistrationOptions({
     userID: nanoId,
     userName: email,
   });
@@ -48,5 +53,8 @@ export const POST = async (req: NextRequest) => {
     });
   }
 
-  return NextResponse.json({ options });
+  return NextResponse.json({
+    success: true,
+    options,
+  });
 };

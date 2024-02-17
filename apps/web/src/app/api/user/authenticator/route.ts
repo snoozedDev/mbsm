@@ -14,7 +14,7 @@ export const GET = routeWithAuth({
   handler: async ({ user }) => {
     const userAuthenticators = await getAuthenticatorsForUser(user.id);
 
-    const regOptions = getWebAuthnRegistrationOptions({
+    const regOptions = await getWebAuthnRegistrationOptions({
       userID: user.nanoId,
       userName: user.email,
       excludeCredentials: userAuthenticators,

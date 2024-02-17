@@ -1,6 +1,3 @@
-import { generateActionResponse } from "./utils";
-
 export * from "./auth";
+export * from "./common";
 export * from "./user";
-
-export const EmptyResponseSchema = generateActionResponse({});

@@ -1,18 +1,25 @@
 import { validateInviteCode } from "@/server/inviteCodeUtils";
 import { registerLimiter } from "@/server/rateLimit";
-import { generateEmailVerificationCodeAndSend } from "@/server/serverUtils";
-import { getResponseWithTokens } from "@/utils/tokenUtils";
+import {
+  generateEmailVerificationCodeAndSend,
+  logAndReturnGenericError,
+} from "@/server/serverUtils";
+import { createAndSetAuthTokens } from "@/utils/tokenUtils";
 import { getWebAuthnResponseForRegistration } from "@/utils/webAuthnUtils";
 import { db, schema } from "@mbsm/db-layer";
+import { EmptyResponse } from "@mbsm/types";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 
-export const POST = async (req: NextRequest) => {
+export const POST = async (
+  req: NextRequest
+): Promise<NextResponse<EmptyResponse>> => {
   const limitRes = await registerLimiter.middleware(req);
   if (limitRes) return limitRes;
   const userAgent = req.headers.get("user-agent");
-  if (!userAgent) return new NextResponse("Unauthorized", { status: 401 });
+  if (!userAgent)
+    return logAndReturnGenericError("No user agent found", "unauthorized");
   const { attRes, email, inviteCode } = await req.json();
 
   const inviteCodeResponse = await validateInviteCode(inviteCode);
@@ -24,11 +31,11 @@ export const POST = async (req: NextRequest) => {
     .where(eq(schema.user.email, email));
 
   if (!user?.currentRegChallenge) {
-    return new NextResponse("Not Found", { status: 404 });
+    return logAndReturnGenericError("No challenge found", "unauthorized");
   }
 
   if (user.protected) {
-    return new NextResponse("Forbidden", { status: 403 });
+    return logAndReturnGenericError("User already registered", "unauthorized");
   }
 
   let verification;
@@ -38,13 +45,14 @@ export const POST = async (req: NextRequest) => {
       expectedChallenge: user.currentRegChallenge,
     });
   } catch (e) {
-    console.error(e);
-    return new NextResponse("Unauthorized", { status: 401 });
+    return logAndReturnGenericError(e, "unauthorized");
   }
 
   const { verified, registrationInfo } = verification;
 
-  if (!verified) return new NextResponse("Unauthorized", { status: 401 });
+  if (!verified) {
+    return logAndReturnGenericError("Verification failed", "unauthorized");
+  }
 
   const {
     credentialPublicKey,
@@ -54,11 +62,10 @@ export const POST = async (req: NextRequest) => {
     credentialDeviceType,
   } = registrationInfo!;
 
-  const [response] = await Promise.all([
-    getResponseWithTokens({
-      req,
-      user,
-    }),
+  const res = NextResponse.json({ success: true as const });
+
+  await Promise.all([
+    createAndSetAuthTokens(req, res, user),
     generateEmailVerificationCodeAndSend({
       email,
       userId: user.id,
@@ -84,5 +91,5 @@ export const POST = async (req: NextRequest) => {
       .where(eq(schema.inviteCode.code, inviteCode)),
   ]);
 
-  return response;
+  return res;
 };

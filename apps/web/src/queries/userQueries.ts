@@ -2,11 +2,12 @@
 // import { getUserSettings } from "@/actions/userActions";
 import { apiClient } from "@/utils/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const useUserMeQuery = () => {
   return useQuery({
     queryKey: ["user", "me"],
-    queryFn: () => apiClient.get("/user/me"),
+    queryFn: apiClient.get.userMe,
     retry: false,
   });
 };
@@ -14,7 +15,7 @@ export const useUserMeQuery = () => {
 export const useUserSettingsQuery = () => {
   return useQuery({
     queryKey: ["user", "settings"],
-    queryFn: () => ({}), //getUserSettings(),
+    queryFn: apiClient.get.userSettings,
     retry: false,
   });
 };
@@ -42,6 +43,19 @@ export const useUpdateAuthenticatorMutation = ({
       client.invalidateQueries({
         queryKey: ["user", "settings"],
       });
+    },
+  });
+};
+
+export const useEmailVerificationMutation = () => {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["user", "emailVerification"],
+    mutationFn: apiClient.post.userEmailVerify,
+    onSuccess: () => {
+      client.resetQueries({ queryKey: ["user"] });
+      toast("Your email has been verified.");
     },
   });
 };

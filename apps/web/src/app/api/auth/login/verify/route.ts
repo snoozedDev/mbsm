@@ -3,11 +3,13 @@ import { logAndReturnGenericError } from "@/server/serverUtils";
 import { createAndSetAuthTokens } from "@/utils/tokenUtils";
 import { getWebAuthnResponseForAuthentication } from "@/utils/webAuthnUtils";
 import { db, schema } from "@mbsm/db-layer";
-import { isPostLoginVerifyBody } from "@mbsm/types";
+import { EmptyResponse, isPostAuthLoginVerifyBody } from "@mbsm/types";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
-const postLoginVerify = async (req: NextRequest) => {
+const postLoginVerify = async (
+  req: NextRequest
+): Promise<NextResponse<EmptyResponse>> => {
   const limitRes = await loginLimiter.middleware(req);
   if (limitRes) return limitRes;
   const userAgent = req.headers.get("user-agent");
@@ -16,7 +18,7 @@ const postLoginVerify = async (req: NextRequest) => {
   }
   const body = await req.json();
 
-  if (!isPostLoginVerifyBody(body)) {
+  if (!isPostAuthLoginVerifyBody(body)) {
     return logAndReturnGenericError("Invalid body", "badRequest");
   }
 
@@ -64,16 +66,14 @@ const postLoginVerify = async (req: NextRequest) => {
 
   await db
     .update(schema.authenticator)
-    .set({
-      counter: newCounter,
-    })
+    .set({ counter: newCounter })
     .where(eq(schema.authenticator.credentialId, authenticator.credentialId));
 
-  const response = new NextResponse();
+  const res = NextResponse.json({ success: true as const });
 
-  await createAndSetAuthTokens(response, user);
+  await createAndSetAuthTokens(req, res, user);
 
-  return response;
+  return res;
 };
 
 export { postLoginVerify as POST };

@@ -1,8 +1,9 @@
 import { cn } from "@/lib/utils";
-import { useEmailVerificationMutation } from "@/queries/authQueries";
+import { useIsLoggedIn } from "@/queries/authQueries";
+import { useEmailVerificationMutation } from "@/queries/userQueries";
 import { getErrorMessage } from "@/utils/stringUtils";
+import { PostUserEmailVerifyBody } from "@mbsm/types";
 import { MailWarning } from "lucide-react";
-import { FormValues } from "./hooks/forms/formHooksUtils";
 import { useVerificationCodeForm } from "./hooks/forms/useVerificationCodeForm";
 import { useIsEmailVerified } from "./hooks/useIsEmailVerified";
 import { LoadingDots } from "./loading-dots";
@@ -19,16 +20,19 @@ import {
 import { Input } from "./ui/input";
 
 export const UnverifiedEmailWarning = () => {
-  const emailVerified = useIsEmailVerified();
+  const { isLoggedIn } = useIsLoggedIn();
+  const { emailVerified, isPending } = useIsEmailVerified();
 
   const emailVerification = useEmailVerificationMutation();
   const codeForm = useVerificationCodeForm();
 
-  const onSubmit = (values: FormValues<typeof codeForm>) => {
+  const onSubmit = (values: PostUserEmailVerifyBody) => {
     emailVerification.mutate({ code: values.code });
   };
 
   const submitting = emailVerification.isPending;
+
+  if (isPending || !isLoggedIn) return null;
 
   return emailVerified === false ? (
     <Form {...codeForm}>

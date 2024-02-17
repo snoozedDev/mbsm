@@ -1,13 +1,15 @@
+import { decodeAccessToken } from "@/utils/tokenUtils";
 import { redis } from "@mbsm/db-layer";
+import type { ErrorResponse, Token } from "@mbsm/types";
 import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 import { customAlphabet } from "nanoid";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { resend } from "./email";
 
 export const logAndReturnGenericError = (
   err: any,
   errorType?: "unauthorized" | "badRequest" | "internal"
-): NextResponse => {
+): NextResponse<ErrorResponse> => {
   console.error("Error happened: ", err);
 
   switch (errorType) {
@@ -27,11 +29,8 @@ export const IS_SERVER = typeof window === "undefined";
 export const wait = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
-export const getEmailVerificationCode = async ({
-  userId,
-}: {
-  userId: number;
-}) => redis.get<string | number>(`verification:${userId}`);
+export const getEmailVerificationCodeForUser = async (userId: number) =>
+  redis.get<string | number>(`verification:${userId}`);
 
 export const deleteEmailVerificationCode = async ({
   userId,
@@ -63,5 +62,27 @@ export const generateEmailVerificationCodeAndSend = async ({
           `,
       }),
     ]);
+  }
+};
+
+export const authMiddleware = <
+  T extends boolean,
+  R extends T extends true
+    ? { session: Token } | NextResponse<ErrorResponse>
+    : { session?: Token },
+>(
+  req: NextRequest,
+  authRequired?: T
+): R => {
+  try {
+    const accessToken = req.cookies.get("accessToken")?.value;
+    if (!accessToken) throw new Error("No token found");
+    const session = decodeAccessToken(accessToken);
+    if (!session) throw new Error("Invalid token");
+
+    return { session } as R;
+  } catch (e) {
+    if (authRequired) return logAndReturnGenericError(e, "unauthorized") as R;
+    return {} as R;
   }
 };

@@ -1,3 +1,4 @@
+export * from "./account/accountMutations";
 export * from "./authenticator/authenticatorMutations";
 export * from "./authenticator/authenticatorQueries";
 export * from "./inviteCode/inviteCodeMutations";

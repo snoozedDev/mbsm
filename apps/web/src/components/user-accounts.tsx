@@ -1,11 +1,11 @@
 "use client";
-import { useUserQuery } from "@/queries/authQueries";
+import { useUserMeQuery } from "@/queries/userQueries";
 import { FadeFromBelow } from "./containers/fade-from-below";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 
 export const UserAccounts = () => {
-  const { isPending } = useUserQuery();
+  const { isPending } = useUserMeQuery();
 
   return (
     <FadeFromBelow>

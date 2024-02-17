@@ -10,6 +10,7 @@ import { AlertTriangle, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useIsEmailVerified } from "./hooks/useIsEmailVerified";
+import { LoadingDots } from "./loading-dots";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -41,19 +42,15 @@ export const SiteHeader = () => {
   const login = useLoginMutation();
   const { data: user, isLoading: authLoading } = useUserMeQuery();
   const { mutate: logOut } = useLogoutMutation();
-  const isLoggedIn = useIsLoggedIn();
+  const { isLoggedIn } = useIsLoggedIn();
   const router = useRouter();
 
-  const emailVerified = useIsEmailVerified();
+  const { emailVerified } = useIsEmailVerified();
 
   const hasWarnings = emailVerified === false;
 
   const onLogin = () => {
     login.mutate();
-  };
-
-  const onRegister = () => {
-    router.push("/auth/register");
   };
 
   const isLoading = authLoading || login.isPending;
@@ -64,7 +61,6 @@ export const SiteHeader = () => {
         <h1 className="text-xl font-bold select-none max-sm:hidden mr-4">
           MBSM
         </h1>
-        {JSON.stringify({ user })}
         <NavigationMenu className="max-xs:hidden">
           <NavigationMenuList className="space-x-4 px-4 font-medium">
             {navigation.map(({ name, href }, i) => (
@@ -85,7 +81,9 @@ export const SiteHeader = () => {
           </NavigationMenuList>
         </NavigationMenu>
         <div className="flex-grow" />
-        {isLoggedIn ? (
+        {isLoading ? (
+          <LoadingDots />
+        ) : isLoggedIn ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="relative">
@@ -137,8 +135,8 @@ export const SiteHeader = () => {
             <Button onClick={onLogin} variant="outline">
               LOG IN
             </Button>
-            <Button onClick={onRegister} variant="outline">
-              SIGN UP
+            <Button asChild variant="outline">
+              <Link href={"/auth/signup"}>SIGN UP</Link>
             </Button>
           </div>
         )}
