@@ -35,8 +35,7 @@ yarn-error.log*
 # vercel
 .vercel
 
-.yarn
-dist
+.yarn&
 .sst
 .build
 
