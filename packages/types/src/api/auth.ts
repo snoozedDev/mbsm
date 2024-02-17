@@ -71,3 +71,26 @@ export type PostAuthSignupVerifyBody = z.infer<
 export const isPostAuthSignupVerifyBody = getZodTypeGuard(
   PostAuthSignupVerifyBodySchema
 );
+
+// GET /api/auth
+
+// response schema
+export const GetAuthResponseSchema = generateActionResponse({
+  accessToken: z.string(),
+});
+
+// response type
+
+export type GetAuthResponse = z.infer<typeof GetAuthResponseSchema>;
+
+// GET /api/auth/refresh
+
+// response schema
+export const GetAuthRefreshResponseSchema = generateActionResponse({
+  accessToken: z.string(),
+});
+
+// response type
+export type GetAuthRefreshResponse = z.infer<
+  typeof GetAuthRefreshResponseSchema
+>;

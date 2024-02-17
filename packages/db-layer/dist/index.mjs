@@ -143,7 +143,7 @@ var getTimestampColumns = () => ({
 });
 var getIndexFor = (column, unique) => ({
   [(0, import_utils.snakeToCamel)(column.name)]: (unique ? uniqueIndex : index)(
-    `${column.name}_index`
+    `${column.uniqueName}_index`
   ).on(column)
 });
 

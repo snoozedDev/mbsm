@@ -12,7 +12,7 @@
     "@mbsm/utils": "workspace:*",
     "@tsconfig/node18": "^18.2.2",
     "dotenv-cli": "^7.3.0",
-    "drizzle-kit": "^0.19.13",
+    "drizzle-kit": "0.20.14",
     "eslint": "^8.48.0",
     "prettier": "^3.0.3",
     "sst": "^2.28.1",

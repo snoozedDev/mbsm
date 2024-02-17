@@ -23,6 +23,6 @@ export const getTimestampColumns = () => ({
 
 export const getIndexFor = (column: AnyPgColumn, unique?: boolean) => ({
   [snakeToCamel(column.name)]: (unique ? uniqueIndex : index)(
-    `${column.name}_index`
+    `${column.uniqueName}_index`
   ).on(column),
 });

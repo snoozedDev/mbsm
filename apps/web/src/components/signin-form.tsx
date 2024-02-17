@@ -1,14 +1,13 @@
 "use client";
-import { useSignUp } from "@clerk/clerk-react";
+import { useSignIn } from "@clerk/clerk-react";
 import type { OAuthStrategy } from "@clerk/types";
-
 import { Button } from "./ui/button";
 
-export const SignupForm = ({}) => {
-  const { signUp, isLoaded } = useSignUp();
+export const SigninForm = ({}) => {
+  const { signIn, isLoaded } = useSignIn();
 
-  const signUpWith = (strategy: OAuthStrategy) => {
-    return signUp?.authenticateWithRedirect({
+  const signInWith = (strategy: OAuthStrategy) => {
+    return signIn?.authenticateWithRedirect({
       strategy,
       redirectUrl: "/sso-callback",
       redirectUrlComplete: "/",
@@ -18,7 +17,7 @@ export const SignupForm = ({}) => {
   return (
     <div className="xs:max-w-md w-full self-center mt-16 p-4 relative">
       {isLoaded ? (
-        <Button onClick={() => signUpWith("oauth_google")}>google</Button>
+        <Button onClick={() => signInWith("oauth_google")}>google</Button>
       ) : (
         <p>Loading...</p>
       )}

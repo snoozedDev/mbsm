@@ -1,15 +1,10 @@
 "use client";
 import { cn } from "@/lib/utils";
-import {
-  useIsLoggedIn,
-  useLoginMutation,
-  useLogoutMutation,
-} from "@/queries/authQueries";
-import { useUserMeQuery } from "@/queries/userQueries";
-import { AlertTriangle, SettingsIcon } from "lucide-react";
+import { useAuth } from "@clerk/clerk-react";
+import { SettingsIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useIsEmailVerified } from "./hooks/useIsEmailVerified";
+import { usePathname } from "next/navigation";
+import useApiUser from "./hooks/useUser";
 import { LoadingDots } from "./loading-dots";
 import { Button } from "./ui/button";
 import {
@@ -39,22 +34,8 @@ const navigation = [
 
 export const SiteHeader = () => {
   const pathname = usePathname();
-  const login = useLoginMutation();
-  const { data: user, isLoading: authLoading } = useUserMeQuery();
-  const { mutate: logOut } = useLogoutMutation();
-  const { isLoggedIn } = useIsLoggedIn();
-  const router = useRouter();
-
-  const { emailVerified } = useIsEmailVerified();
-
-  const hasWarnings = emailVerified === false;
-
-  const onLogin = () => {
-    login.mutate();
-  };
-
-  const isLoading = authLoading || login.isPending;
-
+  const { signOut, isLoaded, isSignedIn } = useAuth();
+  useApiUser();
   return (
     <header className="supports-backdrop-blur:bg-background/80 sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur">
       <div className="px-4 flex h-16 items-center max-w-5xl container">
@@ -81,18 +62,18 @@ export const SiteHeader = () => {
           </NavigationMenuList>
         </NavigationMenu>
         <div className="flex-grow" />
-        {isLoading ? (
+        {!isLoaded ? (
           <LoadingDots />
-        ) : isLoggedIn ? (
+        ) : isSignedIn ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="relative">
-                {hasWarnings && (
+                {/* {hasWarnings && (
                   <span className="absolute flex h-3 w-3 -right-1 -top-1">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-warning"></span>
                   </span>
-                )}
+                )} */}
                 <SettingsIcon />
               </Button>
             </DropdownMenuTrigger>
@@ -102,8 +83,8 @@ export const SiteHeader = () => {
               className="flex flex-col items-stretch"
             >
               <DropdownMenuLabel>No account selected</DropdownMenuLabel>
-              {hasWarnings && <DropdownMenuSeparator />}
-              {emailVerified === false && (
+              {/* {hasWarnings && <DropdownMenuSeparator />} */}
+              {/* {emailVerified === false && (
                 <DropdownMenuItem asChild>
                   <Link
                     href={"/auth/verify"}
@@ -113,7 +94,7 @@ export const SiteHeader = () => {
                     <span className="ml-2">Email Unverified</span>
                   </Link>
                 </DropdownMenuItem>
-              )}
+              )} */}
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href={"/settings/user"} className="hover:cursor-pointer">
@@ -122,7 +103,7 @@ export const SiteHeader = () => {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <button
-                  onClick={() => logOut()}
+                  onClick={() => signOut()}
                   className="hover:cursor-pointer"
                 >
                   Log Out
@@ -132,8 +113,8 @@ export const SiteHeader = () => {
           </DropdownMenu>
         ) : (
           <div className="flex items-center space-x-4">
-            <Button onClick={onLogin} variant="outline">
-              LOG IN
+            <Button asChild variant="outline">
+              <Link href={"/auth/signin"}>LOG IN</Link>
             </Button>
             <Button asChild variant="outline">
               <Link href={"/auth/signup"}>SIGN UP</Link>

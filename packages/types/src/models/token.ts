@@ -2,12 +2,9 @@ import { z } from "zod";
 import { getZodTypeGuard } from "../zodUtils";
 
 export const TokenSchema = z.object({
-  user: z.object({
-    username: z.string(),
-    id: z.number(),
-  }),
-  userAgent: z.string(),
-  level: z.union([z.literal("user"), z.literal("admin")]),
+  iss: z.string(),
+  sub: z.string(),
+  aud: z.string(),
 });
 
 export const isToken = getZodTypeGuard(TokenSchema);

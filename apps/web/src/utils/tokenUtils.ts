@@ -1,4 +1,9 @@
-import { InferSelectModel, getUserById, redis, schema } from "@mbsm/db-layer";
+import {
+  InferSelectModel,
+  getUserByNanoId,
+  redis,
+  schema,
+} from "@mbsm/db-layer";
 import { Token, isToken } from "@mbsm/types";
 import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 import jwt from "jsonwebtoken";
@@ -8,8 +13,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const generateAccessToken = (token: Token) =>
   jwt.sign(token, getEnvAsStr("SECRET_ATOKEN"), {
-    // expiresIn: "15m",
-    expiresIn: "2s",
+    expiresIn: "15m",
   });
 
 const generateRefreshToken = (token: Token) =>
@@ -20,10 +24,8 @@ const generateRefreshToken = (token: Token) =>
 const accessTokenCookieOptions: Partial<ResponseCookie> = {
   httpOnly: true,
   path: "/api",
-  // maxAge: 60 * 15, // 15 minutes
-  // expires: new Date(Date.now() + 1000 * 60 * 15), // 15 minutes
-  maxAge: 2, // 2 seconds
-  expires: new Date(Date.now() + 1000 * 2), // 2 seconds
+  maxAge: 60 * 15, // 15 minutes
+  expires: new Date(Date.now() + 1000 * 60 * 15), // 15 minutes
   secure: getEnvAsBool("IS_PROD"),
 };
 
@@ -38,14 +40,14 @@ const refreshTokenCookieOptions: Partial<ResponseCookie> = {
 export async function addToList({
   refresher,
   uniqueId,
-  id,
+  nanoId,
 }: {
-  id: number;
+  nanoId: string;
   uniqueId: string;
   refresher: string;
 }) {
   try {
-    await redis.hset("refresh:" + id, {
+    await redis.hset("refresh:" + nanoId, {
       [uniqueId]: refresher,
     });
   } catch (error) {
@@ -110,10 +112,7 @@ export const decodeAccessToken = (token: string): Token | undefined => {
   return undefined;
 };
 
-export const refreshAndSetTokens = async (
-  req: NextRequest,
-  res: NextResponse
-) => {
+export const refreshAndSetTokens = async (req: NextRequest) => {
   const refreshToken = req.cookies.get("refreshToken")?.value;
   const uniqueId = req.cookies.get("uniqueIdentifier")?.value;
   const userAgent = req.headers.get("user-agent");
@@ -122,10 +121,10 @@ export const refreshAndSetTokens = async (
   }
   console.log({ refreshToken });
   const tokenContents = decodeRefreshToken(refreshToken);
-  console.log({ tokenContents });
   if (!tokenContents) throw new Error("Invalid token.");
+  const nanoId = tokenContents.sub.split("|")[1];
   const userTokens = await redis.hgetall<Record<string, string>>(
-    "refresh:" + tokenContents.user.id
+    "refresh:" + nanoId
   );
 
   if (!userTokens) throw new Error("No tokens found.");
@@ -134,23 +133,20 @@ export const refreshAndSetTokens = async (
   if (redisRToken !== refreshToken) throw new Error("Invalid token.");
 
   await deleteExpiredUserTokens({
-    id: tokenContents.user.id,
+    nanoId,
     tokens: userTokens,
   });
 
-  const user = await getUserById(tokenContents.user.id);
+  const user = await getUserByNanoId(nanoId);
 
   if (!user) {
     throw new Error("No user found for token. This should never happen.");
   }
 
   const token = {
-    level: "user",
-    user: {
-      username: user.email,
-      id: user.id,
-    },
-    userAgent,
+    aud: "localhost",
+    iss: "https://localhost:3000",
+    sub: `localhost|${nanoId}`,
   } satisfies Token;
 
   const accessToken = generateAccessToken(token);
@@ -160,13 +156,18 @@ export const refreshAndSetTokens = async (
   await addToList({
     refresher: newRefreshToken,
     uniqueId,
-    id: user.id,
+    nanoId: user.nanoId,
+  });
+
+  const res = NextResponse.json({
+    success: true as const,
+    accessToken,
   });
 
   setAccessTokenCookie(res, accessToken);
   setRefreshTokenCookie(res, newRefreshToken);
 
-  return { token };
+  return res;
 };
 
 export const createAndSetAuthTokens = async (
@@ -179,12 +180,9 @@ export const createAndSetAuthTokens = async (
   const currentUniqueId = res.cookies.get("uniqueIdentifier")?.value;
 
   const token: Token = {
-    level: "user",
-    user: {
-      username: user.email,
-      id: user.id,
-    },
-    userAgent,
+    aud: "localhost",
+    iss: "https://localhost:3000",
+    sub: `localhost|${user.nanoId}`,
   };
 
   const accessToken = generateAccessToken(token);
@@ -195,7 +193,7 @@ export const createAndSetAuthTokens = async (
 
   await addToList({
     refresher: refreshToken,
-    id: user.id,
+    nanoId: user.nanoId,
     uniqueId,
   });
 
@@ -205,15 +203,15 @@ export const createAndSetAuthTokens = async (
 };
 
 export const deleteExpiredUserTokens = async ({
-  id,
+  nanoId,
   tokens,
 }: {
-  id: number;
+  nanoId: string;
   tokens: Record<string, string>;
 }) => {
   const expiredTokens = Object.entries(tokens).filter(
     ([_, token]) => !decodeRefreshToken(token)
   );
   if (expiredTokens.length === 0) return;
-  await redis.hdel("refresh:" + id, ...expiredTokens.map(([id]) => id));
+  await redis.hdel("refresh:" + nanoId, ...expiredTokens.map(([id]) => id));
 };

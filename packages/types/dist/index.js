@@ -26,6 +26,8 @@ __export(src_exports, {
   EmptyResponseSchema: () => EmptyResponseSchema,
   ErrorResponseSchema: () => ErrorResponseSchema,
   GetAuthLoginResponseSchema: () => GetAuthLoginResponseSchema,
+  GetAuthRefreshResponseSchema: () => GetAuthRefreshResponseSchema,
+  GetAuthResponseSchema: () => GetAuthResponseSchema,
   GetUserMeResponseSchema: () => GetUserMeResponseSchema,
   GetUserSettingsResponseSchema: () => GetUserSettingsResponseSchema,
   ImagePostSchema: () => ImagePostSchema,
@@ -3844,6 +3846,12 @@ var PostAuthSignupVerifyBodySchema = z.object({
 var isPostAuthSignupVerifyBody = getZodTypeGuard(
   PostAuthSignupVerifyBodySchema
 );
+var GetAuthResponseSchema = generateActionResponse({
+  accessToken: z.string()
+});
+var GetAuthRefreshResponseSchema = generateActionResponse({
+  accessToken: z.string()
+});
 
 // src/forms/index.ts
 var EmailVerificationCodeFormSchema = z.object({
@@ -3912,12 +3920,9 @@ var isPost = getZodTypeGuard(PostSchema);
 
 // src/models/token.ts
 var TokenSchema = z.object({
-  user: z.object({
-    username: z.string(),
-    id: z.number()
-  }),
-  userAgent: z.string(),
-  level: z.union([z.literal("user"), z.literal("admin")])
+  iss: z.string(),
+  sub: z.string(),
+  aud: z.string()
 });
 var isToken = getZodTypeGuard(TokenSchema);
 
@@ -3965,6 +3970,8 @@ var PostUserEmailVerifyBodySchema = EmailVerificationCodeFormSchema;
   EmptyResponseSchema,
   ErrorResponseSchema,
   GetAuthLoginResponseSchema,
+  GetAuthRefreshResponseSchema,
+  GetAuthResponseSchema,
   GetUserMeResponseSchema,
   GetUserSettingsResponseSchema,
   ImagePostSchema,

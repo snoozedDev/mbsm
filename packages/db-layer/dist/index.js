@@ -167,7 +167,7 @@ var getTimestampColumns = () => ({
 });
 var getIndexFor = (column, unique) => ({
   [(0, import_utils.snakeToCamel)(column.name)]: (unique ? import_pg_core.uniqueIndex : import_pg_core.index)(
-    `${column.name}_index`
+    `${column.uniqueName}_index`
   ).on(column)
 });
 

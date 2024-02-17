@@ -20,6 +20,10 @@ const envVariables = [
   "RESEND_API_KEY",
   "DEV_VERIFICATION_CODE",
   "REUSABLE_INVITE_CODE",
+  "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+  "CLERK_SECRET_KEY",
+  "CONVEX_DEPLOYMENT",
+  "NEXT_PUBLIC_CONVEX_URL",
 ] as const;
 
 type EnvVariablesType = {

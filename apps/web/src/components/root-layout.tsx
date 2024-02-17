@@ -1,5 +1,6 @@
 import NextTopLoader from "nextjs-toploader";
 import { ReactNode } from "react";
+import { ConvexClientProvider } from "./convex-provider";
 import { QueryLayout } from "./query-layout";
 import { StoreProvider } from "./store-provider";
 import { NextThemeProvider } from "./theme-provider";
@@ -15,9 +16,11 @@ export const RootLayout = ({ children }: { children: ReactNode }) => {
       />
       <NextThemeProvider>
         <TooltipProvider>
-          <QueryLayout>
-            <StoreProvider>{children}</StoreProvider>
-          </QueryLayout>
+          <ConvexClientProvider>
+            <QueryLayout>
+              <StoreProvider>{children}</StoreProvider>
+            </QueryLayout>
+          </ConvexClientProvider>
         </TooltipProvider>
       </NextThemeProvider>
     </>
