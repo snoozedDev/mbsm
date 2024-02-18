@@ -4,6 +4,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AuthModal, AuthModalMode } from "./auth-modal";
 import useApiUser from "./hooks/useUser";
 import { LoadingDots } from "./loading-dots";
 import { Button } from "./ui/button";
@@ -113,9 +114,9 @@ export const SiteHeader = () => {
           </DropdownMenu>
         ) : (
           <div className="flex items-center space-x-4">
-            <Button asChild variant="outline">
-              <Link href={"/auth/signin"}>LOG IN</Link>
-            </Button>
+            <AuthModal initialMode={AuthModalMode.SignIn}>
+              <Button variant="outline">LOG IN</Button>
+            </AuthModal>
             <Button asChild variant="outline">
               <Link href={"/auth/signup"}>SIGN UP</Link>
             </Button>
