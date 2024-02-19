@@ -14,7 +14,7 @@ import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
-export const userEmailVerify = async (
+export const POST = async (
   req: NextRequest
 ): Promise<NextResponse<EmptyResponse>> => {
   const authRes = authMiddleware(req, true);
@@ -61,5 +61,3 @@ export const userEmailVerify = async (
 
   return NextResponse.json({ success: true });
 };
-
-export { userEmailVerify as POST };
