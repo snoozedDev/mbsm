@@ -65,10 +65,10 @@ declare const account: drizzle_orm_pg_core.PgTableWithColumns<{
         userId: drizzle_orm_pg_core.PgColumn<{
             name: "user_id";
             tableName: "account";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
             notNull: true;
             hasDefault: false;
             enumValues: undefined;
@@ -232,10 +232,10 @@ declare const authenticator: drizzle_orm_pg_core.PgTableWithColumns<{
         userId: drizzle_orm_pg_core.PgColumn<{
             name: "user_id";
             tableName: "authenticator";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
             notNull: true;
             hasDefault: false;
             enumValues: undefined;
@@ -267,10 +267,10 @@ declare const inviteCode: drizzle_orm_pg_core.PgTableWithColumns<{
         userId: drizzle_orm_pg_core.PgColumn<{
             name: "user_id";
             tableName: "invite_codes";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
             notNull: true;
             hasDefault: false;
             enumValues: undefined;
@@ -339,25 +339,13 @@ declare const user: drizzle_orm_pg_core.PgTableWithColumns<{
         id: drizzle_orm_pg_core.PgColumn<{
             name: "id";
             tableName: "user";
-            dataType: "number";
-            columnType: "PgSerial";
-            data: number;
-            driverParam: number;
-            notNull: true;
-            hasDefault: true;
-            enumValues: undefined;
-            baseColumn: never;
-        }, {}, {}>;
-        nanoId: drizzle_orm_pg_core.PgColumn<{
-            name: "nano_id";
-            tableName: "user";
             dataType: "string";
-            columnType: "PgVarchar";
+            columnType: "PgUUID";
             data: string;
             driverParam: string;
             notNull: true;
-            hasDefault: false;
-            enumValues: [string, ...string[]];
+            hasDefault: true;
+            enumValues: undefined;
             baseColumn: never;
         }, {}, {}>;
         email: drizzle_orm_pg_core.PgColumn<{
@@ -425,6 +413,7 @@ declare const user: drizzle_orm_pg_core.PgTableWithColumns<{
 }>;
 declare const userRelations: drizzle_orm.Relations<"user", {
     authenticators: drizzle_orm.Many<"authenticator">;
+    inviteCodes: drizzle_orm.Many<"invite_codes">;
 }>;
 
 declare const userPreferences: drizzle_orm_pg_core.PgTableWithColumns<{
@@ -434,10 +423,10 @@ declare const userPreferences: drizzle_orm_pg_core.PgTableWithColumns<{
         userId: drizzle_orm_pg_core.PgColumn<{
             name: "user_id";
             tableName: "user_preferences";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
             notNull: true;
             hasDefault: false;
             enumValues: undefined;
@@ -491,7 +480,7 @@ declare const updateAuthenticator: ({ id, fields, }: {
 }) => Promise<pg.QueryResult<never> | postgres.RowList<never[]>>;
 declare const insertAuthenticator: (fields: PgInsertValue<typeof authenticator>) => Promise<pg.QueryResult<never> | postgres.RowList<never[]>>;
 
-declare const getAuthenticatorsForUser: (userId: number) => Promise<{
+declare const getAuthenticatorsForUser: (userId: string) => Promise<{
     name: string;
     id: number;
     credentialId: string;
@@ -503,7 +492,7 @@ declare const getAuthenticatorsForUser: (userId: number) => Promise<{
     deletedAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
-    userId: number;
+    userId: string;
 }[]>;
 declare const getAuthenticatorByCredentialId: (credentialId: string) => Promise<{
     name: string;
@@ -517,7 +506,7 @@ declare const getAuthenticatorByCredentialId: (credentialId: string) => Promise<
     deletedAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
-    userId: number;
+    userId: string;
 } | undefined>;
 declare const getAuthenticatorAndUserByCredentialId: (credentialId: string) => Promise<{
     name: string;
@@ -531,10 +520,9 @@ declare const getAuthenticatorAndUserByCredentialId: (credentialId: string) => P
     deletedAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
-    userId: number;
+    userId: string;
     user: {
-        id: number;
-        nanoId: string;
+        id: string;
         email: string;
         emailVerified: boolean;
         protected: boolean;
@@ -548,34 +536,33 @@ declare const getAuthenticatorAndUserByCredentialId: (credentialId: string) => P
 
 declare const insertInviteCodes: ({ inviteCodes, userId, }: {
     inviteCodes: InviteCode[];
-    userId: number;
+    userId: string;
 }) => Promise<pg.QueryResult<never> | postgres.RowList<never[]>>;
 declare const updateInviteCode: ({ code, fields, }: {
     code: string;
     fields: PgUpdateSetSource<typeof inviteCode>;
 }) => Promise<pg.QueryResult<never> | postgres.RowList<never[]>>;
 
-declare const getUserInviteCodes: (userId: number) => Promise<{
-    userId: number;
+declare const getUserInviteCodes: (userId: string) => Promise<{
+    userId: string;
     code: string;
     redeemed: boolean;
 }[]>;
 declare const getUnredeemedInviteCode: (inviteCode: string) => Promise<{
-    userId: number;
+    userId: string;
     code: string;
     redeemed: boolean;
 } | undefined>;
 
-declare const clearCurrentUserChallenge: (userId: number) => Promise<pg.QueryResult<never> | postgres.RowList<never[]>>;
+declare const clearCurrentUserChallenge: (userId: string) => Promise<pg.QueryResult<never> | postgres.RowList<never[]>>;
 declare const updateUser: ({ id, fields, }: {
-    id: number;
+    id: string;
     fields: PgUpdateSetSource<typeof user>;
 }) => Promise<pg.QueryResult<never> | postgres.RowList<never[]>>;
 declare const insertUser: (fields: PgInsertValue<typeof user>) => Promise<pg.QueryResult<never> | postgres.RowList<never[]>>;
 
 declare const getUserByEmail: (email: string) => Promise<{
-    id: number;
-    nanoId: string;
+    id: string;
     email: string;
     emailVerified: boolean;
     protected: boolean;
@@ -585,21 +572,8 @@ declare const getUserByEmail: (email: string) => Promise<{
     createdAt: Date;
     updatedAt: Date;
 } | undefined>;
-declare const getUserById: (id: number) => Promise<{
-    id: number;
-    nanoId: string;
-    email: string;
-    emailVerified: boolean;
-    protected: boolean;
-    currentRegChallenge: string | null;
-    role: "user" | "mod" | "admin" | "foru";
-    deletedAt: Date | null;
-    createdAt: Date;
-    updatedAt: Date;
-} | undefined>;
-declare const getUserByNanoId: (nanoId: string) => Promise<{
-    id: number;
-    nanoId: string;
+declare const getUserById: (id: string) => Promise<{
+    id: string;
     email: string;
     emailVerified: boolean;
     protected: boolean;
@@ -612,4 +586,4 @@ declare const getUserByNanoId: (nanoId: string) => Promise<{
 
 declare const redis: _vercel_kv.VercelKV;
 
-export { clearCurrentUserChallenge, db, getAuthenticatorAndUserByCredentialId, getAuthenticatorByCredentialId, getAuthenticatorsForUser, getUnredeemedInviteCode, getUserByEmail, getUserById, getUserByNanoId, getUserInviteCodes, insertAccount, insertAuthenticator, insertInviteCodes, insertUser, redis, schema, updateAuthenticator, updateInviteCode, updateUser };
+export { clearCurrentUserChallenge, db, getAuthenticatorAndUserByCredentialId, getAuthenticatorByCredentialId, getAuthenticatorsForUser, getUnredeemedInviteCode, getUserByEmail, getUserById, getUserInviteCodes, insertAccount, insertAuthenticator, insertInviteCodes, insertUser, redis, schema, updateAuthenticator, updateInviteCode, updateUser };

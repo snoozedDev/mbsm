@@ -1,9 +1,5 @@
 import { authMiddleware, logAndReturnGenericError } from "@/server/serverUtils";
-import {
-  getAuthenticatorByCredentialId,
-  getUserByNanoId,
-  updateAuthenticator,
-} from "@mbsm/db-layer";
+import { db, updateAuthenticator } from "@mbsm/db-layer";
 import {
   EmptyResponse,
   isPatchUserAuthenticatorCredentialIdBody,
@@ -18,11 +14,6 @@ export const PATCH = async (
   if (authRes instanceof NextResponse) return authRes;
 
   const { token } = authRes;
-
-  const user = await getUserByNanoId(token.user.nanoId);
-
-  if (!user) return logAndReturnGenericError("User not found", "unauthorized");
-
   const { credentialId } = params;
 
   const body = await req.json();
@@ -31,19 +22,25 @@ export const PATCH = async (
     return logAndReturnGenericError("Invalid body", "badRequest");
   }
 
+  const user = await db.query.user.findFirst({
+    where: ({ id }, { eq }) => eq(id, token.user.id),
+    with: { authenticators: true },
+  });
+
+  if (!user) return logAndReturnGenericError("User not found", "unauthorized");
+
   const { name } = body;
 
-  const authenticator = await getAuthenticatorByCredentialId(credentialId);
+  const authenticator = user.authenticators.find(
+    (authenticator) => authenticator.credentialId === credentialId
+  );
 
-  if (authenticator?.userId !== user.id) {
-    return logAndReturnGenericError("Authenticator not found", "unauthorized");
-  }
+  if (!authenticator)
+    return logAndReturnGenericError("Authenticator not found", "notFound");
 
   await updateAuthenticator({
     id: authenticator.id,
-    fields: {
-      name,
-    },
+    fields: { name },
   });
 
   return NextResponse.json({ success: true });

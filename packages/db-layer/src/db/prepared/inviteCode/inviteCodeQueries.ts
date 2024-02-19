@@ -1,6 +1,6 @@
 import { db } from "../../db";
 
-export const getUserInviteCodes = async (userId: number) =>
+export const getUserInviteCodes = async (userId: string) =>
   db.query.inviteCode.findMany({
     where: (model, { eq, and }) => eq(model.userId, userId),
   });

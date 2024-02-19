@@ -1,5 +1,5 @@
 import { authMiddleware, logAndReturnGenericError } from "@/server/serverUtils";
-import { getUserByNanoId } from "@mbsm/db-layer";
+import { getUserById } from "@mbsm/db-layer";
 import { GetUserMeResponse } from "@mbsm/types";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -8,7 +8,7 @@ const getUserMe = async (
 ): Promise<NextResponse<GetUserMeResponse>> => {
   const authRes = authMiddleware(req, true);
   if (authRes instanceof NextResponse) return authRes;
-  const user = await getUserByNanoId(authRes.token.user.nanoId);
+  const user = await getUserById(authRes.token.user.id);
 
   if (!user) return logAndReturnGenericError("User not found", "unauthorized");
 

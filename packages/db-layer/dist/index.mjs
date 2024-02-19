@@ -124,8 +124,8 @@ __export(models_exports, {
 });
 
 // src/db/models/account.ts
-import { relations as relations3 } from "drizzle-orm";
-import { integer as integer2, pgTable as pgTable3, serial as serial3, varchar as varchar3 } from "drizzle-orm/pg-core";
+import { relations as relations4 } from "drizzle-orm";
+import { pgTable as pgTable4, serial as serial2, uuid as uuid4, varchar as varchar4 } from "drizzle-orm/pg-core";
 
 // src/db/utils.ts
 var import_utils = __toESM(require_dist());
@@ -148,8 +148,8 @@ var getIndexFor = (column, unique) => ({
 });
 
 // src/db/models/user.ts
-import { relations as relations2 } from "drizzle-orm";
-import { boolean as boolean2, pgEnum, pgTable as pgTable2, serial as serial2, varchar as varchar2 } from "drizzle-orm/pg-core";
+import { relations as relations3 } from "drizzle-orm";
+import { boolean as boolean3, pgEnum, pgTable as pgTable3, uuid as uuid3, varchar as varchar3 } from "drizzle-orm/pg-core";
 
 // src/db/models/authenticator.ts
 import { relations } from "drizzle-orm";
@@ -159,6 +159,7 @@ import {
   pgTable,
   serial,
   text,
+  uuid,
   varchar
 } from "drizzle-orm/pg-core";
 var authenticator = pgTable(
@@ -174,7 +175,7 @@ var authenticator = pgTable(
     credentialBackedUp: boolean("credential_backed_up").notNull(),
     transports: varchar("transports", { length: 256 }).notNull(),
     name: varchar("name", { length: 64 }).notNull(),
-    userId: integer("user_id").references(() => user.id).notNull(),
+    userId: uuid("user_id").references(() => user.id).notNull(),
     ...getTimestampColumns()
   },
   (authenticator2) => ({
@@ -189,36 +190,56 @@ var authenticatorRelations = relations(authenticator, ({ one }) => ({
   })
 }));
 
+// src/db/models/inviteCode.ts
+import { relations as relations2 } from "drizzle-orm";
+import { boolean as boolean2, pgTable as pgTable2, uuid as uuid2, varchar as varchar2 } from "drizzle-orm/pg-core";
+var inviteCode = pgTable2(
+  "invite_codes",
+  {
+    code: varchar2("code", { length: 16 }).primaryKey(),
+    userId: uuid2("user_id").references(() => user.id).notNull(),
+    redeemed: boolean2("redeemed").notNull().default(false)
+  },
+  (inviteCode2) => ({
+    ...getIndexFor(inviteCode2.userId)
+  })
+);
+var inviteCodeRelations = relations2(inviteCode, ({ one }) => ({
+  user: one(user, {
+    fields: [inviteCode.userId],
+    references: [user.id]
+  })
+}));
+
 // src/db/models/user.ts
 var roleEnum = pgEnum("role", ["user", "mod", "admin", "foru"]);
-var user = pgTable2(
+var user = pgTable3(
   "user",
   {
-    id: serial2("id").primaryKey(),
-    nanoId: varchar2("nano_id", { length: 12 }).notNull(),
-    email: varchar2("email", { length: 254 }).notNull(),
-    emailVerified: boolean2("email_verified").notNull().default(false),
-    protected: boolean2("protected").notNull().default(false),
-    currentRegChallenge: varchar2("current_challenge", { length: 256 }),
+    id: uuid3("id").defaultRandom().primaryKey(),
+    email: varchar3("email", { length: 254 }).notNull(),
+    emailVerified: boolean3("email_verified").notNull().default(false),
+    protected: boolean3("protected").notNull().default(false),
+    currentRegChallenge: varchar3("current_challenge", { length: 256 }),
     role: roleEnum("user").notNull(),
     ...getTimestampColumns()
   },
   (user2) => ({
-    ...getIndexFor(user2.nanoId, true),
     ...getIndexFor(user2.email, true)
   })
 );
-var userRelations = relations2(user, ({ one, many }) => ({
-  authenticators: many(authenticator)
+var userRelations = relations3(user, ({ one, many }) => ({
+  authenticators: many(authenticator),
+  inviteCodes: many(inviteCode)
 }));
 
 // src/db/models/account.ts
-var account = pgTable3(
+var account = pgTable4(
   "account",
   {
-    id: serial3("id").primaryKey(),
-    userId: integer2("user_id").references(() => user.id).notNull(),
-    handle: varchar3("handle", { length: 16 }).notNull(),
+    id: serial2("id").primaryKey(),
+    userId: uuid4("user_id").references(() => user.id).notNull(),
+    handle: varchar4("handle", { length: 16 }).notNull(),
     ...getTimestampColumns()
   },
   (account2) => ({
@@ -226,41 +247,20 @@ var account = pgTable3(
     ...getIndexFor(account2.userId)
   })
 );
-var accountRelations = relations3(account, ({ one }) => ({
+var accountRelations = relations4(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
     references: [user.id]
   })
 }));
 
-// src/db/models/inviteCode.ts
-import { relations as relations4 } from "drizzle-orm";
-import { boolean as boolean3, integer as integer3, pgTable as pgTable4, varchar as varchar4 } from "drizzle-orm/pg-core";
-var inviteCode = pgTable4(
-  "invite_codes",
-  {
-    code: varchar4("code", { length: 16 }).primaryKey(),
-    userId: integer3("user_id").references(() => user.id).notNull(),
-    redeemed: boolean3("redeemed").notNull().default(false)
-  },
-  (inviteCode2) => ({
-    ...getIndexFor(inviteCode2.userId)
-  })
-);
-var inviteCodeRelations = relations4(inviteCode, ({ one }) => ({
-  user: one(user, {
-    fields: [inviteCode.userId],
-    references: [user.id]
-  })
-}));
-
 // src/db/models/userPreferences.ts
 import { relations as relations5 } from "drizzle-orm";
-import { integer as integer4, json, pgTable as pgTable5 } from "drizzle-orm/pg-core";
+import { json, pgTable as pgTable5, uuid as uuid5 } from "drizzle-orm/pg-core";
 var userPreferences = pgTable5(
   "user_preferences",
   {
-    userId: integer4("user_id").references(() => user.id).primaryKey(),
+    userId: uuid5("user_id").references(() => user.id).primaryKey(),
     data: json("data").$type().default({ theme: "system", nsfw: "hidden" })
   },
   (userPreferences2) => ({
@@ -345,7 +345,6 @@ var insertUser = async (fields) => db.insert(models_exports.user).values(fields)
 // src/db/prepared/user/userQueries.ts
 var getUserByEmail = async (email) => db.query.user.findFirst({ where: (user2, { eq: eq4 }) => eq4(user2.email, email) });
 var getUserById = async (id) => db.query.user.findFirst({ where: (user2, { eq: eq4 }) => eq4(user2.id, id) });
-var getUserByNanoId = async (nanoId) => db.query.user.findFirst({ where: (user2, { eq: eq4 }) => eq4(user2.nanoId, nanoId) });
 
 // src/db/redis.ts
 import { kv } from "@vercel/kv";
@@ -360,7 +359,6 @@ export {
   getUnredeemedInviteCode,
   getUserByEmail,
   getUserById,
-  getUserByNanoId,
   getUserInviteCodes,
   insertAccount,
   insertAuthenticator,

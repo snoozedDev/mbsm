@@ -3,12 +3,7 @@ import {
   getWebAuthnRegistrationOptions,
   getWebAuthnResponseForRegistration,
 } from "@/utils/webAuthnUtils";
-import {
-  db,
-  getAuthenticatorsForUser,
-  getUserByNanoId,
-  schema,
-} from "@mbsm/db-layer";
+import { db, getUserById, schema } from "@mbsm/db-layer";
 import {
   Authenticator,
   GetUserAuthenticatorResponse,
@@ -27,15 +22,18 @@ export const GET = async (
 
   const { token } = authRes;
 
-  const user = await getUserByNanoId(token.user.nanoId);
+  const user = await db.query.user.findFirst({
+    where: ({ id }, { eq }) => eq(id, token.user.id),
+    with: { authenticators: true },
+  });
 
   if (!user) return logAndReturnGenericError("User not found", "unauthorized");
-  const userAuthenticators = await getAuthenticatorsForUser(user.id);
+  const { authenticators } = user;
 
   const regOptions = await getWebAuthnRegistrationOptions({
-    userID: user.nanoId,
+    userID: user.id,
     userName: user.email,
-    excludeCredentials: userAuthenticators,
+    excludeCredentials: authenticators,
   });
 
   await db
@@ -55,7 +53,7 @@ export const PUT = async (
 
   const { token } = authRes;
 
-  const user = await getUserByNanoId(token.user.nanoId);
+  const user = await getUserById(token.user.id);
 
   if (!user) return logAndReturnGenericError("User not found", "unauthorized");
 
@@ -71,11 +69,6 @@ export const PUT = async (
   });
 
   const { verified, registrationInfo } = verification;
-
-  await db
-    .update(schema.user)
-    .set({ currentRegChallenge: null })
-    .where(eq(schema.user.id, user.id));
 
   if (!verified || !registrationInfo) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -93,16 +86,23 @@ export const PUT = async (
   const credentialId = Buffer.from(credentialID).toString("base64url");
   const name = nanoid(16);
 
-  await db.insert(schema.authenticator).values({
-    counter,
-    credentialBackedUp,
-    credentialDeviceType,
-    credentialId,
-    credentialPublicKey: Buffer.from(credentialPublicKey).toString("base64url"),
-    name,
-    transports: [].join(","),
-    userId: user.id,
-  });
+  await Promise.all([
+    db
+      .update(schema.user)
+      .set({ currentRegChallenge: null })
+      .where(eq(schema.user.id, user.id)),
+    db.insert(schema.authenticator).values({
+      counter,
+      credentialBackedUp,
+      credentialDeviceType,
+      credentialId,
+      credentialPublicKey:
+        Buffer.from(credentialPublicKey).toString("base64url"),
+      name,
+      transports: [].join(","),
+      userId: user.id,
+    }),
+  ]);
 
   const authenticator: Authenticator = {
     addedAt: now.toUTCString(),

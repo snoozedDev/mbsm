@@ -842,24 +842,24 @@ declare const isPost: (value: unknown) => value is {
 
 declare const TokenSchema: z.ZodObject<{
     user: z.ZodObject<{
-        nanoId: z.ZodString;
+        id: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        nanoId: string;
+        id: string;
     }, {
-        nanoId: string;
+        id: string;
     }>;
 }, "strip", z.ZodTypeAny, {
     user: {
-        nanoId: string;
+        id: string;
     };
 }, {
     user: {
-        nanoId: string;
+        id: string;
     };
 }>;
 declare const isToken: (value: unknown) => value is {
     user: {
-        nanoId: string;
+        id: string;
     };
 };
 type Token = z.infer<typeof TokenSchema>;

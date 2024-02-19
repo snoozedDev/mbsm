@@ -24,7 +24,7 @@ export const POST = async (
   const inviteCodeResponse = await validateInviteCode(inviteCode);
   if (inviteCodeResponse) return inviteCodeResponse;
 
-  const nanoId = nanoid(12);
+  const id = nanoid();
 
   const existingUser = await getUserByEmail(email);
 
@@ -33,7 +33,7 @@ export const POST = async (
   }
 
   const options = await getWebAuthnRegistrationOptions({
-    userID: nanoId,
+    userID: id,
     userName: email,
   });
 
@@ -47,8 +47,8 @@ export const POST = async (
   } else {
     await db.insert(schema.user).values({
       role: "user",
+      id,
       email,
-      nanoId,
       currentRegChallenge: options.challenge,
     });
   }

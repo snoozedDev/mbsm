@@ -4,7 +4,7 @@ import {
   getEmailVerificationCodeForUser,
   logAndReturnGenericError,
 } from "@/server/serverUtils";
-import { db, getUserByNanoId, schema } from "@mbsm/db-layer";
+import { db, getUserById, schema } from "@mbsm/db-layer";
 import {
   EmptyResponse,
   PostUserEmailVerifyBodySchema,
@@ -28,13 +28,12 @@ export const POST = async (
     return logAndReturnGenericError("Invalid body", "badRequest");
   }
 
-  const { code } = body;
+  let { code } = body;
 
-  const user = await getUserByNanoId(token.user.nanoId);
-
-  if (!user) return logAndReturnGenericError("User not found", "unauthorized");
-
-  let storedCode = await getEmailVerificationCodeForUser(user.id);
+  const [user, storedCode] = await Promise.all([
+    getUserById(token.user.id),
+    getEmailVerificationCodeForUser(token.user.id),
+  ]);
 
   if (!user) return logAndReturnGenericError("User not found", "unauthorized");
 
@@ -44,7 +43,7 @@ export const POST = async (
     !getEnvAsBool("IS_PROD") &&
     code === getEnvAsStr("DEV_VERIFICATION_CODE")
   ) {
-    storedCode = code;
+    code = storedCode?.toString() || "";
   }
 
   if (code !== storedCode?.toString()) {

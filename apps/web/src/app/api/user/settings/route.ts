@@ -1,11 +1,6 @@
 import { authMiddleware, logAndReturnGenericError } from "@/server/serverUtils";
 import { generateInviteCodes } from "@/utils/inviteCodeUtils";
-import {
-  getAuthenticatorsForUser,
-  getUserByNanoId,
-  getUserInviteCodes,
-  insertInviteCodes,
-} from "@mbsm/db-layer";
+import { db, insertInviteCodes } from "@mbsm/db-layer";
 import {
   Authenticator,
   GetUserSettingsResponse,
@@ -20,16 +15,16 @@ export const GET = async (
   if (authRes instanceof NextResponse) return authRes;
   const { token } = authRes;
 
-  const user = await getUserByNanoId(token.user.nanoId);
+  const user = await db.query.user.findFirst({
+    where: ({ id }, { eq }) => eq(id, token.user.id),
+    with: { authenticators: true, inviteCodes: true },
+  });
 
   if (!user) {
     return logAndReturnGenericError("No user found for token", "unauthorized");
   }
 
-  let [authenticators, inviteCodes] = await Promise.all([
-    getAuthenticatorsForUser(user.id),
-    getUserInviteCodes(user.id),
-  ]);
+  const { authenticators, inviteCodes } = user;
 
   let finalAuthenticators: Authenticator[] = authenticators.map(
     (authenticator) => ({

@@ -3,7 +3,7 @@ import { PgInsertValue, PgUpdateSetSource } from "drizzle-orm/pg-core";
 import { db } from "../../db";
 import { schema } from "../../schemaModels";
 
-export const clearCurrentUserChallenge = async (userId: number) =>
+export const clearCurrentUserChallenge = async (userId: string) =>
   db
     .update(schema.user)
     .set({ currentRegChallenge: null })
@@ -13,7 +13,7 @@ export const updateUser = async ({
   id,
   fields,
 }: {
-  id: number;
+  id: string;
   fields: PgUpdateSetSource<typeof schema.user>;
 }) => db.update(schema.user).set(fields).where(eq(schema.user.id, id));
 

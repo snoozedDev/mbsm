@@ -7,28 +7,17 @@ declare const appRouter: _trpc_server_dist_unstable_core_do_not_import.BuiltRout
     ctx: {
         token: {
             user: {
-                nanoId: string;
+                id: string;
             };
         } | {
             level: string;
             user: {
-                username: string;
-                userNanoId: string;
+                username: any;
+                userNanoId: any;
             };
             userAgent: string;
         };
-        user: {
-            id: number;
-            nanoId: string;
-            email: string;
-            emailVerified: boolean;
-            protected: boolean;
-            currentRegChallenge: string | null;
-            role: "user" | "mod" | "admin" | "foru";
-            deletedAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
-        };
+        user: any;
     } | {
         token: null;
         user: null;
@@ -45,28 +34,17 @@ declare const appRouter: _trpc_server_dist_unstable_core_do_not_import.BuiltRout
         ctx: {
             token: {
                 user: {
-                    nanoId: string;
+                    id: string;
                 };
             } | {
                 level: string;
                 user: {
-                    username: string;
-                    userNanoId: string;
+                    username: any;
+                    userNanoId: any;
                 };
                 userAgent: string;
             };
-            user: {
-                id: number;
-                nanoId: string;
-                email: string;
-                emailVerified: boolean;
-                protected: boolean;
-                currentRegChallenge: string | null;
-                role: "user" | "mod" | "admin" | "foru";
-                deletedAt: Date | null;
-                createdAt: Date;
-                updatedAt: Date;
-            };
+            user: any;
         } | {
             token: null;
             user: null;
@@ -79,8 +57,8 @@ declare const appRouter: _trpc_server_dist_unstable_core_do_not_import.BuiltRout
             input: void;
             output: {
                 success: boolean;
-                email: string;
-                emailVerified: boolean;
+                email: any;
+                emailVerified: any;
                 error?: undefined;
             } | {
                 success: boolean;
@@ -98,28 +76,17 @@ declare const router: {
         ctx: {
             token: {
                 user: {
-                    nanoId: string;
+                    id: string;
                 };
             } | {
                 level: string;
                 user: {
-                    username: string;
-                    userNanoId: string;
+                    username: any;
+                    userNanoId: any;
                 };
                 userAgent: string;
             };
-            user: {
-                id: number;
-                nanoId: string;
-                email: string;
-                emailVerified: boolean;
-                protected: boolean;
-                currentRegChallenge: string | null;
-                role: "user" | "mod" | "admin" | "foru";
-                deletedAt: Date | null;
-                createdAt: Date;
-                updatedAt: Date;
-            };
+            user: any;
         } | {
             token: null;
             user: null;
@@ -132,28 +99,17 @@ declare const router: {
         ctx: {
             token: {
                 user: {
-                    nanoId: string;
+                    id: string;
                 };
             } | {
                 level: string;
                 user: {
-                    username: string;
-                    userNanoId: string;
+                    username: any;
+                    userNanoId: any;
                 };
                 userAgent: string;
             };
-            user: {
-                id: number;
-                nanoId: string;
-                email: string;
-                emailVerified: boolean;
-                protected: boolean;
-                currentRegChallenge: string | null;
-                role: "user" | "mod" | "admin" | "foru";
-                deletedAt: Date | null;
-                createdAt: Date;
-                updatedAt: Date;
-            };
+            user: any;
         } | {
             token: null;
             user: null;
@@ -166,28 +122,17 @@ declare const router: {
 declare const publicProcedure: _trpc_server_dist_unstable_core_do_not_import.ProcedureBuilder<{
     token: {
         user: {
-            nanoId: string;
+            id: string;
         };
     } | {
         level: string;
         user: {
-            username: string;
-            userNanoId: string;
+            username: any;
+            userNanoId: any;
         };
         userAgent: string;
     };
-    user: {
-        id: number;
-        nanoId: string;
-        email: string;
-        emailVerified: boolean;
-        protected: boolean;
-        currentRegChallenge: string | null;
-        role: "user" | "mod" | "admin" | "foru";
-        deletedAt: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
-    };
+    user: any;
 } | {
     token: null;
     user: null;
@@ -197,28 +142,17 @@ declare const createCallerFactory: <TRecord extends _trpc_server.TRPCRouterRecor
     ctx: {
         token: {
             user: {
-                nanoId: string;
+                id: string;
             };
         } | {
             level: string;
             user: {
-                username: string;
-                userNanoId: string;
+                username: any;
+                userNanoId: any;
             };
             userAgent: string;
         };
-        user: {
-            id: number;
-            nanoId: string;
-            email: string;
-            emailVerified: boolean;
-            protected: boolean;
-            currentRegChallenge: string | null;
-            role: "user" | "mod" | "admin" | "foru";
-            deletedAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
-        };
+        user: any;
     } | {
         token: null;
         user: null;
@@ -230,28 +164,17 @@ declare const createCallerFactory: <TRecord extends _trpc_server.TRPCRouterRecor
     ctx: {
         token: {
             user: {
-                nanoId: string;
+                id: string;
             };
         } | {
             level: string;
             user: {
-                username: string;
-                userNanoId: string;
+                username: any;
+                userNanoId: any;
             };
             userAgent: string;
         };
-        user: {
-            id: number;
-            nanoId: string;
-            email: string;
-            emailVerified: boolean;
-            protected: boolean;
-            currentRegChallenge: string | null;
-            role: "user" | "mod" | "admin" | "foru";
-            deletedAt: Date | null;
-            createdAt: Date;
-            updatedAt: Date;
-        };
+        user: any;
     } | {
         token: null;
         user: null;

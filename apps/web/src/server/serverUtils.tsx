@@ -1,14 +1,15 @@
+import VerifyEmail from "@/components/emails/VerifyEmail";
 import { decodeAccessToken } from "@/utils/tokenUtils";
 import { redis } from "@mbsm/db-layer";
 import type { ErrorResponse, Token } from "@mbsm/types";
-import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
+import { getEnvAsBool } from "@mbsm/utils";
 import { customAlphabet } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 import { resend } from "./email";
 
 export const logAndReturnGenericError = (
   err: any,
-  errorType?: "unauthorized" | "badRequest" | "internal"
+  errorType?: "unauthorized" | "badRequest" | "internal" | "notFound"
 ): NextResponse<ErrorResponse> => {
   console.error("Error happened: ", err);
 
@@ -19,6 +20,8 @@ export const logAndReturnGenericError = (
       return new NextResponse("Bad Request", { status: 400 });
     case "internal":
       return new NextResponse("Internal Server Error", { status: 500 });
+    case "notFound":
+      return new NextResponse("Not Found", { status: 404 });
     default:
       return new NextResponse("Internal Server Error", { status: 500 });
   }
@@ -29,20 +32,20 @@ export const IS_SERVER = typeof window === "undefined";
 export const wait = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
-export const getEmailVerificationCodeForUser = async (userId: number) =>
+export const getEmailVerificationCodeForUser = async (userId: string) =>
   redis.get<string | number>(`verification:${userId}`);
 
 export const deleteEmailVerificationCode = async ({
   userId,
 }: {
-  userId: number;
+  userId: string;
 }) => redis.del(`verification:${userId}`);
 
 export const generateEmailVerificationCodeAndSend = async ({
   userId,
   email,
 }: {
-  userId: number;
+  userId: string;
   email: string;
 }) => {
   const verificationCode = customAlphabet("0123456789", 6)();
@@ -52,14 +55,9 @@ export const generateEmailVerificationCodeAndSend = async ({
       redis.set(`verification:${userId}`, verificationCode),
       resend.emails.send({
         from: "noreply@mbsm.io",
-        subject: "Verification code for MBSM",
+        subject: `Your MBSM verification code is ${verificationCode}`,
         to: email,
-        html: `
-        <p>Your verification code is: <b>${verificationCode}</b></p>
-        <p>Or click <a href="${getEnvAsStr(
-          "ORIGIN"
-        )}/verify/${verificationCode}">here</a> to verify your account.</p>
-          `,
+        react: <VerifyEmail verificationCode={verificationCode} />,
       }),
     ]);
   }

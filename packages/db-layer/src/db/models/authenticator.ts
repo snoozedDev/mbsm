@@ -5,6 +5,7 @@ import {
   pgTable,
   serial,
   text,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 import { getIndexFor, getTimestampColumns } from "../utils";
@@ -23,7 +24,7 @@ export const authenticator = pgTable(
     credentialBackedUp: boolean("credential_backed_up").notNull(),
     transports: varchar("transports", { length: 256 }).notNull(),
     name: varchar("name", { length: 64 }).notNull(),
-    userId: integer("user_id")
+    userId: uuid("user_id")
       .references(() => user.id)
       .notNull(),
     ...getTimestampColumns(),

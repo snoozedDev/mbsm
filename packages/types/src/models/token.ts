@@ -3,7 +3,7 @@ import { getZodTypeGuard } from "../zodUtils";
 
 export const TokenSchema = z.object({
   user: z.object({
-    nanoId: z.string(),
+    id: z.string(),
   }),
 });
 

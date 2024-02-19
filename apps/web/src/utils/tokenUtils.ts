@@ -1,10 +1,5 @@
 import { logAndReturnGenericError } from "@/server/serverUtils";
-import {
-  InferSelectModel,
-  getUserByNanoId,
-  redis,
-  schema,
-} from "@mbsm/db-layer";
+import { InferSelectModel, getUserById, redis, schema } from "@mbsm/db-layer";
 import { Token, isToken } from "@mbsm/types";
 import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 import jwt from "jsonwebtoken";
@@ -13,7 +8,7 @@ import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { NextRequest, NextResponse } from "next/server";
 
 const shapeToken = (user: InferSelectModel<typeof schema.user>): Token => ({
-  user: { nanoId: user.nanoId },
+  user: { id: user.id },
 });
 
 const generateAccessToken = (token: Token) =>
@@ -45,14 +40,14 @@ const refreshTokenCookieOptions: Partial<ResponseCookie> = {
 export async function addToList({
   refresher,
   uniqueId,
-  nanoId,
+  id,
 }: {
-  nanoId: string;
+  id: string;
   uniqueId: string;
   refresher: string;
 }) {
   try {
-    await redis.hset("refresh:" + nanoId, {
+    await redis.hset("refresh:" + id, {
       [uniqueId]: refresher,
     });
   } catch (error) {
@@ -130,9 +125,9 @@ export const refreshAndSetTokens = async (req: NextRequest) => {
   const tokenContents = decodeRefreshToken(refreshToken);
   if (!tokenContents)
     return logAndReturnGenericError("Invalid token", "unauthorized");
-  const { nanoId } = tokenContents.user;
+  const { id } = tokenContents.user;
   const userTokens = await redis.hgetall<Record<string, string>>(
-    "refresh:" + nanoId
+    "refresh:" + id
   );
 
   if (!userTokens)
@@ -143,11 +138,11 @@ export const refreshAndSetTokens = async (req: NextRequest) => {
     return logAndReturnGenericError("Invalid token", "unauthorized");
 
   await deleteExpiredUserTokens({
-    nanoId,
+    id,
     tokens: userTokens,
   });
 
-  const user = await getUserByNanoId(nanoId);
+  const user = await getUserById(id);
 
   if (!user) {
     return logAndReturnGenericError("No user found", "unauthorized");
@@ -162,7 +157,7 @@ export const refreshAndSetTokens = async (req: NextRequest) => {
   await addToList({
     refresher: newRefreshToken,
     uniqueId,
-    nanoId: user.nanoId,
+    id: user.id,
   });
 
   const res = NextResponse.json({
@@ -194,7 +189,7 @@ export const createAndSetAuthTokens = async (
 
   await addToList({
     refresher: refreshToken,
-    nanoId: user.nanoId,
+    id: user.id,
     uniqueId,
   });
 
@@ -204,15 +199,15 @@ export const createAndSetAuthTokens = async (
 };
 
 export const deleteExpiredUserTokens = async ({
-  nanoId,
+  id,
   tokens,
 }: {
-  nanoId: string;
+  id: string;
   tokens: Record<string, string>;
 }) => {
   const expiredTokens = Object.entries(tokens).filter(
     ([_, token]) => !decodeRefreshToken(token)
   );
   if (expiredTokens.length === 0) return;
-  await redis.hdel("refresh:" + nanoId, ...expiredTokens.map(([id]) => id));
+  await redis.hdel("refresh:" + id, ...expiredTokens.map(([id]) => id));
 };

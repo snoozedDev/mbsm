@@ -111,7 +111,6 @@ __export(src_exports, {
   getUnredeemedInviteCode: () => getUnredeemedInviteCode,
   getUserByEmail: () => getUserByEmail,
   getUserById: () => getUserById,
-  getUserByNanoId: () => getUserByNanoId,
   getUserInviteCodes: () => getUserInviteCodes,
   insertAccount: () => insertAccount,
   insertAuthenticator: () => insertAuthenticator,
@@ -152,8 +151,8 @@ __export(models_exports, {
 });
 
 // src/db/models/account.ts
-var import_drizzle_orm4 = require("drizzle-orm");
-var import_pg_core4 = require("drizzle-orm/pg-core");
+var import_drizzle_orm5 = require("drizzle-orm");
+var import_pg_core5 = require("drizzle-orm/pg-core");
 
 // src/db/utils.ts
 var import_utils = __toESM(require_dist());
@@ -172,8 +171,8 @@ var getIndexFor = (column, unique) => ({
 });
 
 // src/db/models/user.ts
-var import_drizzle_orm3 = require("drizzle-orm");
-var import_pg_core3 = require("drizzle-orm/pg-core");
+var import_drizzle_orm4 = require("drizzle-orm");
+var import_pg_core4 = require("drizzle-orm/pg-core");
 
 // src/db/models/authenticator.ts
 var import_drizzle_orm2 = require("drizzle-orm");
@@ -191,7 +190,7 @@ var authenticator = (0, import_pg_core2.pgTable)(
     credentialBackedUp: (0, import_pg_core2.boolean)("credential_backed_up").notNull(),
     transports: (0, import_pg_core2.varchar)("transports", { length: 256 }).notNull(),
     name: (0, import_pg_core2.varchar)("name", { length: 64 }).notNull(),
-    userId: (0, import_pg_core2.integer)("user_id").references(() => user.id).notNull(),
+    userId: (0, import_pg_core2.uuid)("user_id").references(() => user.id).notNull(),
     ...getTimestampColumns()
   },
   (authenticator2) => ({
@@ -206,36 +205,56 @@ var authenticatorRelations = (0, import_drizzle_orm2.relations)(authenticator, (
   })
 }));
 
+// src/db/models/inviteCode.ts
+var import_drizzle_orm3 = require("drizzle-orm");
+var import_pg_core3 = require("drizzle-orm/pg-core");
+var inviteCode = (0, import_pg_core3.pgTable)(
+  "invite_codes",
+  {
+    code: (0, import_pg_core3.varchar)("code", { length: 16 }).primaryKey(),
+    userId: (0, import_pg_core3.uuid)("user_id").references(() => user.id).notNull(),
+    redeemed: (0, import_pg_core3.boolean)("redeemed").notNull().default(false)
+  },
+  (inviteCode2) => ({
+    ...getIndexFor(inviteCode2.userId)
+  })
+);
+var inviteCodeRelations = (0, import_drizzle_orm3.relations)(inviteCode, ({ one }) => ({
+  user: one(user, {
+    fields: [inviteCode.userId],
+    references: [user.id]
+  })
+}));
+
 // src/db/models/user.ts
-var roleEnum = (0, import_pg_core3.pgEnum)("role", ["user", "mod", "admin", "foru"]);
-var user = (0, import_pg_core3.pgTable)(
+var roleEnum = (0, import_pg_core4.pgEnum)("role", ["user", "mod", "admin", "foru"]);
+var user = (0, import_pg_core4.pgTable)(
   "user",
   {
-    id: (0, import_pg_core3.serial)("id").primaryKey(),
-    nanoId: (0, import_pg_core3.varchar)("nano_id", { length: 12 }).notNull(),
-    email: (0, import_pg_core3.varchar)("email", { length: 254 }).notNull(),
-    emailVerified: (0, import_pg_core3.boolean)("email_verified").notNull().default(false),
-    protected: (0, import_pg_core3.boolean)("protected").notNull().default(false),
-    currentRegChallenge: (0, import_pg_core3.varchar)("current_challenge", { length: 256 }),
+    id: (0, import_pg_core4.uuid)("id").defaultRandom().primaryKey(),
+    email: (0, import_pg_core4.varchar)("email", { length: 254 }).notNull(),
+    emailVerified: (0, import_pg_core4.boolean)("email_verified").notNull().default(false),
+    protected: (0, import_pg_core4.boolean)("protected").notNull().default(false),
+    currentRegChallenge: (0, import_pg_core4.varchar)("current_challenge", { length: 256 }),
     role: roleEnum("user").notNull(),
     ...getTimestampColumns()
   },
   (user2) => ({
-    ...getIndexFor(user2.nanoId, true),
     ...getIndexFor(user2.email, true)
   })
 );
-var userRelations = (0, import_drizzle_orm3.relations)(user, ({ one, many }) => ({
-  authenticators: many(authenticator)
+var userRelations = (0, import_drizzle_orm4.relations)(user, ({ one, many }) => ({
+  authenticators: many(authenticator),
+  inviteCodes: many(inviteCode)
 }));
 
 // src/db/models/account.ts
-var account = (0, import_pg_core4.pgTable)(
+var account = (0, import_pg_core5.pgTable)(
   "account",
   {
-    id: (0, import_pg_core4.serial)("id").primaryKey(),
-    userId: (0, import_pg_core4.integer)("user_id").references(() => user.id).notNull(),
-    handle: (0, import_pg_core4.varchar)("handle", { length: 16 }).notNull(),
+    id: (0, import_pg_core5.serial)("id").primaryKey(),
+    userId: (0, import_pg_core5.uuid)("user_id").references(() => user.id).notNull(),
+    handle: (0, import_pg_core5.varchar)("handle", { length: 16 }).notNull(),
     ...getTimestampColumns()
   },
   (account2) => ({
@@ -243,30 +262,9 @@ var account = (0, import_pg_core4.pgTable)(
     ...getIndexFor(account2.userId)
   })
 );
-var accountRelations = (0, import_drizzle_orm4.relations)(account, ({ one }) => ({
+var accountRelations = (0, import_drizzle_orm5.relations)(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
-    references: [user.id]
-  })
-}));
-
-// src/db/models/inviteCode.ts
-var import_drizzle_orm5 = require("drizzle-orm");
-var import_pg_core5 = require("drizzle-orm/pg-core");
-var inviteCode = (0, import_pg_core5.pgTable)(
-  "invite_codes",
-  {
-    code: (0, import_pg_core5.varchar)("code", { length: 16 }).primaryKey(),
-    userId: (0, import_pg_core5.integer)("user_id").references(() => user.id).notNull(),
-    redeemed: (0, import_pg_core5.boolean)("redeemed").notNull().default(false)
-  },
-  (inviteCode2) => ({
-    ...getIndexFor(inviteCode2.userId)
-  })
-);
-var inviteCodeRelations = (0, import_drizzle_orm5.relations)(inviteCode, ({ one }) => ({
-  user: one(user, {
-    fields: [inviteCode.userId],
     references: [user.id]
   })
 }));
@@ -277,7 +275,7 @@ var import_pg_core6 = require("drizzle-orm/pg-core");
 var userPreferences = (0, import_pg_core6.pgTable)(
   "user_preferences",
   {
-    userId: (0, import_pg_core6.integer)("user_id").references(() => user.id).primaryKey(),
+    userId: (0, import_pg_core6.uuid)("user_id").references(() => user.id).primaryKey(),
     data: (0, import_pg_core6.json)("data").$type().default({ theme: "system", nsfw: "hidden" })
   },
   (userPreferences2) => ({
@@ -362,7 +360,6 @@ var insertUser = async (fields) => db.insert(models_exports.user).values(fields)
 // src/db/prepared/user/userQueries.ts
 var getUserByEmail = async (email) => db.query.user.findFirst({ where: (user2, { eq: eq4 }) => eq4(user2.email, email) });
 var getUserById = async (id) => db.query.user.findFirst({ where: (user2, { eq: eq4 }) => eq4(user2.id, id) });
-var getUserByNanoId = async (nanoId) => db.query.user.findFirst({ where: (user2, { eq: eq4 }) => eq4(user2.nanoId, nanoId) });
 
 // src/db/redis.ts
 var import_kv = require("@vercel/kv");
@@ -378,7 +375,6 @@ var redis = import_kv.kv;
   getUnredeemedInviteCode,
   getUserByEmail,
   getUserById,
-  getUserByNanoId,
   getUserInviteCodes,
   insertAccount,
   insertAuthenticator,
