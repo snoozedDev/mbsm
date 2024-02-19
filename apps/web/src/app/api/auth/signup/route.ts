@@ -4,8 +4,8 @@ import { logAndReturnGenericError } from "@/server/serverUtils";
 import { getWebAuthnRegistrationOptions } from "@/utils/webAuthnUtils";
 import { db, getUserByEmail, schema } from "@mbsm/db-layer";
 import { PostAuthSignupResponse, isPostAuthSignupBody } from "@mbsm/types";
+import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
-import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (
@@ -24,7 +24,7 @@ export const POST = async (
   const inviteCodeResponse = await validateInviteCode(inviteCode);
   if (inviteCodeResponse) return inviteCodeResponse;
 
-  const id = nanoid();
+  const id = randomUUID();
 
   const existingUser = await getUserByEmail(email);
 
@@ -47,7 +47,6 @@ export const POST = async (
   } else {
     await db.insert(schema.user).values({
       role: "user",
-      id,
       email,
       currentRegChallenge: options.challenge,
     });
