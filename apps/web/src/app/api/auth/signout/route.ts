@@ -13,3 +13,5 @@ export const GET = async (
   removeRefreshTokenCookie(res);
   return res;
 };
+
+export const dynamic = "force-dynamic";

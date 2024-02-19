@@ -72,10 +72,18 @@ export const setRefreshTokenCookie = (res: NextResponse, token: string) =>
   res.cookies.set("refreshToken", token, refreshTokenCookieOptions);
 
 export const removeAccessTokenCookie = (res: NextResponse) =>
-  res.cookies.delete("accessToken");
+  res.cookies.set("accessToken", "", {
+    ...accessTokenCookieOptions,
+    maxAge: 0,
+    expires: new Date(Date.now()),
+  });
 
 export const removeRefreshTokenCookie = (res: NextResponse) =>
-  res.cookies.delete("refreshToken");
+  res.cookies.set("refreshToken", "", {
+    ...refreshTokenCookieOptions,
+    maxAge: 0,
+    expires: new Date(Date.now()),
+  });
 
 export const setUniqueIdentifierCookie = (
   res: NextResponse,
