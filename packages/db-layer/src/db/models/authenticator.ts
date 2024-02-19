@@ -14,7 +14,7 @@ export const authenticator = pgTable(
   "authenticator",
   {
     id: serial("id").primaryKey(),
-    credentialId: varchar("credential_id", { length: 64 }).notNull(),
+    credentialId: varchar("credential_id", { length: 256 }).notNull(),
     credentialPublicKey: text("credential_public_key").notNull(),
     counter: integer("counter").notNull(),
     credentialDeviceType: varchar("credential_device_type", {

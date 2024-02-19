@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { useAddAuthenticatorMutation } from "@/queries/authQueries";
 import {
+  useAddAuthenticatorMutation,
   useUpdateAuthenticatorMutation,
   useUserMeQuery,
   useUserSettingsQuery,

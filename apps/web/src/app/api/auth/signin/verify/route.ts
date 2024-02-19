@@ -3,11 +3,11 @@ import { logAndReturnGenericError } from "@/server/serverUtils";
 import { createAndSetAuthTokens } from "@/utils/tokenUtils";
 import { getWebAuthnResponseForAuthentication } from "@/utils/webAuthnUtils";
 import { db, schema } from "@mbsm/db-layer";
-import { EmptyResponse, isPostAuthLoginVerifyBody } from "@mbsm/types";
+import { EmptyResponse, isPostAuthSignInVerifyBody } from "@mbsm/types";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
-const postLoginVerify = async (
+export const POST = async (
   req: NextRequest
 ): Promise<NextResponse<EmptyResponse>> => {
   const limitRes = await loginLimiter.middleware(req);
@@ -18,7 +18,7 @@ const postLoginVerify = async (
   }
   const body = await req.json();
 
-  if (!isPostAuthLoginVerifyBody(body)) {
+  if (!isPostAuthSignInVerifyBody(body)) {
     return logAndReturnGenericError("Invalid body", "badRequest");
   }
 
@@ -75,5 +75,3 @@ const postLoginVerify = async (
 
   return res;
 };
-
-export { postLoginVerify as POST };

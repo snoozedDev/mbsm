@@ -1,6 +1,6 @@
 import { decodeAccessToken } from "@/utils/tokenUtils";
 import { redis } from "@mbsm/db-layer";
-import type { ErrorResponse } from "@mbsm/types";
+import type { ErrorResponse, Token } from "@mbsm/types";
 import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 import { customAlphabet } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
@@ -68,8 +68,8 @@ export const generateEmailVerificationCodeAndSend = async ({
 export const authMiddleware = <
   T extends boolean,
   R extends T extends true
-    ? { accessToken: string } | NextResponse<ErrorResponse>
-    : { accessToken?: string },
+    ? { accessToken: string; token: Token } | NextResponse<ErrorResponse>
+    : { accessToken?: string; token?: Token },
 >(
   req: NextRequest,
   authRequired?: T
@@ -77,10 +77,10 @@ export const authMiddleware = <
   try {
     const accessToken = req.cookies.get("accessToken")?.value;
     if (!accessToken) throw new Error("No token found");
-    const session = decodeAccessToken(accessToken);
-    if (!session) throw new Error("Invalid token");
+    const token = decodeAccessToken(accessToken);
+    if (!token) throw new Error("Invalid token");
 
-    return { accessToken } as R;
+    return { accessToken, token } as R;
   } catch (e) {
     if (authRequired) return logAndReturnGenericError(e, "unauthorized") as R;
     return {} as R;

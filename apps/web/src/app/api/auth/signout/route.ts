@@ -5,7 +5,7 @@ import {
 import { EmptyResponse } from "@mbsm/types";
 import { NextRequest, NextResponse } from "next/server";
 
-const authLogout = async (
+export const GET = async (
   _req: NextRequest
 ): Promise<NextResponse<EmptyResponse>> => {
   const res = NextResponse.json({ success: true as const });
@@ -13,5 +13,3 @@ const authLogout = async (
   removeRefreshTokenCookie(res);
   return res;
 };
-
-export { authLogout as GET };

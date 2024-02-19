@@ -1,11 +1,13 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@clerk/clerk-react";
+import {
+  useSignInMutation,
+  useSignOutMutation,
+  useSignedInStatus,
+} from "@/queries/authQueries";
 import { SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AuthModal, AuthModalMode } from "./auth-modal";
-import useApiUser from "./hooks/useUser";
 import { LoadingDots } from "./loading-dots";
 import { Button } from "./ui/button";
 import {
@@ -35,8 +37,13 @@ const navigation = [
 
 export const SiteHeader = () => {
   const pathname = usePathname();
-  const { signOut, isLoaded, isSignedIn } = useAuth();
-  useApiUser();
+  const signIn = useSignInMutation();
+  const signOut = useSignOutMutation();
+  const signedInStatus = useSignedInStatus();
+
+  const isLoading =
+    signIn.isPending || signOut.isPending || signedInStatus.isPending;
+
   return (
     <header className="supports-backdrop-blur:bg-background/80 sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur">
       <div className="px-4 flex h-16 items-center max-w-5xl container">
@@ -63,9 +70,9 @@ export const SiteHeader = () => {
           </NavigationMenuList>
         </NavigationMenu>
         <div className="flex-grow" />
-        {!isLoaded ? (
+        {isLoading ? (
           <LoadingDots />
-        ) : isSignedIn ? (
+        ) : signedInStatus.isSignedIn ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="relative">
@@ -104,7 +111,7 @@ export const SiteHeader = () => {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <button
-                  onClick={() => signOut()}
+                  onClick={() => signOut.mutate()}
                   className="hover:cursor-pointer"
                 >
                   Log Out
@@ -114,9 +121,9 @@ export const SiteHeader = () => {
           </DropdownMenu>
         ) : (
           <div className="flex items-center space-x-4">
-            <AuthModal initialMode={AuthModalMode.SignIn}>
-              <Button variant="outline">LOG IN</Button>
-            </AuthModal>
+            <Button onClick={() => signIn.mutate()} variant="outline">
+              LOG IN
+            </Button>
             <Button asChild variant="outline">
               <Link href={"/auth/signup"}>SIGN UP</Link>
             </Button>

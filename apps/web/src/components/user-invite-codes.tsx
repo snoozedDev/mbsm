@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { useIsLoggedIn } from "@/queries/authQueries";
+import { useSignedInStatus } from "@/queries/authQueries";
 import { useUserSettingsQuery } from "@/queries/userQueries";
 import { InviteCode } from "@mbsm/types";
 import { motion } from "framer-motion";
@@ -130,13 +130,13 @@ const WarningMessage = ({ message }: { message: string }) => (
 );
 
 export const UserInviteCodes = () => {
-  const { isLoggedIn } = useIsLoggedIn();
+  const { isSignedIn } = useSignedInStatus();
   const { isPending: isEmailVerificationPending, emailVerified } =
     useIsEmailVerified();
   const { isLoading: userSettingsLoading, data } = useUserSettingsQuery();
 
   const isLoading =
-    userSettingsLoading || !isLoggedIn || isEmailVerificationPending;
+    userSettingsLoading || !isSignedIn || isEmailVerificationPending;
 
   const renderCodesList = useCallback(() => {
     if (isLoading || !data) {

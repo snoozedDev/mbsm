@@ -2,31 +2,31 @@ import { z } from "zod";
 import { getZodTypeGuard } from "../zodUtils";
 import { generateActionResponse } from "./common";
 
-// GET /api/auth/login
+// GET /api/auth/signin
 
 // response schema
-export const GetAuthLoginResponseSchema = generateActionResponse({
+export const GetAuthSignInResponseSchema = generateActionResponse({
   options: z.any(),
 });
 
 // response type
-export type GetAuthLoginResponse = z.infer<typeof GetAuthLoginResponseSchema>;
+export type GetAuthSignInResponse = z.infer<typeof GetAuthSignInResponseSchema>;
 
-// POST /api/auth/login/verify
+// POST /api/auth/signin/verify
 
 // body schema
-export const PostAuthLoginVerifyBodySchema = z.object({
+export const PostAuthSignInVerifyBodySchema = z.object({
   attRes: z.any(),
 });
 
 // body type
-export type PostAuthLoginVerifyBody = z.infer<
-  typeof PostAuthLoginVerifyBodySchema
+export type PostAuthSignInVerifyBody = z.infer<
+  typeof PostAuthSignInVerifyBodySchema
 >;
 
 // body type guard
-export const isPostAuthLoginVerifyBody = getZodTypeGuard(
-  PostAuthLoginVerifyBodySchema
+export const isPostAuthSignInVerifyBody = getZodTypeGuard(
+  PostAuthSignInVerifyBodySchema
 );
 
 // POST /api/auth/signup
@@ -71,26 +71,3 @@ export type PostAuthSignupVerifyBody = z.infer<
 export const isPostAuthSignupVerifyBody = getZodTypeGuard(
   PostAuthSignupVerifyBodySchema
 );
-
-// GET /api/auth
-
-// response schema
-export const GetAuthResponseSchema = generateActionResponse({
-  accessToken: z.string(),
-});
-
-// response type
-
-export type GetAuthResponse = z.infer<typeof GetAuthResponseSchema>;
-
-// GET /api/auth/refresh
-
-// response schema
-export const GetAuthRefreshResponseSchema = generateActionResponse({
-  accessToken: z.string(),
-});
-
-// response type
-export type GetAuthRefreshResponse = z.infer<
-  typeof GetAuthRefreshResponseSchema
->;

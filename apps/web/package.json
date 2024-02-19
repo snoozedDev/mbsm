@@ -3,16 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\" -n frontend,backend -c green,blue",
-    "dev:frontend": "next dev",
-    "dev:backend": "convex dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "@clerk/clerk-react": "^4.30.5",
-    "@clerk/nextjs": "^4.29.7",
     "@hookform/resolvers": "^3.3.4",
     "@mbsm/db-layer": "workspace:*",
     "@mbsm/server": "workspace:*",
@@ -54,8 +50,6 @@
     "axios": "^1.4.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^1.2.1",
-    "concurrently": "^8.2.2",
-    "convex": "^1.9.0",
     "framer-motion": "^10.16.4",
     "geist": "^1.0.0",
     "jose": "^5.2.2",

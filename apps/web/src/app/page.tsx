@@ -1,5 +1,4 @@
 import { ThreeDConstruction } from "@/components/3d-construction";
-import { ConvexTest } from "@/components/convex-test";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,7 +9,6 @@ export const metadata: Metadata = {
 export default async function Home() {
   return (
     <main className="flex flex-col items-center pt-12 md:pt-24 px-4">
-      <ConvexTest />
       <h1 className="text-xl md:text-3xl font-medium text-center">
         nothing here
       </h1>

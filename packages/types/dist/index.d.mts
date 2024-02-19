@@ -1,6 +1,6 @@
 import { z, ZodRawShape, ZodSchema } from 'zod';
 
-declare const GetAuthLoginResponseSchema: z.ZodUnion<[z.ZodObject<{
+declare const GetAuthSignInResponseSchema: z.ZodUnion<[z.ZodObject<{
     success: z.ZodLiteral<true>;
     options: z.ZodAny;
 }, "strip", z.ZodTypeAny, {
@@ -19,16 +19,16 @@ declare const GetAuthLoginResponseSchema: z.ZodUnion<[z.ZodObject<{
     success: false;
     error: string;
 }>]>;
-type GetAuthLoginResponse = z.infer<typeof GetAuthLoginResponseSchema>;
-declare const PostAuthLoginVerifyBodySchema: z.ZodObject<{
+type GetAuthSignInResponse = z.infer<typeof GetAuthSignInResponseSchema>;
+declare const PostAuthSignInVerifyBodySchema: z.ZodObject<{
     attRes: z.ZodAny;
 }, "strip", z.ZodTypeAny, {
     attRes?: any;
 }, {
     attRes?: any;
 }>;
-type PostAuthLoginVerifyBody = z.infer<typeof PostAuthLoginVerifyBodySchema>;
-declare const isPostAuthLoginVerifyBody: (value: unknown) => value is {
+type PostAuthSignInVerifyBody = z.infer<typeof PostAuthSignInVerifyBodySchema>;
+declare const isPostAuthSignInVerifyBody: (value: unknown) => value is {
     attRes?: any;
 };
 declare const PostAuthSignupResponseSchema: z.ZodUnion<[z.ZodObject<{
@@ -85,46 +85,6 @@ declare const isPostAuthSignupVerifyBody: (value: unknown) => value is {
     inviteCode: string;
     attRes?: any;
 };
-declare const GetAuthResponseSchema: z.ZodUnion<[z.ZodObject<{
-    success: z.ZodLiteral<true>;
-    accessToken: z.ZodString;
-}, "strip", z.ZodTypeAny, {
-    success: true;
-    accessToken: string;
-}, {
-    success: true;
-    accessToken: string;
-}>, z.ZodObject<{
-    success: z.ZodLiteral<false>;
-    error: z.ZodString;
-}, "strip", z.ZodTypeAny, {
-    success: false;
-    error: string;
-}, {
-    success: false;
-    error: string;
-}>]>;
-type GetAuthResponse = z.infer<typeof GetAuthResponseSchema>;
-declare const GetAuthRefreshResponseSchema: z.ZodUnion<[z.ZodObject<{
-    success: z.ZodLiteral<true>;
-    accessToken: z.ZodString;
-}, "strip", z.ZodTypeAny, {
-    success: true;
-    accessToken: string;
-}, {
-    success: true;
-    accessToken: string;
-}>, z.ZodObject<{
-    success: z.ZodLiteral<false>;
-    error: z.ZodString;
-}, "strip", z.ZodTypeAny, {
-    success: false;
-    error: string;
-}, {
-    success: false;
-    error: string;
-}>]>;
-type GetAuthRefreshResponse = z.infer<typeof GetAuthRefreshResponseSchema>;
 
 declare const SuccessResponseSchema: z.ZodObject<{
     success: z.ZodLiteral<true>;
@@ -298,8 +258,79 @@ declare const PostUserEmailVerifyBodySchema: z.ZodObject<{
     code: string;
 }>;
 type PostUserEmailVerifyBody = z.infer<typeof PostUserEmailVerifyBodySchema>;
+declare const GetUserAuthenticatorResponseSchema: z.ZodUnion<[z.ZodObject<{
+    success: z.ZodLiteral<true>;
+    regOptions: z.ZodAny;
+}, "strip", z.ZodTypeAny, {
+    success: true;
+    regOptions?: any;
+}, {
+    success: true;
+    regOptions?: any;
+}>, z.ZodObject<{
+    success: z.ZodLiteral<false>;
+    error: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    success: false;
+    error: string;
+}, {
+    success: false;
+    error: string;
+}>]>;
+type GetUserAuthenticatorResponse = z.infer<typeof GetUserAuthenticatorResponseSchema>;
+declare const PutUserAuthenticatorResponseSchema: z.ZodUnion<[z.ZodObject<{
+    success: z.ZodLiteral<true>;
+    authenticator: z.ZodObject<{
+        credentialId: z.ZodString;
+        name: z.ZodString;
+        addedAt: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        credentialId: string;
+        name: string;
+        addedAt: string;
+    }, {
+        credentialId: string;
+        name: string;
+        addedAt: string;
+    }>;
+}, "strip", z.ZodTypeAny, {
+    success: true;
+    authenticator: {
+        credentialId: string;
+        name: string;
+        addedAt: string;
+    };
+}, {
+    success: true;
+    authenticator: {
+        credentialId: string;
+        name: string;
+        addedAt: string;
+    };
+}>, z.ZodObject<{
+    success: z.ZodLiteral<false>;
+    error: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    success: false;
+    error: string;
+}, {
+    success: false;
+    error: string;
+}>]>;
+type PutUserAuthenticatorResponse = z.infer<typeof PutUserAuthenticatorResponseSchema>;
+declare const PatchUserAuthenticatorCredentialIdBodySchema: z.ZodObject<{
+    name: z.ZodString;
+}, "strip", z.ZodTypeAny, {
+    name: string;
+}, {
+    name: string;
+}>;
+type PatchUserAuthenticatorCredentialIdBody = z.infer<typeof PatchUserAuthenticatorCredentialIdBodySchema>;
+declare const isPatchUserAuthenticatorCredentialIdBody: (value: unknown) => value is {
+    name: string;
+};
 
-declare const envVariables: readonly ["IS_PROD", "POSTGRES_URL", "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DATABASE", "POSTGRES_USER", "POSTGRES_PASSWORD", "KV_URL", "KV_REST_API_URL", "KV_REST_API_TOKEN", "KV_REST_API_READ_ONLY_TOKEN", "BLOB_READ_WRITE_TOKEN", "EDGE_CONFIG", "ORIGIN", "RP_NAME", "RP_ID", "SECRET_ATOKEN", "SECRET_RTOKEN", "RESEND_API_KEY", "DEV_VERIFICATION_CODE", "REUSABLE_INVITE_CODE", "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "CLERK_SECRET_KEY", "CONVEX_DEPLOYMENT", "NEXT_PUBLIC_CONVEX_URL"];
+declare const envVariables: readonly ["IS_PROD", "POSTGRES_URL", "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DATABASE", "POSTGRES_USER", "POSTGRES_PASSWORD", "KV_URL", "KV_REST_API_URL", "KV_REST_API_TOKEN", "KV_REST_API_READ_ONLY_TOKEN", "BLOB_READ_WRITE_TOKEN", "EDGE_CONFIG", "ORIGIN", "RP_NAME", "RP_ID", "SECRET_ATOKEN", "SECRET_RTOKEN", "RESEND_API_KEY", "DEV_VERIFICATION_CODE", "REUSABLE_INVITE_CODE"];
 type EnvVariablesType = {
     [K in (typeof envVariables)[number]]: string;
 };
@@ -810,22 +841,26 @@ declare const isPost: (value: unknown) => value is {
 };
 
 declare const TokenSchema: z.ZodObject<{
-    iss: z.ZodString;
-    sub: z.ZodString;
-    aud: z.ZodString;
+    user: z.ZodObject<{
+        nanoId: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        nanoId: string;
+    }, {
+        nanoId: string;
+    }>;
 }, "strip", z.ZodTypeAny, {
-    iss: string;
-    sub: string;
-    aud: string;
+    user: {
+        nanoId: string;
+    };
 }, {
-    iss: string;
-    sub: string;
-    aud: string;
+    user: {
+        nanoId: string;
+    };
 }>;
 declare const isToken: (value: unknown) => value is {
-    iss: string;
-    sub: string;
-    aud: string;
+    user: {
+        nanoId: string;
+    };
 };
 type Token = z.infer<typeof TokenSchema>;
 
@@ -985,4 +1020,4 @@ declare const isUserPreferences: (value: unknown) => value is {
 declare const getZodTypeGuard: <T extends ZodSchema<any, z.ZodTypeDef, any>>(schema: T) => (value: unknown) => value is z.TypeOf<T>;
 declare const getFormattedZodError: (error: z.ZodError) => string;
 
-export { AccountCreationFormSchema, Authenticator, AuthenticatorSchema, EmailVerificationCodeForm, EmailVerificationCodeFormSchema, EmptyResponse, EmptyResponseSchema, EnvVariablesKeys, ErrorResponse, ErrorResponseSchema, GetAuthLoginResponse, GetAuthLoginResponseSchema, GetAuthRefreshResponse, GetAuthRefreshResponseSchema, GetAuthResponse, GetAuthResponseSchema, GetUserMeResponse, GetUserMeResponseSchema, GetUserSettingsResponse, GetUserSettingsResponseSchema, Image, ImagePost, ImagePostSchema, ImageSchema, InviteCode, InviteCodeSchema, Post, PostAuthLoginVerifyBody, PostAuthLoginVerifyBodySchema, PostAuthSignupBody, PostAuthSignupBodySchema, PostAuthSignupResponse, PostAuthSignupResponseSchema, PostAuthSignupVerifyBody, PostAuthSignupVerifyBodySchema, PostPrimitiveSchema, PostSchema, PostUserEmailVerifyBody, PostUserEmailVerifyBodySchema, SuccessResponse, SuccessResponseSchema, TextPost, TextPostSchema, Token, TokenSchema, User, UserAccount, UserAccountSchema, UserPreferences, UserPreferencesSchema, UserSchema, generateActionResponse, getFormattedZodError, getZodTypeGuard, isAuthenticator, isImage, isImagePost, isInviteCode, isPost, isPostAuthLoginVerifyBody, isPostAuthSignupBody, isPostAuthSignupVerifyBody, isTextPost, isToken, isUser, isUserPreferences };
+export { AccountCreationFormSchema, Authenticator, AuthenticatorSchema, EmailVerificationCodeForm, EmailVerificationCodeFormSchema, EmptyResponse, EmptyResponseSchema, EnvVariablesKeys, ErrorResponse, ErrorResponseSchema, GetAuthSignInResponse, GetAuthSignInResponseSchema, GetUserAuthenticatorResponse, GetUserAuthenticatorResponseSchema, GetUserMeResponse, GetUserMeResponseSchema, GetUserSettingsResponse, GetUserSettingsResponseSchema, Image, ImagePost, ImagePostSchema, ImageSchema, InviteCode, InviteCodeSchema, PatchUserAuthenticatorCredentialIdBody, PatchUserAuthenticatorCredentialIdBodySchema, Post, PostAuthSignInVerifyBody, PostAuthSignInVerifyBodySchema, PostAuthSignupBody, PostAuthSignupBodySchema, PostAuthSignupResponse, PostAuthSignupResponseSchema, PostAuthSignupVerifyBody, PostAuthSignupVerifyBodySchema, PostPrimitiveSchema, PostSchema, PostUserEmailVerifyBody, PostUserEmailVerifyBodySchema, PutUserAuthenticatorResponse, PutUserAuthenticatorResponseSchema, SuccessResponse, SuccessResponseSchema, TextPost, TextPostSchema, Token, TokenSchema, User, UserAccount, UserAccountSchema, UserPreferences, UserPreferencesSchema, UserSchema, generateActionResponse, getFormattedZodError, getZodTypeGuard, isAuthenticator, isImage, isImagePost, isInviteCode, isPatchUserAuthenticatorCredentialIdBody, isPost, isPostAuthSignInVerifyBody, isPostAuthSignupBody, isPostAuthSignupVerifyBody, isTextPost, isToken, isUser, isUserPreferences };

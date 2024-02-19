@@ -182,7 +182,7 @@ var authenticator = (0, import_pg_core2.pgTable)(
   "authenticator",
   {
     id: (0, import_pg_core2.serial)("id").primaryKey(),
-    credentialId: (0, import_pg_core2.varchar)("credential_id", { length: 64 }).notNull(),
+    credentialId: (0, import_pg_core2.varchar)("credential_id", { length: 256 }).notNull(),
     credentialPublicKey: (0, import_pg_core2.text)("credential_public_key").notNull(),
     counter: (0, import_pg_core2.integer)("counter").notNull(),
     credentialDeviceType: (0, import_pg_core2.varchar)("credential_device_type", {

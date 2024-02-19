@@ -11,12 +11,12 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useUserMeQuery } from "./userQueries";
 
-export const useLogoutMutation = () => {
+export const useSignOutMutation = () => {
   const router = useRouter();
   const client = useQueryClient();
   return useMutation({
     mutationKey: ["logout"],
-    mutationFn: apiClient.get.authLogout, //logout,
+    mutationFn: apiClient.get.authSignOut, //logout,
     onSuccess: ({ success }) => {
       if (success) {
         toast("You have been logged out.");
@@ -28,17 +28,17 @@ export const useLogoutMutation = () => {
   });
 };
 
-export const useIsLoggedIn = () => {
+export const useSignedInStatus = () => {
   const { isPending, data } = useUserMeQuery();
-  return { isPending, isLoggedIn: !isPending && Boolean(data?.success) };
+  return { isPending, isSignedIn: !isPending && Boolean(data?.success) };
 };
 
-export const useLoginMutation = () => {
+export const useSignInMutation = () => {
   const client = useQueryClient();
 
   const requestLogin = useMutation({
     mutationFn: async () => {
-      const optRes = await apiClient.get.authLogin();
+      const optRes = await apiClient.get.authSignIn();
       if (!optRes.success) throw optRes.error;
       let attRes;
       try {
@@ -51,7 +51,7 @@ export const useLoginMutation = () => {
         }
         throw err;
       }
-      const verRes = await apiClient.post.authLoginVerify({ attRes });
+      const verRes = await apiClient.post.authSignInVerify({ attRes });
       if (!verRes.success) throw new Error(verRes.error);
       return verRes;
     },
@@ -68,12 +68,12 @@ export const useLoginMutation = () => {
   return requestLogin;
 };
 
-export const useRegisterMutation = () => {
+export const useSignUpMutation = () => {
   const client = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ email, inviteCode }: PostAuthSignupBody) => {
-      const optRes = await apiClient.post.authSignup({
+      const optRes = await apiClient.post.authSignUp({
         email,
         inviteCode,
       });
@@ -104,50 +104,4 @@ export const useRegisterMutation = () => {
       });
     },
   });
-};
-
-export const useAddAuthenticatorMutation = () => {
-  const client = useQueryClient();
-
-  const requestLogin = useMutation({
-    mutationFn: async () => {
-      // const optRes = await getNewAuthenticatorOptions();
-      // if (!optRes.success) throw new Error(optRes.error);
-      // const { options } = optRes;
-      // let attRes;
-      // try {
-      //   attRes = await startRegistration(options);
-      // } catch (err) {
-      //   if (err instanceof Error && "name" in err) {
-      //     if (err.name === "NotAllowedError") {
-      //       throw new Error("You denied the request for passkey.");
-      //     }
-      //   }
-      //   throw err;
-      // }
-      // const verifyRes = await verifyNewAuthenticator({ attRes });
-      // if (!verifyRes.success) throw new Error(verifyRes.error);
-      // return verifyRes.authenticator;
-    },
-    onError: (err) => {
-      toast("Failed to add authenticator", {
-        description: err instanceof Error ? err.message : "Unknown error",
-      });
-    },
-    onSuccess: (newAuthenticator) => {
-      // client.setQueryData<{
-      //   authenticators: Authenticator[];
-      //   inviteCodes: InviteCode[];
-      // }>(["user", "settings"], (old) =>
-      // old
-      //   ? {
-      //       ...old,
-      //       authenticators: [newAuthenticator, ...old.authenticators],
-      //     }
-      //   : old
-      // );
-    },
-  });
-
-  return requestLogin;
 };

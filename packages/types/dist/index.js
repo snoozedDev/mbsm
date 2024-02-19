@@ -25,21 +25,22 @@ __export(src_exports, {
   EmailVerificationCodeFormSchema: () => EmailVerificationCodeFormSchema,
   EmptyResponseSchema: () => EmptyResponseSchema,
   ErrorResponseSchema: () => ErrorResponseSchema,
-  GetAuthLoginResponseSchema: () => GetAuthLoginResponseSchema,
-  GetAuthRefreshResponseSchema: () => GetAuthRefreshResponseSchema,
-  GetAuthResponseSchema: () => GetAuthResponseSchema,
+  GetAuthSignInResponseSchema: () => GetAuthSignInResponseSchema,
+  GetUserAuthenticatorResponseSchema: () => GetUserAuthenticatorResponseSchema,
   GetUserMeResponseSchema: () => GetUserMeResponseSchema,
   GetUserSettingsResponseSchema: () => GetUserSettingsResponseSchema,
   ImagePostSchema: () => ImagePostSchema,
   ImageSchema: () => ImageSchema,
   InviteCodeSchema: () => InviteCodeSchema,
-  PostAuthLoginVerifyBodySchema: () => PostAuthLoginVerifyBodySchema,
+  PatchUserAuthenticatorCredentialIdBodySchema: () => PatchUserAuthenticatorCredentialIdBodySchema,
+  PostAuthSignInVerifyBodySchema: () => PostAuthSignInVerifyBodySchema,
   PostAuthSignupBodySchema: () => PostAuthSignupBodySchema,
   PostAuthSignupResponseSchema: () => PostAuthSignupResponseSchema,
   PostAuthSignupVerifyBodySchema: () => PostAuthSignupVerifyBodySchema,
   PostPrimitiveSchema: () => PostPrimitiveSchema,
   PostSchema: () => PostSchema,
   PostUserEmailVerifyBodySchema: () => PostUserEmailVerifyBodySchema,
+  PutUserAuthenticatorResponseSchema: () => PutUserAuthenticatorResponseSchema,
   SuccessResponseSchema: () => SuccessResponseSchema,
   TextPostSchema: () => TextPostSchema,
   TokenSchema: () => TokenSchema,
@@ -53,8 +54,9 @@ __export(src_exports, {
   isImage: () => isImage,
   isImagePost: () => isImagePost,
   isInviteCode: () => isInviteCode,
+  isPatchUserAuthenticatorCredentialIdBody: () => isPatchUserAuthenticatorCredentialIdBody,
   isPost: () => isPost,
-  isPostAuthLoginVerifyBody: () => isPostAuthLoginVerifyBody,
+  isPostAuthSignInVerifyBody: () => isPostAuthSignInVerifyBody,
   isPostAuthSignupBody: () => isPostAuthSignupBody,
   isPostAuthSignupVerifyBody: () => isPostAuthSignupVerifyBody,
   isTextPost: () => isTextPost,
@@ -3821,14 +3823,14 @@ var generateActionResponse = (data) => z.union([SuccessResponseSchema.extend(dat
 var EmptyResponseSchema = generateActionResponse({});
 
 // src/api/auth.ts
-var GetAuthLoginResponseSchema = generateActionResponse({
+var GetAuthSignInResponseSchema = generateActionResponse({
   options: z.any()
 });
-var PostAuthLoginVerifyBodySchema = z.object({
+var PostAuthSignInVerifyBodySchema = z.object({
   attRes: z.any()
 });
-var isPostAuthLoginVerifyBody = getZodTypeGuard(
-  PostAuthLoginVerifyBodySchema
+var isPostAuthSignInVerifyBody = getZodTypeGuard(
+  PostAuthSignInVerifyBodySchema
 );
 var PostAuthSignupResponseSchema = generateActionResponse({
   options: z.any()
@@ -3846,12 +3848,6 @@ var PostAuthSignupVerifyBodySchema = z.object({
 var isPostAuthSignupVerifyBody = getZodTypeGuard(
   PostAuthSignupVerifyBodySchema
 );
-var GetAuthResponseSchema = generateActionResponse({
-  accessToken: z.string()
-});
-var GetAuthRefreshResponseSchema = generateActionResponse({
-  accessToken: z.string()
-});
 
 // src/forms/index.ts
 var EmailVerificationCodeFormSchema = z.object({
@@ -3920,9 +3916,9 @@ var isPost = getZodTypeGuard(PostSchema);
 
 // src/models/token.ts
 var TokenSchema = z.object({
-  iss: z.string(),
-  sub: z.string(),
-  aud: z.string()
+  user: z.object({
+    nanoId: z.string()
+  })
 });
 var isToken = getZodTypeGuard(TokenSchema);
 
@@ -3962,6 +3958,18 @@ var GetUserSettingsResponseSchema = generateActionResponse({
   inviteCodes: InviteCodeSchema.array()
 });
 var PostUserEmailVerifyBodySchema = EmailVerificationCodeFormSchema;
+var GetUserAuthenticatorResponseSchema = generateActionResponse({
+  regOptions: z.any()
+});
+var PutUserAuthenticatorResponseSchema = generateActionResponse({
+  authenticator: AuthenticatorSchema
+});
+var PatchUserAuthenticatorCredentialIdBodySchema = z.object({
+  name: z.string()
+});
+var isPatchUserAuthenticatorCredentialIdBody = getZodTypeGuard(
+  PatchUserAuthenticatorCredentialIdBodySchema
+);
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   AccountCreationFormSchema,
@@ -3969,21 +3977,22 @@ var PostUserEmailVerifyBodySchema = EmailVerificationCodeFormSchema;
   EmailVerificationCodeFormSchema,
   EmptyResponseSchema,
   ErrorResponseSchema,
-  GetAuthLoginResponseSchema,
-  GetAuthRefreshResponseSchema,
-  GetAuthResponseSchema,
+  GetAuthSignInResponseSchema,
+  GetUserAuthenticatorResponseSchema,
   GetUserMeResponseSchema,
   GetUserSettingsResponseSchema,
   ImagePostSchema,
   ImageSchema,
   InviteCodeSchema,
-  PostAuthLoginVerifyBodySchema,
+  PatchUserAuthenticatorCredentialIdBodySchema,
+  PostAuthSignInVerifyBodySchema,
   PostAuthSignupBodySchema,
   PostAuthSignupResponseSchema,
   PostAuthSignupVerifyBodySchema,
   PostPrimitiveSchema,
   PostSchema,
   PostUserEmailVerifyBodySchema,
+  PutUserAuthenticatorResponseSchema,
   SuccessResponseSchema,
   TextPostSchema,
   TokenSchema,
@@ -3997,8 +4006,9 @@ var PostUserEmailVerifyBodySchema = EmailVerificationCodeFormSchema;
   isImage,
   isImagePost,
   isInviteCode,
+  isPatchUserAuthenticatorCredentialIdBody,
   isPost,
-  isPostAuthLoginVerifyBody,
+  isPostAuthSignInVerifyBody,
   isPostAuthSignupBody,
   isPostAuthSignupVerifyBody,
   isTextPost,

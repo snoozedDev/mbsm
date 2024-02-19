@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { useIsLoggedIn } from "@/queries/authQueries";
+import { useSignedInStatus } from "@/queries/authQueries";
 import { useEmailVerificationMutation } from "@/queries/userQueries";
 import { getErrorMessage } from "@/utils/stringUtils";
 import { PostUserEmailVerifyBody } from "@mbsm/types";
@@ -20,7 +20,7 @@ import {
 import { Input } from "./ui/input";
 
 export const UnverifiedEmailWarning = () => {
-  const { isLoggedIn } = useIsLoggedIn();
+  const { isSignedIn } = useSignedInStatus();
   const { emailVerified, isPending } = useIsEmailVerified();
 
   const emailVerification = useEmailVerificationMutation();
@@ -32,7 +32,7 @@ export const UnverifiedEmailWarning = () => {
 
   const submitting = emailVerification.isPending;
 
-  if (isPending || !isLoggedIn) return null;
+  if (isPending || !isSignedIn) return null;
 
   return emailVerified === false ? (
     <Form {...codeForm}>

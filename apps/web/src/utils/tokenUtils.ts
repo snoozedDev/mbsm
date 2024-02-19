@@ -1,3 +1,4 @@
+import { logAndReturnGenericError } from "@/server/serverUtils";
 import {
   InferSelectModel,
   getUserByNanoId,
@@ -10,6 +11,10 @@ import jwt from "jsonwebtoken";
 import { nanoid } from "nanoid";
 import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { NextRequest, NextResponse } from "next/server";
+
+const shapeToken = (user: InferSelectModel<typeof schema.user>): Token => ({
+  user: { nanoId: user.nanoId },
+});
 
 const generateAccessToken = (token: Token) =>
   jwt.sign(token, getEnvAsStr("SECRET_ATOKEN"), {
@@ -117,20 +122,25 @@ export const refreshAndSetTokens = async (req: NextRequest) => {
   const uniqueId = req.cookies.get("uniqueIdentifier")?.value;
   const userAgent = req.headers.get("user-agent");
   if (!refreshToken || !uniqueId || !userAgent) {
-    throw new Error("No token found.");
+    return logAndReturnGenericError(
+      "No refresh token or unique identifier",
+      "unauthorized"
+    );
   }
-  console.log({ refreshToken });
   const tokenContents = decodeRefreshToken(refreshToken);
-  if (!tokenContents) throw new Error("Invalid token.");
-  const nanoId = tokenContents.sub.split("|")[1];
+  if (!tokenContents)
+    return logAndReturnGenericError("Invalid token", "unauthorized");
+  const { nanoId } = tokenContents.user;
   const userTokens = await redis.hgetall<Record<string, string>>(
     "refresh:" + nanoId
   );
 
-  if (!userTokens) throw new Error("No tokens found.");
+  if (!userTokens)
+    return logAndReturnGenericError("No user tokens", "unauthorized");
   const redisRToken = userTokens[uniqueId];
   console.log({ redisRToken });
-  if (redisRToken !== refreshToken) throw new Error("Invalid token.");
+  if (redisRToken !== refreshToken)
+    return logAndReturnGenericError("Invalid token", "unauthorized");
 
   await deleteExpiredUserTokens({
     nanoId,
@@ -140,14 +150,10 @@ export const refreshAndSetTokens = async (req: NextRequest) => {
   const user = await getUserByNanoId(nanoId);
 
   if (!user) {
-    throw new Error("No user found for token. This should never happen.");
+    return logAndReturnGenericError("No user found", "unauthorized");
   }
 
-  const token = {
-    aud: "localhost",
-    iss: "https://localhost:3000",
-    sub: `localhost|${nanoId}`,
-  } satisfies Token;
+  const token = shapeToken(user);
 
   const accessToken = generateAccessToken(token);
 
@@ -161,7 +167,6 @@ export const refreshAndSetTokens = async (req: NextRequest) => {
 
   const res = NextResponse.json({
     success: true as const,
-    accessToken,
   });
 
   setAccessTokenCookie(res, accessToken);
@@ -179,11 +184,7 @@ export const createAndSetAuthTokens = async (
   if (!userAgent) throw new Error("No User Agent");
   const currentUniqueId = res.cookies.get("uniqueIdentifier")?.value;
 
-  const token: Token = {
-    aud: "localhost",
-    iss: "https://localhost:3000",
-    sub: `localhost|${user.nanoId}`,
-  };
+  const token = shapeToken(user);
 
   const accessToken = generateAccessToken(token);
 
