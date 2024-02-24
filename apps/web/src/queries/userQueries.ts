@@ -1,110 +1,73 @@
 // import { renameAuthenticator } from "@/actions/authActions";
 // import { getUserSettings } from "@/actions/userActions";
-import { apiClient } from "@/utils/api";
-import { Authenticator, InviteCode } from "@mbsm/types";
+import { trpc } from "@/components/query-layout";
+import { getErrorMessage } from "@mbsm/utils";
 import { startRegistration } from "@simplewebauthn/browser";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export const useUserMeQuery = () => {
-  return useQuery({
-    queryKey: ["user", "me"],
-    queryFn: apiClient.get.userMe,
-    retry: false,
-  });
+  return trpc.user.me.useQuery(undefined, { retry: false });
 };
 
 export const useUserSettingsQuery = () => {
-  return useQuery({
-    queryKey: ["user", "settings"],
-    queryFn: apiClient.get.userSettings,
-    retry: false,
-  });
+  return trpc.user.settings.useQuery(undefined, { retry: false });
 };
 
-export const useUpdateAuthenticatorMutation = ({
-  credentialId,
-}: {
-  credentialId: string;
-}) => {
-  const client = useQueryClient();
-  return useMutation({
-    mutationKey: ["authenticator", "update", credentialId],
-    mutationFn: async ({ name }: { name: string }) => {
-      const res = await apiClient.patch.userAuthenticatorCredentialId(
-        credentialId,
-        { name }
-      );
-      if (!res.success) throw new Error(res.error);
-    },
+export const useUpdateAuthenticatorMutation = () => {
+  const utils = trpc.useUtils();
+
+  return trpc.user.updateAuthenticator.useMutation({
     onSuccess: () => {
-      client.invalidateQueries({
-        queryKey: ["user", "settings"],
-      });
+      utils.user.settings.invalidate();
     },
     onError: () => {
-      client.invalidateQueries({
-        queryKey: ["user", "settings"],
-      });
+      utils.user.settings.invalidate();
     },
   });
 };
 
 export const useEmailVerificationMutation = () => {
-  const client = useQueryClient();
+  const utils = trpc.useUtils();
 
-  return useMutation({
-    mutationKey: ["user", "emailVerification"],
-    mutationFn: apiClient.post.userEmailVerify,
+  return trpc.user.verifyEmail.useMutation({
     onSuccess: () => {
-      client.resetQueries({ queryKey: ["user"] });
+      utils.user.me.invalidate();
       toast("Your email has been verified.");
     },
   });
 };
 
 export const useAddAuthenticatorMutation = () => {
-  const client = useQueryClient();
+  const utils = trpc.useUtils();
+  const [isLoading, setIsLoading] = useState(false);
+  const startAddAuthenticator = trpc.user.startAddAuthenticator.useMutation();
+  const verifyAddAuthenticator = trpc.user.verifyAddAuthenticator.useMutation();
 
-  const requestLogin = useMutation({
-    mutationFn: async () => {
-      const optRes = await apiClient.get.userAuthenticator();
-      if (!optRes.success) throw new Error(optRes.error);
-      const { regOptions } = optRes;
-      let attRes;
-      try {
-        attRes = await startRegistration(regOptions);
-      } catch (err) {
-        if (err instanceof Error && "name" in err) {
-          if (err.name === "NotAllowedError") {
-            throw new Error("You denied the request for passkey.");
-          }
-        }
-        throw err;
-      }
-      const verifyRes = await apiClient.put.userAuthenticator({ attRes });
-      if (!verifyRes.success) throw new Error(verifyRes.error);
-      return verifyRes.authenticator;
-    },
-    onError: (err) => {
-      toast("Failed to add authenticator", {
-        description: err instanceof Error ? err.message : "Unknown error",
+  const requestAddAuthenticator = async () => {
+    setIsLoading(true);
+    try {
+      const { options } = await startAddAuthenticator.mutateAsync();
+      const attRes = await startRegistration(options);
+      const { authenticator } = await verifyAddAuthenticator.mutateAsync({
+        attRes,
       });
-    },
-    onSuccess: (newAuthenticator) => {
-      client.setQueryData<{
-        authenticators: Authenticator[];
-        inviteCodes: InviteCode[];
-      }>(["user", "settings"], (old) =>
+      utils.user.settings.setData(undefined, (old) =>
         old
           ? {
               ...old,
-              authenticators: [newAuthenticator, ...old.authenticators],
+              authenticators: [authenticator, ...old.authenticators],
             }
-          : old
+          : undefined
       );
-    },
-  });
+    } catch (err) {
+      toast("Failed to add authenticator", {
+        description: getErrorMessage(err),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  return requestLogin;
+  return { requestAddAuthenticator, isLoading };
 };

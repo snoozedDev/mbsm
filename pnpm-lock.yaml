@@ -145,16 +145,16 @@ importers:
         specifier: 5.17.19
         version: 5.17.19(@tanstack/react-query@5.17.19)(react@18.2.0)
       '@trpc/client':
-        specifier: next
+        specifier: 11.0.0-next-beta.274
         version: 11.0.0-next-beta.274(@trpc/server@11.0.0-next-beta.274)
       '@trpc/next':
         specifier: next
         version: 11.0.0-next-beta.274(@tanstack/react-query@5.17.19)(@trpc/client@11.0.0-next-beta.274)(@trpc/react-query@11.0.0-next-beta.274)(@trpc/server@11.0.0-next-beta.274)(next@14.1.0)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/react-query':
-        specifier: next
+        specifier: 11.0.0-next-beta.274
         version: 11.0.0-next-beta.274(@tanstack/react-query@5.17.19)(@trpc/client@11.0.0-next-beta.274)(@trpc/server@11.0.0-next-beta.274)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/server':
-        specifier: next
+        specifier: 11.0.0-next-beta.274
         version: 11.0.0-next-beta.274
       '@types/three':
         specifier: ^0.155.0
@@ -174,6 +174,9 @@ importers:
       clsx:
         specifier: ^1.2.1
         version: 1.2.1
+      cookie:
+        specifier: ^0.6.0
+        version: 0.6.0
       framer-motion:
         specifier: ^10.16.4
         version: 10.16.4(react-dom@18.2.0)(react@18.2.0)
@@ -250,6 +253,9 @@ importers:
       '@simplewebauthn/types':
         specifier: 9.0.1
         version: 9.0.1
+      '@types/cookie':
+        specifier: ^0.6.0
+        version: 0.6.0
       '@types/jsonwebtoken':
         specifier: ^9.0.2
         version: 9.0.2
@@ -5370,6 +5376,10 @@ packages:
       '@types/responselike': 1.0.3
     dev: true
 
+  /@types/cookie@0.6.0:
+    resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
+    dev: true
+
   /@types/draco3d@1.4.7:
     resolution: {integrity: sha512-sjx6hQ8UArRZf+2ZhpPkjJW8iCkyxar69/IElc9NHuGE40n0U9SuvxX59CHvF4xUH7qfJDQ2lIbANZ0HHJg+BQ==}
     dev: false
@@ -6647,6 +6657,11 @@ packages:
     resolution: {integrity: sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==}
     engines: {node: '>= 0.6'}
     dev: true
+
+  /cookie@0.6.0:
+    resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
+    engines: {node: '>= 0.6'}
+    dev: false
 
   /copy-anything@3.0.5:
     resolution: {integrity: sha512-yCEafptTtb4bk7GLEQoM8KVJpxAfdBJYaXyzQEgQQQgYrZiDp8SJmGKlYza6CYjEDNstAdNdKA3UuoULlEbS6w==}

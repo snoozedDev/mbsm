@@ -1,107 +1,80 @@
 "use client";
 
-import { apiClient } from "@/utils/api";
-import { PostAuthSignupBody } from "@mbsm/types";
+import { trpc } from "@/components/query-layout";
+import { SignUpFormValues } from "@/components/signup-form";
+import { getErrorMessage } from "@mbsm/utils";
 import {
   startAuthentication,
   startRegistration,
 } from "@simplewebauthn/browser";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useUserMeQuery } from "./userQueries";
 
 export const useSignOutMutation = () => {
   const router = useRouter();
-  const client = useQueryClient();
-  return useMutation({
-    mutationKey: ["logout"],
-    mutationFn: apiClient.get.authSignOut, //logout,
-    onSuccess: ({ success }) => {
-      if (success) {
-        toast("You have been logged out.");
-        client.resetQueries({ queryKey: ["user"] });
-        router.push("/");
-      }
+  const utils = trpc.useUtils();
+
+  return trpc.auth.signOut.useMutation({
+    onSuccess: () => {
+      toast("You have been logged out.");
+      utils.user.me.invalidate();
+      router.push("/");
     },
     retry: false,
   });
 };
 
 export const useSignedInStatus = () => {
-  const { isPending, data } = useUserMeQuery();
-  return { isPending, isSignedIn: !isPending && Boolean(data?.success) };
+  const { isPending, isSuccess } = useUserMeQuery();
+  return { isPending, isSignedIn: isSuccess };
 };
 
 export const useSignInMutation = () => {
-  const client = useQueryClient();
+  const utils = trpc.useUtils();
+  const [isLoading, setIsLoading] = useState(false);
+  const startSignIn = trpc.auth.startSignin.useMutation();
+  const verifySignIn = trpc.auth.verifySignin.useMutation();
 
-  const requestLogin = useMutation({
-    mutationFn: async () => {
-      const optRes = await apiClient.get.authSignIn();
-      if (!optRes.success) throw optRes.error;
-      let attRes;
-      try {
-        attRes = await startAuthentication(optRes.options);
-      } catch (err) {
-        if (err instanceof Error && "name" in err) {
-          if (err.name === "NotAllowedError") {
-            throw new Error("You denied the request for passkey.");
-          }
-        }
-        throw err;
-      }
-      const verRes = await apiClient.post.authSignInVerify({ attRes });
-      if (!verRes.success) throw new Error(verRes.error);
-      return verRes;
-    },
-    onError: (err) => {
-      toast("Login failed", {
-        description: err instanceof Error ? err.message : "Unknown error",
-      });
-    },
-    onSuccess: () => {
-      client.invalidateQueries({ queryKey: ["user"] });
-    },
-  });
+  const requestSignIn = async () => {
+    setIsLoading(true);
+    try {
+      const { options } = await startSignIn.mutateAsync();
+      const attRes = await startAuthentication(options);
+      await verifySignIn.mutateAsync({ attRes });
+      utils.user.me.invalidate();
+    } catch (err) {
+      toast("Login failed", { description: getErrorMessage(err) });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  return requestLogin;
+  return { isLoading, requestSignIn };
 };
 
 export const useSignUpMutation = () => {
-  const client = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
+  const startSignup = trpc.auth.startSignup.useMutation();
+  const verifySignup = trpc.auth.verifySignup.useMutation();
+  const utils = trpc.useUtils();
 
-  return useMutation({
-    mutationFn: async ({ email, inviteCode }: PostAuthSignupBody) => {
-      const optRes = await apiClient.post.authSignUp({
-        email,
-        inviteCode,
-      });
-      if (!optRes.success) throw new Error(optRes.error);
-      const { options } = optRes;
-      let attRes;
-      try {
-        attRes = await startRegistration(options);
-      } catch (err) {
-        if (err instanceof Error && "name" in err) {
-          if (err.name === "NotAllowedError") {
-            throw new Error("You denied the request for passkey.");
-          }
-        }
-        throw err;
-      }
-      const verRes = await apiClient.post.authSignupVerify({
-        attRes,
-        email,
-        inviteCode,
-      });
-      if (!verRes.success) throw new Error(verRes.error);
-      return verRes;
-    },
-    onSuccess: () => {
-      client.invalidateQueries({
-        queryKey: ["user"],
-      });
-    },
-  });
+  const requestSignUp = async (values: SignUpFormValues) => {
+    setIsLoading(true);
+    setError(undefined);
+    try {
+      const { options } = await startSignup.mutateAsync(values);
+      const attRes = await startRegistration(options);
+      await verifySignup.mutateAsync({ ...values, attRes });
+      utils.user.me.invalidate();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { requestSignUp, isLoading, error };
 };

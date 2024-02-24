@@ -133,13 +133,17 @@ export const UserInviteCodes = () => {
   const { isSignedIn } = useSignedInStatus();
   const { isPending: isEmailVerificationPending, emailVerified } =
     useIsEmailVerified();
-  const { isLoading: userSettingsLoading, data } = useUserSettingsQuery();
+  const {
+    isLoading: userSettingsLoading,
+    data,
+    isSuccess,
+  } = useUserSettingsQuery();
 
   const isLoading =
     userSettingsLoading || !isSignedIn || isEmailVerificationPending;
 
   const renderCodesList = useCallback(() => {
-    if (isLoading || !data) {
+    if (isLoading) {
       return Array.from({ length: 5 }).map((_, i) => (
         <li key={i} className="flex flex-1">
           <Code loading />
@@ -147,7 +151,7 @@ export const UserInviteCodes = () => {
       ));
     }
 
-    if (!data || !data.success) {
+    if (!isSuccess) {
       return null;
     }
 

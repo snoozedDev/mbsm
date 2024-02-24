@@ -3,14 +3,12 @@
 import { useSignUpMutation, useSignedInStatus } from "@/queries/authQueries";
 import { useUserMeQuery } from "@/queries/userQueries";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getErrorMessage } from "@mbsm/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useIsDesktop } from "./hooks/isDesktop";
-import { useIsEmailVerified } from "./hooks/useIsEmailVerified";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -39,7 +37,7 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 
-const formSchema = z.object({
+const SignUpFormSchema = z.object({
   email: z.string().email(),
   inviteCode: z
     .string()
@@ -47,36 +45,36 @@ const formSchema = z.object({
     .length(16, "Invite code must be 16 characters long"),
 });
 
+export type SignUpFormValues = z.infer<typeof SignUpFormSchema>;
+
 export const SignupForm = ({}) => {
-  const register = useSignUpMutation();
-  const user = useUserMeQuery();
+  const {
+    requestSignUp,
+    isLoading: signUpLoading,
+    error,
+  } = useSignUpMutation();
   const router = useRouter();
+  const user = useUserMeQuery();
   const signedInStatus = useSignedInStatus();
-  const { emailVerified } = useIsEmailVerified();
   const isDesktop = useIsDesktop();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<SignUpFormValues>({
+    resolver: zodResolver(SignUpFormSchema),
     defaultValues: {
       email: "",
       inviteCode: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    register.mutate({ email: values.email, inviteCode: values.inviteCode });
-  }
-
   useEffect(() => {
-    if (emailVerified === true) {
+    if (user.data?.emailVerified === true) {
       router.push("/settings/user");
     } else if (signedInStatus.isSignedIn) {
       router.push("/auth/verify");
     }
-  }, [signedInStatus, router, emailVerified]);
+  }, [signedInStatus, router, user]);
 
-  const isLoading =
-    register.isPending || user.isLoading || signedInStatus.isSignedIn;
+  const isLoading = signUpLoading || user.isLoading;
 
   const renderPasskeyDescription = () => (
     <>
@@ -158,7 +156,7 @@ export const SignupForm = ({}) => {
     <div className="xs:max-w-md w-full self-center mt-16 p-4 relative">
       <Form {...form}>
         <h1 className="text-2xl font-bold mb-4">User Registration</h1>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(requestSignUp)} className="space-y-6">
           <FormField
             control={form.control}
             name="email"
@@ -212,9 +210,9 @@ export const SignupForm = ({}) => {
             </p>
           </div>
         </form>
-        {register.isError && (
+        {error && (
           <p className="mt-3 self-start text-destructive text-sm inline-flex rounded-md font-medium tracking-wide">
-            {getErrorMessage(register.error)}
+            {error}
           </p>
         )}
       </Form>

@@ -1,16 +1,12 @@
 import { Ratelimit, RatelimitConfig, redis } from "@mbsm/db-layer";
-import { NextRequest } from "next/server";
-import { logAndReturnGenericError } from "./serverUtils";
 
 const createRateLimiter = (opts: RatelimitConfig) => {
   const rateLimiter = new Ratelimit(opts);
 
-  const middleware = async (req: NextRequest) => {
+  const middleware = async (req: Request): Promise<boolean> => {
     const ip = req.headers.get("cf-connecting-ip") || "_";
     const { success } = await rateLimiter.limit(ip);
-    console.log("success", success);
-    if (success) return undefined;
-    return logAndReturnGenericError("Rate limit exceeded", "unauthorized");
+    return success;
   };
 
   return { rateLimiter, middleware };
@@ -36,3 +32,5 @@ export const loginLimiter = createRateLimiter({
   analytics: true,
   prefix: "@mbsm/login",
 });
+
+export type RateLimiter = ReturnType<typeof createRateLimiter>;

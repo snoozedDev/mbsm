@@ -4,6 +4,6 @@ export const useIsEmailVerified = () => {
   const { data, isLoading } = useUserMeQuery();
   return {
     isPending: isLoading,
-    emailVerified: data?.success === true ? data.emailVerified : false,
+    emailVerified: data?.emailVerified,
   };
 };

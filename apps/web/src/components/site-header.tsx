@@ -1,10 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
-import {
-  useSignInMutation,
-  useSignOutMutation,
-  useSignedInStatus,
-} from "@/queries/authQueries";
+import { useSignInMutation, useSignOutMutation } from "@/queries/authQueries";
+import { useUserMeQuery } from "@/queries/userQueries";
 import { SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -37,12 +34,11 @@ const navigation = [
 
 export const SiteHeader = () => {
   const pathname = usePathname();
+  const user = useUserMeQuery();
   const signIn = useSignInMutation();
   const signOut = useSignOutMutation();
-  const signedInStatus = useSignedInStatus();
 
-  const isLoading =
-    signIn.isPending || signOut.isPending || signedInStatus.isPending;
+  const isLoading = signIn.isLoading || user.isPending;
 
   return (
     <header className="supports-backdrop-blur:bg-background/80 sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur">
@@ -72,7 +68,7 @@ export const SiteHeader = () => {
         <div className="flex-grow" />
         {isLoading ? (
           <LoadingDots />
-        ) : signedInStatus.isSignedIn ? (
+        ) : user.data ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="relative">
@@ -121,7 +117,7 @@ export const SiteHeader = () => {
           </DropdownMenu>
         ) : (
           <div className="flex items-center space-x-4">
-            <Button onClick={() => signIn.mutate()} variant="outline">
+            <Button onClick={() => signIn.requestSignIn()} variant="outline">
               LOG IN
             </Button>
             <Button asChild variant="outline">

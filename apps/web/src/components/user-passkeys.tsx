@@ -64,9 +64,7 @@ const SingleAuthenticator = ({
   const [name, setName] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { mutate: updateName, isPending } = useUpdateAuthenticatorMutation({
-    credentialId: authenticator.credentialId,
-  });
+  const { mutate: updateName, isPending } = useUpdateAuthenticatorMutation();
 
   useEffect(() => {
     if (authenticator) setName(authenticator.name);
@@ -76,7 +74,8 @@ const SingleAuthenticator = ({
     (e?: FormEvent) => {
       e?.preventDefault();
       setEditing(false);
-      if (name !== authenticator?.name) updateName({ name });
+      if (name !== authenticator.name)
+        updateName({ name, credentialId: authenticator.credentialId });
     },
     [authenticator, name, updateName]
   );
@@ -91,7 +90,7 @@ const SingleAuthenticator = ({
 
   const onDelete = useCallback(() => {}, []);
 
-  if (!data?.success) return null;
+  if (!data) return null;
 
   const canDelete = (data?.authenticators ?? []).length > 1;
 
@@ -240,8 +239,10 @@ const SingleAuthenticator = ({
 export const UserPasskeys = () => {
   const { isPending: isUserMePending } = useUserMeQuery();
   const { isPending: isUserSettingsPending, data } = useUserSettingsQuery();
-  const { isPending: addingAuthenticator, mutate: addAuthenticator } =
-    useAddAuthenticatorMutation();
+  const {
+    isLoading: addingAuthenticator,
+    requestAddAuthenticator: addAuthenticator,
+  } = useAddAuthenticatorMutation();
 
   const isPending = isUserMePending || isUserSettingsPending;
 
@@ -264,7 +265,7 @@ export const UserPasskeys = () => {
                     {i !== 2 && <Separator />}
                   </Fragment>
                 ))
-              : data?.success
+              : data
               ? data.authenticators
                   .sort(
                     (a, b) =>

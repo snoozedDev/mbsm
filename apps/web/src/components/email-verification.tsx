@@ -66,10 +66,8 @@ export const EmailVerification = () => {
                 >
                   {emailConcealed ? (
                     <span className="blur-sm">your.email@address.com</span>
-                  ) : user.data?.success ? (
-                    user.data?.email
                   ) : (
-                    ""
+                    user.data?.email ?? ""
                   )}
                 </button>
               </TooltipTrigger>

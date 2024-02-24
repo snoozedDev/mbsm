@@ -15,6 +15,7 @@ const envVariables = [
   "ORIGIN",
   "RP_NAME",
   "RP_ID",
+  "SERVER_PROCEDURE_SECRET",
   "SECRET_ATOKEN",
   "SECRET_RTOKEN",
   "RESEND_API_KEY",

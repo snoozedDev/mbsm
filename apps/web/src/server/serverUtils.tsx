@@ -33,7 +33,8 @@ export const wait = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 export const getEmailVerificationCodeForUser = async (userId: string) =>
-  redis.get<string | number>(`verification:${userId}`);
+  (await redis.get<string | number>(`verification:${userId}`))?.toString() ??
+  "";
 
 export const deleteEmailVerificationCode = async ({
   userId,
