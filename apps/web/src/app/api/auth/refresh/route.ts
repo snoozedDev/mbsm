@@ -1,11 +1,9 @@
 import { refreshAndSetTokens } from "@/utils/tokenUtils";
-import { EmptyResponse } from "@mbsm/types";
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
-const refreshAuthToken = async (
-  req: NextRequest
-): Promise<NextResponse<EmptyResponse>> => await refreshAndSetTokens(req);
+const refreshAuthToken = async (req: NextRequest) =>
+  await refreshAndSetTokens(req);
 
 export { refreshAuthToken as GET };
 
