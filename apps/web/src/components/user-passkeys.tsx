@@ -288,10 +288,9 @@ export const UserPasskeys = () => {
           </ul>
         </div>
 
-        <div className="bg-muted/50 py-2 px-4 flex flex-row-reverse">
+        <div className="bg-muted/50 p-4 flex flex-row-reverse">
           <Button
             disabled={addingAuthenticator || isPending}
-            className="h-9 my-2"
             onClick={() => addAuthenticator()}
           >
             {addingAuthenticator ? <LoadingDots /> : "Add New"}

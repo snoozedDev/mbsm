@@ -1,10 +1,12 @@
 "use client";
+import { useAccountSwitcher } from "@/hooks/useAccountSwitcher";
 import { cn } from "@/lib/utils";
 import { useSignInMutation, useSignOutMutation } from "@/queries/authQueries";
 import { useUserMeQuery } from "@/queries/userQueries";
 import { SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AccountAvatar } from "./account-avatar";
 import { LoadingDots } from "./loading-dots";
 import { Button } from "./ui/button";
 import {
@@ -37,6 +39,7 @@ export const SiteHeader = () => {
   const user = useUserMeQuery();
   const signIn = useSignInMutation();
   const signOut = useSignOutMutation();
+  const { activeAccount } = useAccountSwitcher();
 
   const isLoading = signIn.isLoading || user.isPending;
 
@@ -71,22 +74,32 @@ export const SiteHeader = () => {
         ) : user.data ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="relative">
-                {/* {hasWarnings && (
+              {activeAccount ? (
+                <button>
+                  <AccountAvatar account={activeAccount} />
+                </button>
+              ) : (
+                <Button variant="outline" className="relative">
+                  {/* {hasWarnings && (
                   <span className="absolute flex h-3 w-3 -right-1 -top-1">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-warning"></span>
                   </span>
                 )} */}
-                <SettingsIcon />
-              </Button>
+                  <SettingsIcon />
+                </Button>
+              )}
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
               sideOffset={6}
               className="flex flex-col items-stretch"
             >
-              <DropdownMenuLabel>No account selected</DropdownMenuLabel>
+              {activeAccount ? (
+                <></>
+              ) : (
+                <DropdownMenuLabel>No account selected</DropdownMenuLabel>
+              )}
               {/* {hasWarnings && <DropdownMenuSeparator />} */}
               {/* {emailVerified === false && (
                 <DropdownMenuItem asChild>

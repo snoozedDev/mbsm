@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { getZodTypeGuard } from "../zodUtils";
-import { ImageSchema } from "./post";
+import { ImageSchema } from "./image";
 
 // SCHEMAS
 

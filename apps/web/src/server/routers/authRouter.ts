@@ -16,7 +16,7 @@ import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { validateInviteCode } from "../inviteCodeUtils";
-import { loginLimiter } from "../rateLimit";
+import { signInLimiter, signUpLimiter } from "../rateLimit";
 import {
   generateEmailVerificationCodeAndSend,
   logAndReturnGenericError,
@@ -25,6 +25,7 @@ import { limiterMiddleware, router, webProcedure } from "../trpc";
 
 export const authRouter = router({
   startSignup: webProcedure
+    .use(limiterMiddleware(signUpLimiter))
     .input(
       z.object({
         email: z.string(),
@@ -77,6 +78,7 @@ export const authRouter = router({
       };
     }),
   verifySignup: webProcedure
+    .use(limiterMiddleware(signUpLimiter))
     .input(
       z.object({
         attRes: z.any(),
@@ -172,7 +174,7 @@ export const authRouter = router({
       }
     ),
   startSignin: webProcedure
-    .use(limiterMiddleware(loginLimiter))
+    .use(limiterMiddleware(signInLimiter))
     .output(
       z.object({
         options: z.any(),
@@ -185,7 +187,7 @@ export const authRouter = router({
       };
     }),
   verifySignin: webProcedure
-    .use(limiterMiddleware(loginLimiter))
+    .use(limiterMiddleware(signInLimiter))
     .input(
       z.object({
         attRes: z.any(),

@@ -20,6 +20,7 @@
     "@vercel/kv": "1.0.1",
     "@vercel/postgres": "0.7.2",
     "drizzle-orm": "0.29.3",
+    "drizzle-zod": "^0.5.1",
     "postgres": "3.4.3"
   },
   "devDependencies": {

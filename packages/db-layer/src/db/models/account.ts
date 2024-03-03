@@ -1,16 +1,23 @@
+import { AccountProfileData } from "@mbsm/types";
 import { relations } from "drizzle-orm";
-import { pgTable, serial, uuid, varchar } from "drizzle-orm/pg-core";
+import { json, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
 import { getIndexFor, getTimestampColumns } from "../utils";
+import { image } from "./image";
 import { user } from "./user";
 
 export const account = pgTable(
   "account",
   {
-    id: serial("id").primaryKey(),
+    id: uuid("id").defaultRandom().primaryKey(),
     userId: uuid("user_id")
       .references(() => user.id)
       .notNull(),
     handle: varchar("handle", { length: 16 }).notNull(),
+    profileData: json("profile_data")
+      .$type<AccountProfileData>()
+      .notNull()
+      .default({ links: [] }),
+    avatarId: uuid("avatar_id").references(() => image.id),
     ...getTimestampColumns(),
   },
   (account) => ({
@@ -23,5 +30,9 @@ export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
     references: [user.id],
+  }),
+  avatar: one(image, {
+    fields: [account.avatarId],
+    references: [image.id],
   }),
 }));

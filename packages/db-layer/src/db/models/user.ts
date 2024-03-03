@@ -1,6 +1,8 @@
 import { relations } from "drizzle-orm";
 import { boolean, pgEnum, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
+import { createSelectSchema } from "drizzle-zod";
 import { getIndexFor, getTimestampColumns } from "../utils";
+import { account } from "./account";
 import { authenticator } from "./authenticator";
 import { inviteCode } from "./inviteCode";
 
@@ -25,4 +27,7 @@ export const user = pgTable(
 export const userRelations = relations(user, ({ one, many }) => ({
   authenticators: many(authenticator),
   inviteCodes: many(inviteCode),
+  accounts: many(account),
 }));
+
+export const userSchema = createSelectSchema(user);

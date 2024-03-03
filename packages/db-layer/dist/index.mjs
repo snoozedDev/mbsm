@@ -101,7 +101,7 @@ var require_dist = __commonJS({
 import { Ratelimit } from "@upstash/ratelimit";
 
 // src/db/db.ts
-var import_utils7 = __toESM(require_dist());
+var import_utils8 = __toESM(require_dist());
 import { sql as vercel } from "@vercel/postgres";
 import { drizzle as pgDrizzle } from "drizzle-orm/postgres-js";
 import { drizzle as vercelDrizzle } from "drizzle-orm/vercel-postgres";
@@ -114,18 +114,20 @@ __export(models_exports, {
   accountRelations: () => accountRelations,
   authenticator: () => authenticator,
   authenticatorRelations: () => authenticatorRelations,
+  image: () => image,
   inviteCode: () => inviteCode,
   inviteCodeRelations: () => inviteCodeRelations,
   roleEnum: () => roleEnum,
   user: () => user,
   userPreferences: () => userPreferences,
   userPreferencesRelations: () => userPreferencesRelations,
-  userRelations: () => userRelations
+  userRelations: () => userRelations,
+  userSchema: () => userSchema
 });
 
 // src/db/models/account.ts
 import { relations as relations4 } from "drizzle-orm";
-import { pgTable as pgTable4, serial as serial2, uuid as uuid4, varchar as varchar4 } from "drizzle-orm/pg-core";
+import { json as json2, pgTable as pgTable5, uuid as uuid5, varchar as varchar5 } from "drizzle-orm/pg-core";
 
 // src/db/utils.ts
 var import_utils = __toESM(require_dist());
@@ -147,9 +149,13 @@ var getIndexFor = (column, unique) => ({
   ).on(column)
 });
 
+// src/db/models/image.ts
+import { integer as integer2, json, pgTable as pgTable4, uuid as uuid4, varchar as varchar4 } from "drizzle-orm/pg-core";
+
 // src/db/models/user.ts
 import { relations as relations3 } from "drizzle-orm";
 import { boolean as boolean3, pgEnum, pgTable as pgTable3, uuid as uuid3, varchar as varchar3 } from "drizzle-orm/pg-core";
+import { createSelectSchema } from "drizzle-zod";
 
 // src/db/models/authenticator.ts
 import { relations } from "drizzle-orm";
@@ -230,16 +236,37 @@ var user = pgTable3(
 );
 var userRelations = relations3(user, ({ one, many }) => ({
   authenticators: many(authenticator),
-  inviteCodes: many(inviteCode)
+  inviteCodes: many(inviteCode),
+  accounts: many(account)
 }));
+var userSchema = createSelectSchema(user);
+
+// src/db/models/image.ts
+var image = pgTable4(
+  "image",
+  {
+    id: uuid4("id").defaultRandom().primaryKey(),
+    userId: uuid4("user_id").references(() => user.id).notNull(),
+    url: varchar4("url", { length: 256 }).notNull(),
+    hotspot: json("hotspot").$type(),
+    height: integer2("height").notNull(),
+    width: integer2("width").notNull(),
+    ...getTimestampColumns()
+  },
+  (image2) => ({
+    ...getIndexFor(image2.userId)
+  })
+);
 
 // src/db/models/account.ts
-var account = pgTable4(
+var account = pgTable5(
   "account",
   {
-    id: serial2("id").primaryKey(),
-    userId: uuid4("user_id").references(() => user.id).notNull(),
-    handle: varchar4("handle", { length: 16 }).notNull(),
+    id: uuid5("id").defaultRandom().primaryKey(),
+    userId: uuid5("user_id").references(() => user.id).notNull(),
+    handle: varchar5("handle", { length: 16 }).notNull(),
+    profileData: json2("profile_data").$type().notNull().default({ links: [] }),
+    avatarId: uuid5("avatar_id").references(() => image.id),
     ...getTimestampColumns()
   },
   (account2) => ({
@@ -251,17 +278,21 @@ var accountRelations = relations4(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
     references: [user.id]
+  }),
+  avatar: one(image, {
+    fields: [account.avatarId],
+    references: [image.id]
   })
 }));
 
 // src/db/models/userPreferences.ts
 import { relations as relations5 } from "drizzle-orm";
-import { json, pgTable as pgTable5, uuid as uuid5 } from "drizzle-orm/pg-core";
-var userPreferences = pgTable5(
+import { json as json3, pgTable as pgTable6, uuid as uuid6 } from "drizzle-orm/pg-core";
+var userPreferences = pgTable6(
   "user_preferences",
   {
-    userId: uuid5("user_id").references(() => user.id).primaryKey(),
-    data: json("data").$type().default({ theme: "system", nsfw: "hidden" })
+    userId: uuid6("user_id").references(() => user.id).primaryKey(),
+    data: json3("data").$type().default({ theme: "system", nsfw: "hidden" })
   },
   (userPreferences2) => ({
     ...getIndexFor(userPreferences2.userId, true)
@@ -278,8 +309,8 @@ var userPreferencesRelations = relations5(
 );
 
 // src/db/db.ts
-var IS_PROD = (0, import_utils7.getEnvAsBool)("IS_PROD");
-var connection = IS_PROD ? vercel : postgres((0, import_utils7.getEnvAsStr)("POSTGRES_URL"));
+var IS_PROD = (0, import_utils8.getEnvAsBool)("IS_PROD");
+var connection = IS_PROD ? vercel : postgres((0, import_utils8.getEnvAsStr)("POSTGRES_URL"));
 var isVercelConnection = (connection2) => !("END" in connection2);
 var db = isVercelConnection(connection) ? vercelDrizzle(connection, { schema: models_exports }) : pgDrizzle(connection, { schema: models_exports });
 

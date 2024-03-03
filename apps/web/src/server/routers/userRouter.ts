@@ -12,10 +12,12 @@ import {
   updateAuthenticator,
 } from "@mbsm/db-layer";
 import {
+  AccountCreationFormSchema,
   Authenticator,
   AuthenticatorSchema,
   InviteCode,
   InviteCodeSchema,
+  UserAccountSchema,
 } from "@mbsm/types";
 import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 import { TRPCError } from "@trpc/server";
@@ -34,10 +36,16 @@ export const userRouter = router({
       z.object({
         email: z.string(),
         emailVerified: z.boolean(),
+        accounts: UserAccountSchema.array(),
       })
     )
     .query(async ({ ctx }) => {
-      const user = await getUserById(ctx.token.user.id);
+      const user = await db.query.user.findFirst({
+        where: ({ id }, { eq }) => eq(id, ctx.token.user.id),
+        with: { accounts: { with: { avatar: true } } },
+      });
+
+      console.log(user?.accounts);
 
       if (!user)
         throw new TRPCError({
@@ -48,6 +56,7 @@ export const userRouter = router({
       return {
         email: user.email,
         emailVerified: user.emailVerified,
+        accounts: user.accounts,
       };
     }),
   verifyEmail: authedProcedure
@@ -258,5 +267,26 @@ export const userRouter = router({
       };
 
       return { authenticator };
+    }),
+  createAccount: authedProcedure
+    .input(AccountCreationFormSchema)
+    .mutation(async ({ input, ctx: { token } }) => {
+      try {
+        await db.insert(schema.account).values({
+          ...input,
+          userId: token.user.id,
+        });
+      } catch (e) {
+        if (e instanceof Error && "code" in e && e.code === "23505") {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Handle already in use",
+          });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create account",
+        });
+      }
     }),
 });

@@ -21,6 +21,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var src_exports = {};
 __export(src_exports, {
   AccountCreationFormSchema: () => AccountCreationFormSchema,
+  AccountProfileDataSchema: () => AccountProfileDataSchema,
   AuthenticatorSchema: () => AuthenticatorSchema,
   EmailVerificationCodeFormSchema: () => EmailVerificationCodeFormSchema,
   EmptyResponseSchema: () => EmptyResponseSchema,
@@ -29,6 +30,7 @@ __export(src_exports, {
   GetUserAuthenticatorResponseSchema: () => GetUserAuthenticatorResponseSchema,
   GetUserMeResponseSchema: () => GetUserMeResponseSchema,
   GetUserSettingsResponseSchema: () => GetUserSettingsResponseSchema,
+  HotspotSchema: () => HotspotSchema,
   ImagePostSchema: () => ImagePostSchema,
   ImageSchema: () => ImageSchema,
   InviteCodeSchema: () => InviteCodeSchema,
@@ -3860,8 +3862,36 @@ var AccountCreationFormSchema = z.object({
   )
 });
 
+// src/models/image.ts
+var HotspotSchema = z.object({
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+  height: z.number().min(0).max(1),
+  width: z.number().min(0).max(1)
+});
+var ImageSchema = z.object({
+  id: z.string(),
+  url: z.string(),
+  hotspot: HotspotSchema.nullable(),
+  height: z.number().min(1),
+  width: z.number().min(1)
+});
+var isImage = getZodTypeGuard(ImageSchema);
+
 // src/models/account.ts
+var AccountProfileDataSchema = z.object({
+  bio: z.string().optional(),
+  links: z.array(
+    z.object({
+      url: z.string(),
+      title: z.string()
+    })
+  ),
+  birthday: z.string().optional()
+  // ISO date string
+});
 var UserAccountSchema = z.object({
+  avatar: ImageSchema.nullable(),
   handle: z.string()
 });
 
@@ -3881,18 +3911,6 @@ var InviteCodeSchema = z.object({
 var isInviteCode = getZodTypeGuard(InviteCodeSchema);
 
 // src/models/post.ts
-var ImageSchema = z.object({
-  id: z.string(),
-  url: z.string(),
-  hotspot: z.object({
-    x: z.number().min(0).max(1),
-    y: z.number().min(0).max(1),
-    height: z.number().min(0).max(1),
-    width: z.number().min(0).max(1)
-  }).optional(),
-  height: z.number().min(1),
-  width: z.number().min(1)
-});
 var PostPrimitiveSchema = z.object({
   id: z.string(),
   authorId: z.string(),
@@ -3909,7 +3927,6 @@ var TextPostSchema = PostPrimitiveSchema.extend({
   type: z.literal("text")
 });
 var PostSchema = z.union([ImagePostSchema, TextPostSchema]);
-var isImage = getZodTypeGuard(ImageSchema);
 var isImagePost = getZodTypeGuard(ImagePostSchema);
 var isTextPost = getZodTypeGuard(TextPostSchema);
 var isPost = getZodTypeGuard(PostSchema);
@@ -3973,6 +3990,7 @@ var isPatchUserAuthenticatorCredentialIdBody = getZodTypeGuard(
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   AccountCreationFormSchema,
+  AccountProfileDataSchema,
   AuthenticatorSchema,
   EmailVerificationCodeFormSchema,
   EmptyResponseSchema,
@@ -3981,6 +3999,7 @@ var isPatchUserAuthenticatorCredentialIdBody = getZodTypeGuard(
   GetUserAuthenticatorResponseSchema,
   GetUserMeResponseSchema,
   GetUserSettingsResponseSchema,
+  HotspotSchema,
   ImagePostSchema,
   ImageSchema,
   InviteCodeSchema,

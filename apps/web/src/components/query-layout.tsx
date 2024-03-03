@@ -37,17 +37,22 @@ export const QueryLayout = ({ children }: { children: ReactNode }) => {
             const { get, post } = api;
             if (typeof url === "string") {
               const path = url.split("/api")[1];
-              const res =
-                method === "GET"
-                  ? await get(path, {
-                      headers: opt?.headers as Record<string, string>,
-                    })
-                  : await post(path, JSON.parse(opt?.body as string), {
-                      headers: opt?.headers as Record<string, string>,
-                    });
-              return {
-                json: async () => res.data,
-              };
+              try {
+                const res =
+                  method === "GET"
+                    ? await get(path, {
+                        headers: opt?.headers as Record<string, string>,
+                      })
+                    : await post(path, JSON.parse(opt?.body as string), {
+                        headers: opt?.headers as Record<string, string>,
+                      });
+                return {
+                  json: async () => res.data,
+                };
+              } catch (err) {
+                console.error({ err });
+                throw err;
+              }
             }
             return new Promise(() => {});
           },

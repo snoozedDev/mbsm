@@ -351,13 +351,111 @@ declare const AccountCreationFormSchema: z.ZodObject<{
 }, {
     handle: string;
 }>;
+type AccountCreationForm = z.infer<typeof AccountCreationFormSchema>;
 
+declare const AccountProfileDataSchema: z.ZodObject<{
+    bio: z.ZodOptional<z.ZodString>;
+    links: z.ZodArray<z.ZodObject<{
+        url: z.ZodString;
+        title: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        url: string;
+        title: string;
+    }, {
+        url: string;
+        title: string;
+    }>, "many">;
+    birthday: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    links: {
+        url: string;
+        title: string;
+    }[];
+    bio?: string | undefined;
+    birthday?: string | undefined;
+}, {
+    links: {
+        url: string;
+        title: string;
+    }[];
+    bio?: string | undefined;
+    birthday?: string | undefined;
+}>;
+type AccountProfileData = z.infer<typeof AccountProfileDataSchema>;
 declare const UserAccountSchema: z.ZodObject<{
+    avatar: z.ZodNullable<z.ZodObject<{
+        id: z.ZodString;
+        url: z.ZodString;
+        hotspot: z.ZodNullable<z.ZodObject<{
+            x: z.ZodNumber;
+            y: z.ZodNumber;
+            height: z.ZodNumber;
+            width: z.ZodNumber;
+        }, "strip", z.ZodTypeAny, {
+            x: number;
+            y: number;
+            height: number;
+            width: number;
+        }, {
+            x: number;
+            y: number;
+            height: number;
+            width: number;
+        }>>;
+        height: z.ZodNumber;
+        width: z.ZodNumber;
+    }, "strip", z.ZodTypeAny, {
+        height: number;
+        width: number;
+        id: string;
+        url: string;
+        hotspot: {
+            x: number;
+            y: number;
+            height: number;
+            width: number;
+        } | null;
+    }, {
+        height: number;
+        width: number;
+        id: string;
+        url: string;
+        hotspot: {
+            x: number;
+            y: number;
+            height: number;
+            width: number;
+        } | null;
+    }>>;
     handle: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     handle: string;
+    avatar: {
+        height: number;
+        width: number;
+        id: string;
+        url: string;
+        hotspot: {
+            x: number;
+            y: number;
+            height: number;
+            width: number;
+        } | null;
+    } | null;
 }, {
     handle: string;
+    avatar: {
+        height: number;
+        width: number;
+        id: string;
+        url: string;
+        hotspot: {
+            x: number;
+            y: number;
+            height: number;
+            width: number;
+        } | null;
+    } | null;
 }>;
 type UserAccount = z.infer<typeof UserAccountSchema>;
 
@@ -381,26 +479,26 @@ declare const isAuthenticator: (value: unknown) => value is {
     addedAt: string;
 };
 
-declare const InviteCodeSchema: z.ZodObject<{
-    code: z.ZodString;
-    redeemed: z.ZodBoolean;
+declare const HotspotSchema: z.ZodObject<{
+    x: z.ZodNumber;
+    y: z.ZodNumber;
+    height: z.ZodNumber;
+    width: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    code: string;
-    redeemed: boolean;
+    x: number;
+    y: number;
+    height: number;
+    width: number;
 }, {
-    code: string;
-    redeemed: boolean;
+    x: number;
+    y: number;
+    height: number;
+    width: number;
 }>;
-type InviteCode = z.infer<typeof InviteCodeSchema>;
-declare const isInviteCode: (value: unknown) => value is {
-    code: string;
-    redeemed: boolean;
-};
-
 declare const ImageSchema: z.ZodObject<{
     id: z.ZodString;
     url: z.ZodString;
-    hotspot: z.ZodOptional<z.ZodObject<{
+    hotspot: z.ZodNullable<z.ZodObject<{
         x: z.ZodNumber;
         y: z.ZodNumber;
         height: z.ZodNumber;
@@ -419,28 +517,59 @@ declare const ImageSchema: z.ZodObject<{
     height: z.ZodNumber;
     width: z.ZodNumber;
 }, "strip", z.ZodTypeAny, {
-    id: string;
-    url: string;
     height: number;
     width: number;
-    hotspot?: {
+    id: string;
+    url: string;
+    hotspot: {
         x: number;
         y: number;
         height: number;
         width: number;
-    } | undefined;
+    } | null;
 }, {
-    id: string;
-    url: string;
     height: number;
     width: number;
-    hotspot?: {
+    id: string;
+    url: string;
+    hotspot: {
         x: number;
         y: number;
         height: number;
         width: number;
-    } | undefined;
+    } | null;
 }>;
+type ImageHotspot = z.infer<typeof HotspotSchema>;
+type Image = z.infer<typeof ImageSchema>;
+declare const isImage: (value: unknown) => value is {
+    height: number;
+    width: number;
+    id: string;
+    url: string;
+    hotspot: {
+        x: number;
+        y: number;
+        height: number;
+        width: number;
+    } | null;
+};
+
+declare const InviteCodeSchema: z.ZodObject<{
+    code: z.ZodString;
+    redeemed: z.ZodBoolean;
+}, "strip", z.ZodTypeAny, {
+    code: string;
+    redeemed: boolean;
+}, {
+    code: string;
+    redeemed: boolean;
+}>;
+type InviteCode = z.infer<typeof InviteCodeSchema>;
+declare const isInviteCode: (value: unknown) => value is {
+    code: string;
+    redeemed: boolean;
+};
+
 declare const PostPrimitiveSchema: z.ZodObject<{
     id: z.ZodString;
     authorId: z.ZodString;
@@ -465,8 +594,8 @@ declare const PostPrimitiveSchema: z.ZodObject<{
 }>;
 declare const ImagePostSchema: z.ZodObject<{
     id: z.ZodString;
-    authorId: z.ZodString;
     title: z.ZodOptional<z.ZodString>;
+    authorId: z.ZodString;
     body: z.ZodOptional<z.ZodString>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "atleastone">>;
     postedAt: z.ZodString;
@@ -474,7 +603,7 @@ declare const ImagePostSchema: z.ZodObject<{
     images: z.ZodArray<z.ZodObject<{
         id: z.ZodString;
         url: z.ZodString;
-        hotspot: z.ZodOptional<z.ZodObject<{
+        hotspot: z.ZodNullable<z.ZodObject<{
             x: z.ZodNumber;
             y: z.ZodNumber;
             height: z.ZodNumber;
@@ -493,27 +622,27 @@ declare const ImagePostSchema: z.ZodObject<{
         height: z.ZodNumber;
         width: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }, {
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }>, "atleastone">;
 }, "strip", z.ZodTypeAny, {
     type: "image";
@@ -521,27 +650,27 @@ declare const ImagePostSchema: z.ZodObject<{
     authorId: string;
     postedAt: string;
     images: [{
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }, ...{
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }[]];
     title?: string | undefined;
     body?: string | undefined;
@@ -552,27 +681,27 @@ declare const ImagePostSchema: z.ZodObject<{
     authorId: string;
     postedAt: string;
     images: [{
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }, ...{
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }[]];
     title?: string | undefined;
     body?: string | undefined;
@@ -580,8 +709,8 @@ declare const ImagePostSchema: z.ZodObject<{
 }>;
 declare const TextPostSchema: z.ZodObject<{
     id: z.ZodString;
-    authorId: z.ZodString;
     title: z.ZodOptional<z.ZodString>;
+    authorId: z.ZodString;
     body: z.ZodOptional<z.ZodString>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "atleastone">>;
     postedAt: z.ZodString;
@@ -605,8 +734,8 @@ declare const TextPostSchema: z.ZodObject<{
 }>;
 declare const PostSchema: z.ZodUnion<[z.ZodObject<{
     id: z.ZodString;
-    authorId: z.ZodString;
     title: z.ZodOptional<z.ZodString>;
+    authorId: z.ZodString;
     body: z.ZodOptional<z.ZodString>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "atleastone">>;
     postedAt: z.ZodString;
@@ -614,7 +743,7 @@ declare const PostSchema: z.ZodUnion<[z.ZodObject<{
     images: z.ZodArray<z.ZodObject<{
         id: z.ZodString;
         url: z.ZodString;
-        hotspot: z.ZodOptional<z.ZodObject<{
+        hotspot: z.ZodNullable<z.ZodObject<{
             x: z.ZodNumber;
             y: z.ZodNumber;
             height: z.ZodNumber;
@@ -633,27 +762,27 @@ declare const PostSchema: z.ZodUnion<[z.ZodObject<{
         height: z.ZodNumber;
         width: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }, {
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }>, "atleastone">;
 }, "strip", z.ZodTypeAny, {
     type: "image";
@@ -661,27 +790,27 @@ declare const PostSchema: z.ZodUnion<[z.ZodObject<{
     authorId: string;
     postedAt: string;
     images: [{
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }, ...{
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }[]];
     title?: string | undefined;
     body?: string | undefined;
@@ -692,35 +821,35 @@ declare const PostSchema: z.ZodUnion<[z.ZodObject<{
     authorId: string;
     postedAt: string;
     images: [{
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }, ...{
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }[]];
     title?: string | undefined;
     body?: string | undefined;
     tags?: [string, ...string[]] | undefined;
 }>, z.ZodObject<{
     id: z.ZodString;
-    authorId: z.ZodString;
     title: z.ZodOptional<z.ZodString>;
+    authorId: z.ZodString;
     body: z.ZodOptional<z.ZodString>;
     tags: z.ZodOptional<z.ZodArray<z.ZodString, "atleastone">>;
     postedAt: z.ZodString;
@@ -742,49 +871,36 @@ declare const PostSchema: z.ZodUnion<[z.ZodObject<{
     body?: string | undefined;
     tags?: [string, ...string[]] | undefined;
 }>]>;
-type Image = z.infer<typeof ImageSchema>;
 type ImagePost = z.infer<typeof ImagePostSchema>;
 type TextPost = z.infer<typeof TextPostSchema>;
 type Post = z.infer<typeof PostSchema>;
-declare const isImage: (value: unknown) => value is {
-    id: string;
-    url: string;
-    height: number;
-    width: number;
-    hotspot?: {
-        x: number;
-        y: number;
-        height: number;
-        width: number;
-    } | undefined;
-};
 declare const isImagePost: (value: unknown) => value is {
     type: "image";
     id: string;
     authorId: string;
     postedAt: string;
     images: [{
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }, ...{
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }[]];
     title?: string | undefined;
     body?: string | undefined;
@@ -805,27 +921,27 @@ declare const isPost: (value: unknown) => value is {
     authorId: string;
     postedAt: string;
     images: [{
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }, ...{
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }[]];
     title?: string | undefined;
     body?: string | undefined;
@@ -871,7 +987,7 @@ declare const UserSchema: z.ZodObject<{
     avatar: z.ZodObject<{
         id: z.ZodString;
         url: z.ZodString;
-        hotspot: z.ZodOptional<z.ZodObject<{
+        hotspot: z.ZodNullable<z.ZodObject<{
             x: z.ZodNumber;
             y: z.ZodNumber;
             height: z.ZodNumber;
@@ -890,85 +1006,85 @@ declare const UserSchema: z.ZodObject<{
         height: z.ZodNumber;
         width: z.ZodNumber;
     }, "strip", z.ZodTypeAny, {
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }, {
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     }>;
     bio: z.ZodOptional<z.ZodString>;
     links: z.ZodOptional<z.ZodArray<z.ZodObject<{
         name: z.ZodString;
         url: z.ZodString;
     }, "strip", z.ZodTypeAny, {
-        name: string;
         url: string;
+        name: string;
     }, {
-        name: string;
         url: string;
+        name: string;
     }>, "many">>;
     nsfw: z.ZodOptional<z.ZodBoolean>;
     joinedAt: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     id: string;
-    displayName: string;
-    username: string;
     avatar: {
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     };
+    displayName: string;
+    username: string;
     joinedAt: string;
     bio?: string | undefined;
     links?: {
-        name: string;
         url: string;
+        name: string;
     }[] | undefined;
     nsfw?: boolean | undefined;
 }, {
     id: string;
-    displayName: string;
-    username: string;
     avatar: {
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     };
+    displayName: string;
+    username: string;
     joinedAt: string;
     bio?: string | undefined;
     links?: {
-        name: string;
         url: string;
+        name: string;
     }[] | undefined;
     nsfw?: boolean | undefined;
 }>;
@@ -989,25 +1105,25 @@ type User = z.infer<typeof UserSchema>;
 type UserPreferences = z.infer<typeof UserPreferencesSchema>;
 declare const isUser: (value: unknown) => value is {
     id: string;
-    displayName: string;
-    username: string;
     avatar: {
-        id: string;
-        url: string;
         height: number;
         width: number;
-        hotspot?: {
+        id: string;
+        url: string;
+        hotspot: {
             x: number;
             y: number;
             height: number;
             width: number;
-        } | undefined;
+        } | null;
     };
+    displayName: string;
+    username: string;
     joinedAt: string;
     bio?: string | undefined;
     links?: {
-        name: string;
         url: string;
+        name: string;
     }[] | undefined;
     nsfw?: boolean | undefined;
 };
@@ -1020,4 +1136,4 @@ declare const isUserPreferences: (value: unknown) => value is {
 declare const getZodTypeGuard: <T extends ZodSchema<any, z.ZodTypeDef, any>>(schema: T) => (value: unknown) => value is z.TypeOf<T>;
 declare const getFormattedZodError: (error: z.ZodError) => string;
 
-export { AccountCreationFormSchema, Authenticator, AuthenticatorSchema, EmailVerificationCodeForm, EmailVerificationCodeFormSchema, EmptyResponse, EmptyResponseSchema, EnvVariablesKeys, ErrorResponse, ErrorResponseSchema, GetAuthSignInResponse, GetAuthSignInResponseSchema, GetUserAuthenticatorResponse, GetUserAuthenticatorResponseSchema, GetUserMeResponse, GetUserMeResponseSchema, GetUserSettingsResponse, GetUserSettingsResponseSchema, Image, ImagePost, ImagePostSchema, ImageSchema, InviteCode, InviteCodeSchema, PatchUserAuthenticatorCredentialIdBody, PatchUserAuthenticatorCredentialIdBodySchema, Post, PostAuthSignInVerifyBody, PostAuthSignInVerifyBodySchema, PostAuthSignupBody, PostAuthSignupBodySchema, PostAuthSignupResponse, PostAuthSignupResponseSchema, PostAuthSignupVerifyBody, PostAuthSignupVerifyBodySchema, PostPrimitiveSchema, PostSchema, PostUserEmailVerifyBody, PostUserEmailVerifyBodySchema, PutUserAuthenticatorResponse, PutUserAuthenticatorResponseSchema, SuccessResponse, SuccessResponseSchema, TextPost, TextPostSchema, Token, TokenSchema, User, UserAccount, UserAccountSchema, UserPreferences, UserPreferencesSchema, UserSchema, generateActionResponse, getFormattedZodError, getZodTypeGuard, isAuthenticator, isImage, isImagePost, isInviteCode, isPatchUserAuthenticatorCredentialIdBody, isPost, isPostAuthSignInVerifyBody, isPostAuthSignupBody, isPostAuthSignupVerifyBody, isTextPost, isToken, isUser, isUserPreferences };
+export { AccountCreationForm, AccountCreationFormSchema, AccountProfileData, AccountProfileDataSchema, Authenticator, AuthenticatorSchema, EmailVerificationCodeForm, EmailVerificationCodeFormSchema, EmptyResponse, EmptyResponseSchema, EnvVariablesKeys, ErrorResponse, ErrorResponseSchema, GetAuthSignInResponse, GetAuthSignInResponseSchema, GetUserAuthenticatorResponse, GetUserAuthenticatorResponseSchema, GetUserMeResponse, GetUserMeResponseSchema, GetUserSettingsResponse, GetUserSettingsResponseSchema, HotspotSchema, Image, ImageHotspot, ImagePost, ImagePostSchema, ImageSchema, InviteCode, InviteCodeSchema, PatchUserAuthenticatorCredentialIdBody, PatchUserAuthenticatorCredentialIdBodySchema, Post, PostAuthSignInVerifyBody, PostAuthSignInVerifyBodySchema, PostAuthSignupBody, PostAuthSignupBodySchema, PostAuthSignupResponse, PostAuthSignupResponseSchema, PostAuthSignupVerifyBody, PostAuthSignupVerifyBodySchema, PostPrimitiveSchema, PostSchema, PostUserEmailVerifyBody, PostUserEmailVerifyBodySchema, PutUserAuthenticatorResponse, PutUserAuthenticatorResponseSchema, SuccessResponse, SuccessResponseSchema, TextPost, TextPostSchema, Token, TokenSchema, User, UserAccount, UserAccountSchema, UserPreferences, UserPreferencesSchema, UserSchema, generateActionResponse, getFormattedZodError, getZodTypeGuard, isAuthenticator, isImage, isImagePost, isInviteCode, isPatchUserAuthenticatorCredentialIdBody, isPost, isPostAuthSignInVerifyBody, isPostAuthSignupBody, isPostAuthSignupVerifyBody, isTextPost, isToken, isUser, isUserPreferences };

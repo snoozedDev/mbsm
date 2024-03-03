@@ -18,3 +18,5 @@ export const AccountCreationFormSchema = z.object({
       "Handle must only contain letters, numbers, underscores, and hyphens"
     ),
 });
+
+export type AccountCreationForm = z.infer<typeof AccountCreationFormSchema>;

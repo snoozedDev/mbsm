@@ -5,6 +5,7 @@ import * as drizzle_orm_postgres_js from 'drizzle-orm/postgres-js';
 import * as drizzle_orm_vercel_postgres from 'drizzle-orm/vercel-postgres';
 import * as drizzle_orm_pg_core from 'drizzle-orm/pg-core';
 import { PgInsertValue, PgUpdateSetSource } from 'drizzle-orm/pg-core';
+import * as zod from 'zod';
 import * as postgres from 'postgres';
 import * as pg from 'pg';
 import { InviteCode } from '@mbsm/types';
@@ -53,10 +54,10 @@ declare const account: drizzle_orm_pg_core.PgTableWithColumns<{
         id: drizzle_orm_pg_core.PgColumn<{
             name: "id";
             tableName: "account";
-            dataType: "number";
-            columnType: "PgSerial";
-            data: number;
-            driverParam: number;
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
             notNull: true;
             hasDefault: true;
             enumValues: undefined;
@@ -86,11 +87,43 @@ declare const account: drizzle_orm_pg_core.PgTableWithColumns<{
             enumValues: [string, ...string[]];
             baseColumn: never;
         }, {}, {}>;
+        profileData: drizzle_orm_pg_core.PgColumn<{
+            name: "profile_data";
+            tableName: "account";
+            dataType: "json";
+            columnType: "PgJson";
+            data: {
+                links: {
+                    url: string;
+                    title: string;
+                }[];
+                bio?: string | undefined;
+                birthday?: string | undefined;
+            };
+            driverParam: unknown;
+            notNull: true;
+            hasDefault: true;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        avatarId: drizzle_orm_pg_core.PgColumn<{
+            name: "avatar_id";
+            tableName: "account";
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
     };
     dialect: "pg";
 }>;
 declare const accountRelations: drizzle_orm.Relations<"account", {
     user: drizzle_orm.One<"user", true>;
+    avatar: drizzle_orm.One<"image", false>;
 }>;
 
 declare const authenticator: drizzle_orm_pg_core.PgTableWithColumns<{
@@ -246,6 +279,127 @@ declare const authenticator: drizzle_orm_pg_core.PgTableWithColumns<{
 }>;
 declare const authenticatorRelations: drizzle_orm.Relations<"authenticator", {
     user: drizzle_orm.One<"user", true>;
+}>;
+
+declare const image: drizzle_orm_pg_core.PgTableWithColumns<{
+    name: "image";
+    schema: undefined;
+    columns: {
+        deletedAt: drizzle_orm_pg_core.PgColumn<{
+            name: "deleted_at";
+            tableName: "image";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        createdAt: drizzle_orm_pg_core.PgColumn<{
+            name: "created_at";
+            tableName: "image";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        updatedAt: drizzle_orm_pg_core.PgColumn<{
+            name: "updated_at";
+            tableName: "image";
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        id: drizzle_orm_pg_core.PgColumn<{
+            name: "id";
+            tableName: "image";
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: true;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        userId: drizzle_orm_pg_core.PgColumn<{
+            name: "user_id";
+            tableName: "image";
+            dataType: "string";
+            columnType: "PgUUID";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        url: drizzle_orm_pg_core.PgColumn<{
+            name: "url";
+            tableName: "image";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
+        hotspot: drizzle_orm_pg_core.PgColumn<{
+            name: "hotspot";
+            tableName: "image";
+            dataType: "json";
+            columnType: "PgJson";
+            data: {
+                x: number;
+                y: number;
+                height: number;
+                width: number;
+            };
+            driverParam: unknown;
+            notNull: false;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        height: drizzle_orm_pg_core.PgColumn<{
+            name: "height";
+            tableName: "image";
+            dataType: "number";
+            columnType: "PgInteger";
+            data: number;
+            driverParam: string | number;
+            notNull: true;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+        width: drizzle_orm_pg_core.PgColumn<{
+            name: "width";
+            tableName: "image";
+            dataType: "number";
+            columnType: "PgInteger";
+            data: number;
+            driverParam: string | number;
+            notNull: true;
+            hasDefault: false;
+            enumValues: undefined;
+            baseColumn: never;
+        }, {}, {}>;
+    };
+    dialect: "pg";
 }>;
 
 declare const inviteCode: drizzle_orm_pg_core.PgTableWithColumns<{
@@ -414,6 +568,38 @@ declare const user: drizzle_orm_pg_core.PgTableWithColumns<{
 declare const userRelations: drizzle_orm.Relations<"user", {
     authenticators: drizzle_orm.Many<"authenticator">;
     inviteCodes: drizzle_orm.Many<"invite_codes">;
+    accounts: drizzle_orm.Many<"account">;
+}>;
+declare const userSchema: zod.ZodObject<{
+    deletedAt: zod.ZodNullable<zod.ZodDate>;
+    createdAt: zod.ZodDate;
+    updatedAt: zod.ZodDate;
+    id: zod.ZodString;
+    email: zod.ZodString;
+    emailVerified: zod.ZodBoolean;
+    protected: zod.ZodBoolean;
+    currentRegChallenge: zod.ZodNullable<zod.ZodString>;
+    role: zod.ZodEnum<["user", "mod", "admin", "foru"]>;
+}, zod.UnknownKeysParam, zod.ZodTypeAny, {
+    id: string;
+    email: string;
+    emailVerified: boolean;
+    protected: boolean;
+    currentRegChallenge: string | null;
+    role: "user" | "mod" | "admin" | "foru";
+    deletedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+}, {
+    id: string;
+    email: string;
+    emailVerified: boolean;
+    protected: boolean;
+    currentRegChallenge: string | null;
+    role: "user" | "mod" | "admin" | "foru";
+    deletedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
 }>;
 
 declare const userPreferences: drizzle_orm_pg_core.PgTableWithColumns<{
@@ -459,6 +645,7 @@ declare const schema_account: typeof account;
 declare const schema_accountRelations: typeof accountRelations;
 declare const schema_authenticator: typeof authenticator;
 declare const schema_authenticatorRelations: typeof authenticatorRelations;
+declare const schema_image: typeof image;
 declare const schema_inviteCode: typeof inviteCode;
 declare const schema_inviteCodeRelations: typeof inviteCodeRelations;
 declare const schema_roleEnum: typeof roleEnum;
@@ -466,8 +653,9 @@ declare const schema_user: typeof user;
 declare const schema_userPreferences: typeof userPreferences;
 declare const schema_userPreferencesRelations: typeof userPreferencesRelations;
 declare const schema_userRelations: typeof userRelations;
+declare const schema_userSchema: typeof userSchema;
 declare namespace schema {
-  export { schema_account as account, schema_accountRelations as accountRelations, schema_authenticator as authenticator, schema_authenticatorRelations as authenticatorRelations, schema_inviteCode as inviteCode, schema_inviteCodeRelations as inviteCodeRelations, schema_roleEnum as roleEnum, schema_user as user, schema_userPreferences as userPreferences, schema_userPreferencesRelations as userPreferencesRelations, schema_userRelations as userRelations };
+  export { schema_account as account, schema_accountRelations as accountRelations, schema_authenticator as authenticator, schema_authenticatorRelations as authenticatorRelations, schema_image as image, schema_inviteCode as inviteCode, schema_inviteCodeRelations as inviteCodeRelations, schema_roleEnum as roleEnum, schema_user as user, schema_userPreferences as userPreferences, schema_userPreferencesRelations as userPreferencesRelations, schema_userRelations as userRelations, schema_userSchema as userSchema };
 }
 
 declare const db: drizzle_orm_vercel_postgres.VercelPgDatabase<typeof schema> | drizzle_orm_postgres_js.PostgresJsDatabase<typeof schema>;

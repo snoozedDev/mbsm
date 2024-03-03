@@ -10,7 +10,8 @@ const serverUsers: User[] = [
       id: "TG5elKTaKd3iiUL7",
       height: 300,
       width: 300,
-      url: "https://cdn.mbsm.io/full/TG5elKTaKd3iiUL7.png",
+      url: "https://nf4afcgnw5gxczd6.public.blob.vercel-storage.com/full/TG5elKTaKd3iiUL7-8UxFDdem2rFw98XpBuGNU6O5c1pGqz.png",
+      hotspot: null,
     },
     bio: "the creator of this website and nanachi god",
     links: [
@@ -58,7 +59,7 @@ const serverPosts: Post[] = [
           width: 0.5,
         },
         id: "yumWzPVApyokUTTm",
-        url: "https://cdn.mbsm.io/full/yumWzPVApyokUTTm.png",
+        url: "https://nf4afcgnw5gxczd6.public.blob.vercel-storage.com/full/yumWzPVApyokUTTm-1TajvsklDxAmVgN9NgBE4qKzqsJsnn.png",
         height: 2225,
         width: 1913,
       },

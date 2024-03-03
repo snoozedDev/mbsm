@@ -71,3 +71,12 @@ export const useAddAuthenticatorMutation = () => {
 
   return { requestAddAuthenticator, isLoading };
 };
+
+export const useCreateAccountMutation = () => {
+  const utils = trpc.useUtils();
+  return trpc.user.createAccount.useMutation({
+    onSuccess: () => {
+      utils.user.me.invalidate();
+    },
+  });
+};

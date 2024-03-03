@@ -5,6 +5,7 @@ export const api = axios.create({
   withCredentials: true,
   timeout: 10000,
   timeoutErrorMessage: "Request timed out",
+  validateStatus: (status) => status !== 401,
 });
 // Define the structure of a retry queue item
 interface RetryQueueItem {

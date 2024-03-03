@@ -1,7 +1,7 @@
 import { Token } from "@mbsm/types";
 import { getEnvAsStr } from "@mbsm/utils";
 import { TRPCError, initTRPC } from "@trpc/server";
-import { RateLimiter } from "./rateLimit";
+import { RateLimiter, globalLimiter } from "./rateLimit";
 
 type Context = {
   token?: Token;
@@ -16,20 +16,37 @@ export const router = t.router;
 export const publicProcedure = t.procedure;
 export const createCallerFactory = t.createCallerFactory;
 
-export const webProcedure = publicProcedure.use(async function isWeb(opts) {
-  const { resHeaders, req } = opts.ctx;
+export const limiterMiddleware = (limiter: RateLimiter) =>
+  t.middleware(async function withLimiter(opts) {
+    const { req } = opts.ctx;
+    if (!req) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
 
-  if (!req || !resHeaders) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
+    const success = await limiter.middleware(req);
+    if (!success) {
+      throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+    }
 
-  return opts.next({
-    ctx: {
-      resHeaders,
-      req,
-    },
+    return opts.next();
   });
-});
+
+export const webProcedure = publicProcedure
+  .use(limiterMiddleware(globalLimiter))
+  .use(async function isWeb(opts) {
+    const { resHeaders, req } = opts.ctx;
+
+    if (!req || !resHeaders) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    return opts.next({
+      ctx: {
+        resHeaders,
+        req,
+      },
+    });
+  });
 
 export const authedProcedure = webProcedure.use(async function isAuthed(opts) {
   const { token } = opts.ctx;
@@ -64,18 +81,3 @@ export const serverProcedure = publicProcedure.use(
     });
   }
 );
-
-export const limiterMiddleware = (limiter: RateLimiter) =>
-  t.middleware(async function withLimiter(opts) {
-    const { req } = opts.ctx;
-    if (!req) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-
-    const success = await limiter.middleware(req);
-    if (!success) {
-      throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
-    }
-
-    return opts.next();
-  });

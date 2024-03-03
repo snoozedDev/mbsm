@@ -19,18 +19,18 @@ export const globalLimiter = createRateLimiter({
   prefix: "@mbsm/global",
 });
 
-export const registerLimiter = createRateLimiter({
+export const signUpLimiter = createRateLimiter({
   redis,
-  limiter: Ratelimit.slidingWindow(20, "10 m"),
+  limiter: Ratelimit.slidingWindow(6, "1 h"),
   analytics: true,
-  prefix: "@mbsm/register",
+  prefix: "@mbsm/signUp",
 });
 
-export const loginLimiter = createRateLimiter({
+export const signInLimiter = createRateLimiter({
   redis,
-  limiter: Ratelimit.slidingWindow(20, "10 m"),
+  limiter: Ratelimit.slidingWindow(10, "30 m"),
   analytics: true,
-  prefix: "@mbsm/login",
+  prefix: "@mbsm/signIn",
 });
 
 export type RateLimiter = ReturnType<typeof createRateLimiter>;
