@@ -4,7 +4,7 @@ const createRateLimiter = (opts: RatelimitConfig) => {
   const rateLimiter = new Ratelimit(opts);
 
   const middleware = async (req: Request): Promise<boolean> => {
-    const ip = req.headers.get("cf-connecting-ip") || "_";
+    const ip = req.headers.get("x-real-ip") || "_";
     const { success } = await rateLimiter.limit(ip);
     return success;
   };
