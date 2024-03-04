@@ -19,10 +19,10 @@ export const useUpdateAuthenticatorMutation = () => {
 
   return trpc.user.updateAuthenticator.useMutation({
     onSuccess: () => {
-      utils.user.settings.invalidate();
+      utils.user.settings.refetch();
     },
     onError: () => {
-      utils.user.settings.invalidate();
+      utils.user.settings.reset();
     },
   });
 };
@@ -32,7 +32,7 @@ export const useEmailVerificationMutation = () => {
 
   return trpc.user.verifyEmail.useMutation({
     onSuccess: () => {
-      utils.user.me.invalidate();
+      utils.user.me.refetch();
       toast("Your email has been verified.");
     },
   });
@@ -61,7 +61,7 @@ export const useAddAuthenticatorMutation = () => {
           : undefined
       );
     } catch (err) {
-      toast("Failed to add authenticator", {
+      toast.error("Failed to add authenticator", {
         description: getErrorMessage(err),
       });
     } finally {
@@ -76,7 +76,7 @@ export const useCreateAccountMutation = () => {
   const utils = trpc.useUtils();
   return trpc.user.createAccount.useMutation({
     onSuccess: () => {
-      utils.user.me.invalidate();
+      utils.user.me.refetch();
     },
   });
 };

@@ -4,8 +4,6 @@ import {
   useCreateAccountMutation,
   useUserMeQuery,
 } from "@/queries/userQueries";
-import { useAppDispatch } from "@/redux/hooks";
-import { addModal } from "@/redux/slices/modalSlice";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AccountCreationForm,
@@ -20,6 +18,9 @@ import { AccountAvatar } from "./account-avatar";
 import { FadeFromBelow } from "./containers/fade-from-below";
 import { useIsDesktop } from "./hooks/isDesktop";
 import { LoadingDots } from "./loading-dots";
+import { useModals } from "./modals-layer";
+import { CreateAccountModal } from "./modals/CreateAccountModal";
+import { ManageAccountModal } from "./modals/ManageAccountModal";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import {
@@ -58,7 +59,7 @@ const SingleAccount = ({
   account: UserAccount;
   isActive?: boolean;
 }) => {
-  const dispatch = useAppDispatch();
+  const { push } = useModals();
   const { onSwitchActiveAccount } = useAccountSwitcher();
 
   return (
@@ -94,14 +95,11 @@ const SingleAccount = ({
         )}
       </AnimatePresence>
       <Button
-        onClick={() => {
-          dispatch(
-            addModal({
-              id: "manage_account",
-              props: { handle: account.handle },
-            })
-          );
-        }}
+        onClick={() =>
+          push(({ id }) => (
+            <ManageAccountModal id={id} handle={account.handle} />
+          ))
+        }
         className="px-3 disabled:p-0 disabled:w-0 disabled:overflow-hidden ml-2"
         variant="outline"
       >
@@ -124,7 +122,7 @@ const LoadingAccount = () => {
 };
 
 export const UserAccounts = () => {
-  const dispatch = useAppDispatch();
+  const { push } = useModals();
   const { isPending, data } = useUserMeQuery();
   const { activeAccount } = useAccountSwitcher();
   const accounts = data?.accounts;
@@ -159,7 +157,7 @@ export const UserAccounts = () => {
           <div className="bg-muted/50 p-4 flex flex-row-reverse">
             <Button
               disabled={isPending}
-              onClick={() => dispatch(addModal({ id: "create_account" }))}
+              onClick={() => push(({ id }) => <CreateAccountModal id={id} />)}
             >
               Create Account
             </Button>
@@ -173,7 +171,7 @@ export const UserAccounts = () => {
               {`You can't post or comment without an account.`}
             </p>
             <Button
-              onClick={() => dispatch(addModal({ id: "create_account" }))}
+              onClick={() => push(({ id }) => <CreateAccountModal id={id} />)}
             >
               Create Account
             </Button>

@@ -1,7 +1,8 @@
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { dismissModal, type ModalType } from "@/redux/slices/modalSlice";
-import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import { ReactNode, useEffect, useMemo, useState } from "react";
+import * as portals from "react-reverse-portal";
 import { useIsDesktop } from "./hooks/isDesktop";
+import { useModals } from "./modals-layer";
 import {
   Dialog,
   DialogContent,
@@ -17,31 +18,28 @@ import {
   DrawerTitle,
 } from "./ui/drawer";
 
-export const Modal = <T extends ModalType["id"]>({
+export const Modal = ({
   id,
-  renderContent,
+  children,
   description,
-  title,
   shouldClose,
   dismissable,
+  title,
 }: {
-  id: T;
+  id: string;
   title?: string;
   description?: string;
   shouldClose?: boolean;
-  renderContent: (args: { close: () => void }) => React.JSX.Element;
   dismissable?: boolean;
+  children: ReactNode;
 }) => {
-  const modals = useAppSelector((s) => s.modal.modals);
+  const { close } = useModals();
+  const portalNode = useMemo(() => portals.createHtmlPortalNode(), []);
   const [open, setOpen] = useState(true);
-  const dispatch = useAppDispatch();
   const isDesktop = useIsDesktop();
 
-  const selfIndex = modals.findIndex((m) => m.id === id);
-  const isLast = selfIndex === modals.length - 1;
-
   const Wrapper = isDesktop ? Dialog : Drawer;
-  const Content = isDesktop ? DialogContent : DrawerContent;
+  const ContentWrapper = isDesktop ? DialogContent : DrawerContent;
   const Header = isDesktop ? DialogHeader : DrawerHeader;
   const Title = isDesktop ? DialogTitle : DrawerTitle;
   const Description = isDesktop ? DialogDescription : DrawerDescription;
@@ -49,7 +47,7 @@ export const Modal = <T extends ModalType["id"]>({
   useEffect(() => {
     if (!open) {
       setTimeout(() => {
-        dispatch(dismissModal());
+        close(id);
       }, 250);
     }
   }, [open]);
@@ -59,22 +57,28 @@ export const Modal = <T extends ModalType["id"]>({
   }, [shouldClose]);
 
   return (
-    <Wrapper open={open} onOpenChange={setOpen} dismissible={dismissable}>
-      <Content
-        onFocusOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-        onPointerDownOutside={(e) => e.preventDefault()}
-      >
-        <Header>
-          {title && <Title className="mb-4 text-2xl">{title}</Title>}
-          {description && (
-            <Description className="text-base text-center">
-              {description}
-            </Description>
-          )}
-          {renderContent({ close: () => setOpen(false) })}
-        </Header>
-      </Content>
-    </Wrapper>
+    <>
+      <portals.InPortal node={portalNode}>{children}</portals.InPortal>
+      <Wrapper open={open} onOpenChange={setOpen} dismissible={dismissable}>
+        <ContentWrapper
+          onFocusOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+          onPointerDownOutside={(e) => e.preventDefault()}
+          className={cn("px-6 pb-6 flex flex-col items-stretch")}
+        >
+          <Header>
+            {title && <Title className="mb-4 text-2xl">{title}</Title>}
+            {description && (
+              <Description className="text-base text-center">
+                {description}
+              </Description>
+            )}
+          </Header>
+          <div>
+            <portals.OutPortal node={portalNode} />
+          </div>
+        </ContentWrapper>
+      </Wrapper>
+    </>
   );
 };

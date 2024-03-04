@@ -1,7 +1,10 @@
 "use client";
+import { cn } from "@/lib/utils";
+import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export const ThemeSwitcher = () => {
   const [mounted, setMounted] = useState(false);
@@ -27,9 +30,45 @@ export const ThemeSwitcher = () => {
       value={currentTheme}
       onValueChange={onChangeTheme}
     >
-      <ToggleGroupItem value="dark">D</ToggleGroupItem>
-      <ToggleGroupItem value="system">S</ToggleGroupItem>
-      <ToggleGroupItem value="light">L</ToggleGroupItem>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <ToggleGroupItem
+            value="dark"
+            className={cn(currentTheme === "dark" && "bg-accent")}
+          >
+            <Moon className="h-4" />
+          </ToggleGroupItem>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Dark Theme</p>
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <ToggleGroupItem
+            value="system"
+            className={cn(currentTheme === "system" && "bg-accent")}
+          >
+            <Monitor className="h-4" />
+          </ToggleGroupItem>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>System Theme</p>
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <ToggleGroupItem
+            value="light"
+            className={cn(currentTheme === "light" && "bg-accent")}
+          >
+            <Sun className="h-4" />
+          </ToggleGroupItem>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Light Theme</p>
+        </TooltipContent>
+      </Tooltip>
     </ToggleGroup>
   );
 };

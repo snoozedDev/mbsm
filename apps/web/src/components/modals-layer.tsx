@@ -1,28 +1,57 @@
 "use client";
 
-import { useAppSelector } from "@/redux/hooks";
-import type { ModalType } from "@/redux/slices/modalSlice";
-import { CreateAccountModal } from "./modals/CreateAccountModal";
-import { EditImageModal } from "./modals/EditImageModal";
-import { ManageAccountModal } from "./modals/ManageAccountModal";
+import React, { Fragment, ReactElement, ReactNode, useState } from "react";
 
-export const ModalsLayer = () => {
-  const modals = useAppSelector((s) => s.modal.modals);
-
-  return modals.map((modal, i) => (
-    <ModalMapper key={`${modal.id}-${i}`} modal={modal} />
-  ));
+type ModalType = {
+  id: string;
+  renderElement: (props: { id: string }) => ReactElement;
 };
 
-const ModalMapper = ({ modal }: { modal: ModalType }) => {
-  switch (modal.id) {
-    case "create_account":
-      return <CreateAccountModal />;
-    case "manage_account":
-      return <ManageAccountModal {...modal.props} />;
-    case "edit_image":
-      return <EditImageModal {...modal.props} />;
-    default:
-      return null;
-  }
+type ModalContextType = {
+  currentlyActiveModal: ModalType | undefined;
+  modals: ModalType[];
+  close: (id: string) => void;
+  push: (
+    renderElement: ModalType["renderElement"],
+    id?: ModalType["id"]
+  ) => void;
 };
+
+const ModalContext = React.createContext<ModalContextType>({
+  close: () => {},
+  push: () => {},
+  modals: [],
+  currentlyActiveModal: undefined,
+});
+
+export const ModalsProvider = ({ children }: { children: ReactNode }) => {
+  const [modals, setModals] = useState<ModalType[]>([]);
+  const currentlyActiveModal = modals[modals.length - 1];
+
+  const close = (id: string) => {
+    setModals((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const push: ModalContextType["push"] = (renderElement, givenId) => {
+    const id = givenId || Math.random().toString(36).substring(7);
+    setModals((prev) => [
+      ...prev.filter((m) => m.id !== id),
+      { renderElement, id },
+    ]);
+  };
+
+  return (
+    <ModalContext.Provider
+      value={{ push, close, modals, currentlyActiveModal }}
+    >
+      <>
+        {modals.map((m) => (
+          <Fragment key={m.id}>{m.renderElement({ id: m.id })}</Fragment>
+        ))}
+        {children}
+      </>
+    </ModalContext.Provider>
+  );
+};
+
+export const useModals = () => React.useContext(ModalContext);

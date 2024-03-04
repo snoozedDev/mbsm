@@ -45,8 +45,6 @@ export const userRouter = router({
         with: { accounts: { with: { avatar: true } } },
       });
 
-      console.log(user?.accounts);
-
       if (!user)
         throw new TRPCError({
           code: "NOT_FOUND",

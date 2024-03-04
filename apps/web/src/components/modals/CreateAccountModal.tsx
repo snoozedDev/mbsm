@@ -17,7 +17,7 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 
-export const CreateAccountModal = () => {
+export const CreateAccountModal = ({ id }: { id: string }) => {
   const [shouldClose, setShouldClose] = useState(false);
   const form = useForm<AccountCreationForm>({
     resolver: zodResolver(AccountCreationFormSchema),
@@ -36,15 +36,19 @@ export const CreateAccountModal = () => {
       form.setError("handle", {
         message: error.message,
       });
-    if (isSuccess) setShouldClose(true);
+    if (isSuccess) close();
   }, [error, isSuccess]);
 
   const onSubmit = (values: AccountCreationForm) => {
     createAccount.mutate(values);
   };
 
-  const renderForm = ({ close }: { close: () => void }) => {
-    return (
+  const close = () => {
+    setShouldClose(true);
+  };
+
+  return (
+    <Modal id={id} shouldClose={shouldClose}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
@@ -86,14 +90,6 @@ export const CreateAccountModal = () => {
           </div>
         </form>
       </Form>
-    );
-  };
-
-  return (
-    <Modal
-      id="create_account"
-      shouldClose={shouldClose}
-      renderContent={renderForm}
-    />
+    </Modal>
   );
 };

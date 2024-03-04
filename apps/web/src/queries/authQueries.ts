@@ -19,7 +19,7 @@ export const useSignOutMutation = () => {
   return trpc.auth.signOut.useMutation({
     onSuccess: () => {
       toast("You have been logged out.");
-      utils.user.me.invalidate();
+      utils.user.me.reset();
       router.push("/");
     },
     retry: false,
@@ -43,7 +43,7 @@ export const useSignInMutation = () => {
       const { options } = await startSignIn.mutateAsync();
       const attRes = await startAuthentication(options);
       await verifySignIn.mutateAsync({ attRes });
-      utils.user.me.invalidate();
+      utils.user.me.reset();
     } catch (err) {
       toast("Login failed", { description: getErrorMessage(err) });
     } finally {
@@ -68,7 +68,7 @@ export const useSignUpMutation = () => {
       const { options } = await startSignup.mutateAsync(values);
       const attRes = await startRegistration(options);
       await verifySignup.mutateAsync({ ...values, attRes });
-      utils.user.me.invalidate();
+      utils.user.me.reset();
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {

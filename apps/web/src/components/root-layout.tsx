@@ -1,7 +1,7 @@
 import NextTopLoader from "nextjs-toploader";
 import { ReactNode } from "react";
-import { CommandBar } from "./command-bar";
-import { ModalsLayer } from "./modals-layer";
+import { CommandBarProvider } from "./command-bar";
+import { ModalsProvider } from "./modals-layer";
 import { QueryLayout } from "./query-layout";
 import { StoreProvider } from "./store-provider";
 import { NextThemeProvider } from "./theme-provider";
@@ -19,9 +19,9 @@ export const RootLayout = ({ children }: { children: ReactNode }) => {
         <TooltipProvider>
           <QueryLayout>
             <StoreProvider>
-              <CommandBar />
-              <ModalsLayer />
-              {children}
+              <ModalsProvider>
+                <CommandBarProvider>{children}</CommandBarProvider>
+              </ModalsProvider>
             </StoreProvider>
           </QueryLayout>
         </TooltipProvider>

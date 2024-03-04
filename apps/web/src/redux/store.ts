@@ -7,12 +7,10 @@ import {
   REGISTER,
   REHYDRATE,
 } from "redux-persist";
-import { modalReducer } from "./slices/modalSlice";
 import { sessionPerfsReducer } from "./slices/sessionPerfsSlice";
 
 export const store = configureStore({
   reducer: {
-    modal: modalReducer,
     sessionPerfs: sessionPerfsReducer,
   },
   devTools: process.env.NODE_ENV !== "production",

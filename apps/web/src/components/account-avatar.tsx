@@ -1,17 +1,27 @@
+import { cn } from "@/lib/utils";
 import { UserAccount } from "@mbsm/types";
-import { forwardRef } from "react";
+import { ReactNode, forwardRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 export const AccountAvatar = forwardRef<
   HTMLSpanElement,
   {
     account: UserAccount;
+    children?: ReactNode;
   } & React.ComponentProps<typeof Avatar>
->(function AccountAvatar({ account, ...props }, ref) {
+>(function AccountAvatar({ account, className, ...props }, ref) {
   return (
-    <Avatar ref={ref} {...props}>
-      <AvatarImage src={account.avatar?.url} />
-      <AvatarFallback>{account.handle[0]}</AvatarFallback>
+    <Avatar ref={ref} className={cn("rounded-lg", className)} {...props}>
+      <AvatarImage
+        className="rounded-lg"
+        src={account.avatar?.url}
+        alt={`@${account.handle}`}
+      />
+      {props.children ?? (
+        <AvatarFallback className="rounded-lg">
+          {account.handle[0]}
+        </AvatarFallback>
+      )}
     </Avatar>
   );
 });
