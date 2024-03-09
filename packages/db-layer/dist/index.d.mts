@@ -661,6 +661,10 @@ declare namespace schema {
 declare const db: drizzle_orm_vercel_postgres.VercelPgDatabase<typeof schema> | drizzle_orm_postgres_js.PostgresJsDatabase<typeof schema>;
 
 declare const insertAccount: (values: PgInsertValue<typeof account>) => Promise<pg.QueryResult<never> | postgres.RowList<never[]>>;
+declare const updateAccount: ({ id, fields, }: {
+    id: string;
+    fields: PgUpdateSetSource<typeof account>;
+}) => Promise<pg.QueryResult<never> | postgres.RowList<never[]>>;
 
 declare const updateAuthenticator: ({ id, fields, }: {
     id: number;
@@ -774,4 +778,4 @@ declare const getUserById: (id: string) => Promise<{
 
 declare const redis: _vercel_kv.VercelKV;
 
-export { clearCurrentUserChallenge, db, getAuthenticatorAndUserByCredentialId, getAuthenticatorByCredentialId, getAuthenticatorsForUser, getUnredeemedInviteCode, getUserByEmail, getUserById, getUserInviteCodes, insertAccount, insertAuthenticator, insertInviteCodes, insertUser, redis, schema, updateAuthenticator, updateInviteCode, updateUser };
+export { clearCurrentUserChallenge, db, getAuthenticatorAndUserByCredentialId, getAuthenticatorByCredentialId, getAuthenticatorsForUser, getUnredeemedInviteCode, getUserByEmail, getUserById, getUserInviteCodes, insertAccount, insertAuthenticator, insertInviteCodes, insertUser, redis, schema, updateAccount, updateAuthenticator, updateInviteCode, updateUser };

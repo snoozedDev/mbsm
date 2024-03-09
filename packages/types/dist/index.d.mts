@@ -330,7 +330,7 @@ declare const isPatchUserAuthenticatorCredentialIdBody: (value: unknown) => valu
     name: string;
 };
 
-declare const envVariables: readonly ["IS_PROD", "POSTGRES_URL", "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DATABASE", "POSTGRES_USER", "POSTGRES_PASSWORD", "KV_URL", "KV_REST_API_URL", "KV_REST_API_TOKEN", "KV_REST_API_READ_ONLY_TOKEN", "BLOB_READ_WRITE_TOKEN", "EDGE_CONFIG", "ORIGIN", "RP_NAME", "RP_ID", "SERVER_PROCEDURE_SECRET", "SECRET_ATOKEN", "SECRET_RTOKEN", "RESEND_API_KEY", "DEV_VERIFICATION_CODE", "REUSABLE_INVITE_CODE"];
+declare const envVariables: readonly ["IS_PROD", "POSTGRES_URL", "POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DATABASE", "POSTGRES_USER", "POSTGRES_PASSWORD", "KV_URL", "KV_REST_API_URL", "KV_REST_API_TOKEN", "KV_REST_API_READ_ONLY_TOKEN", "BLOB_READ_WRITE_TOKEN", "EDGE_CONFIG", "ORIGIN", "RP_NAME", "RP_ID", "SERVER_PROCEDURE_SECRET", "SECRET_ATOKEN", "SECRET_RTOKEN", "RESEND_API_KEY", "DEV_VERIFICATION_CODE", "REUSABLE_INVITE_CODE", "NGROK_DOMAIN"];
 type EnvVariablesType = {
     [K in (typeof envVariables)[number]]: string;
 };
@@ -402,11 +402,11 @@ declare const UserAccountSchema: z.ZodObject<{
             height: number;
             width: number;
         }>>;
-        height: z.ZodNumber;
-        width: z.ZodNumber;
+        height: z.ZodNullable<z.ZodNumber>;
+        width: z.ZodNullable<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -416,8 +416,8 @@ declare const UserAccountSchema: z.ZodObject<{
             width: number;
         } | null;
     }, {
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -431,8 +431,8 @@ declare const UserAccountSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     handle: string;
     avatar: {
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -445,8 +445,8 @@ declare const UserAccountSchema: z.ZodObject<{
 }, {
     handle: string;
     avatar: {
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -514,11 +514,11 @@ declare const ImageSchema: z.ZodObject<{
         height: number;
         width: number;
     }>>;
-    height: z.ZodNumber;
-    width: z.ZodNumber;
+    height: z.ZodNullable<z.ZodNumber>;
+    width: z.ZodNullable<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
-    height: number;
-    width: number;
+    height: number | null;
+    width: number | null;
     id: string;
     url: string;
     hotspot: {
@@ -528,8 +528,8 @@ declare const ImageSchema: z.ZodObject<{
         width: number;
     } | null;
 }, {
-    height: number;
-    width: number;
+    height: number | null;
+    width: number | null;
     id: string;
     url: string;
     hotspot: {
@@ -542,8 +542,8 @@ declare const ImageSchema: z.ZodObject<{
 type ImageHotspot = z.infer<typeof HotspotSchema>;
 type Image = z.infer<typeof ImageSchema>;
 declare const isImage: (value: unknown) => value is {
-    height: number;
-    width: number;
+    height: number | null;
+    width: number | null;
     id: string;
     url: string;
     hotspot: {
@@ -619,11 +619,11 @@ declare const ImagePostSchema: z.ZodObject<{
             height: number;
             width: number;
         }>>;
-        height: z.ZodNumber;
-        width: z.ZodNumber;
+        height: z.ZodNullable<z.ZodNumber>;
+        width: z.ZodNullable<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -633,8 +633,8 @@ declare const ImagePostSchema: z.ZodObject<{
             width: number;
         } | null;
     }, {
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -650,8 +650,8 @@ declare const ImagePostSchema: z.ZodObject<{
     authorId: string;
     postedAt: string;
     images: [{
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -661,8 +661,8 @@ declare const ImagePostSchema: z.ZodObject<{
             width: number;
         } | null;
     }, ...{
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -681,8 +681,8 @@ declare const ImagePostSchema: z.ZodObject<{
     authorId: string;
     postedAt: string;
     images: [{
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -692,8 +692,8 @@ declare const ImagePostSchema: z.ZodObject<{
             width: number;
         } | null;
     }, ...{
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -759,11 +759,11 @@ declare const PostSchema: z.ZodUnion<[z.ZodObject<{
             height: number;
             width: number;
         }>>;
-        height: z.ZodNumber;
-        width: z.ZodNumber;
+        height: z.ZodNullable<z.ZodNumber>;
+        width: z.ZodNullable<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -773,8 +773,8 @@ declare const PostSchema: z.ZodUnion<[z.ZodObject<{
             width: number;
         } | null;
     }, {
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -790,8 +790,8 @@ declare const PostSchema: z.ZodUnion<[z.ZodObject<{
     authorId: string;
     postedAt: string;
     images: [{
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -801,8 +801,8 @@ declare const PostSchema: z.ZodUnion<[z.ZodObject<{
             width: number;
         } | null;
     }, ...{
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -821,8 +821,8 @@ declare const PostSchema: z.ZodUnion<[z.ZodObject<{
     authorId: string;
     postedAt: string;
     images: [{
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -832,8 +832,8 @@ declare const PostSchema: z.ZodUnion<[z.ZodObject<{
             width: number;
         } | null;
     }, ...{
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -880,8 +880,8 @@ declare const isImagePost: (value: unknown) => value is {
     authorId: string;
     postedAt: string;
     images: [{
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -891,8 +891,8 @@ declare const isImagePost: (value: unknown) => value is {
             width: number;
         } | null;
     }, ...{
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -921,8 +921,8 @@ declare const isPost: (value: unknown) => value is {
     authorId: string;
     postedAt: string;
     images: [{
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -932,8 +932,8 @@ declare const isPost: (value: unknown) => value is {
             width: number;
         } | null;
     }, ...{
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -1003,11 +1003,11 @@ declare const UserSchema: z.ZodObject<{
             height: number;
             width: number;
         }>>;
-        height: z.ZodNumber;
-        width: z.ZodNumber;
+        height: z.ZodNullable<z.ZodNumber>;
+        width: z.ZodNullable<z.ZodNumber>;
     }, "strip", z.ZodTypeAny, {
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -1017,8 +1017,8 @@ declare const UserSchema: z.ZodObject<{
             width: number;
         } | null;
     }, {
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -1044,8 +1044,8 @@ declare const UserSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     id: string;
     avatar: {
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -1067,8 +1067,8 @@ declare const UserSchema: z.ZodObject<{
 }, {
     id: string;
     avatar: {
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {
@@ -1106,8 +1106,8 @@ type UserPreferences = z.infer<typeof UserPreferencesSchema>;
 declare const isUser: (value: unknown) => value is {
     id: string;
     avatar: {
-        height: number;
-        width: number;
+        height: number | null;
+        width: number | null;
         id: string;
         url: string;
         hotspot: {

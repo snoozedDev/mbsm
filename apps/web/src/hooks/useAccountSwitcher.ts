@@ -28,6 +28,11 @@ export const useAccountSwitcher = () => {
         toast("Account not found");
       } else {
         dispatch(switchActiveAccount(account));
+        toast("Account switched", {
+          duration: 2000,
+          description: `You are
+          now using the account @${account.handle}`,
+        });
       }
     },
     [dispatch, isLoading, data]

@@ -1,7 +1,6 @@
 import { UserAccount } from "@mbsm/types";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { persistReducer } from "redux-persist";
-import { toast } from "sonner";
 import { storage } from "../storage";
 
 export type SessionPerfsState = {
@@ -16,12 +15,6 @@ export const sessionPerfsSlice = createSlice({
   reducers: {
     switchActiveAccount: (state, action: PayloadAction<UserAccount>) => {
       state.activeAccount = action.payload.handle;
-      toast("Account switched", {
-        duration: 2000,
-        description: `You are
-        now using the account @${action.payload.handle}`,
-        icon: action.payload.avatar?.url,
-      });
     },
   },
   extraReducers: (builder) => builder,

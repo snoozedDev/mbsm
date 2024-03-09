@@ -43,6 +43,7 @@ export const EditImageModal = ({
   id,
   allowCrop = false,
   allowHotspot = false,
+  maxOutputWidth,
   image,
   aspectRatio,
   onSubmit,
@@ -52,8 +53,9 @@ export const EditImageModal = ({
   image: File;
   allowCrop?: boolean;
   allowHotspot?: boolean;
+  maxOutputWidth?: number;
   aspectRatio?: number;
-  onSubmit: (image: string) => void;
+  onSubmit: (image: File) => void;
   onDismiss?: () => void;
 }) => {
   const [shouldClose, setShouldClose] = useState(false);
@@ -103,16 +105,28 @@ export const EditImageModal = ({
 
   const cropImageNow = useCallback(() => {
     if (!percentCrop || !loadedImage) return;
+
     const canvas = document.createElement("canvas");
-    const scaleX = loadedImage.naturalWidth / loadedImage.width;
-    const scaleY = loadedImage.naturalHeight / loadedImage.height;
-    const x = (percentCrop.x / 100) * loadedImage.width * scaleX;
-    const y = (percentCrop.y / 100) * loadedImage.height * scaleY;
-    const width = (percentCrop.width / 100) * loadedImage.width * scaleX;
-    const height = (percentCrop.height / 100) * loadedImage.height * scaleY;
+    // x and y positions in narutal pixels
+    let x = (percentCrop.x / 100) * loadedImage.naturalWidth;
+    let y = (percentCrop.y / 100) * loadedImage.naturalHeight;
+    // width and height size crop in natural pixels
+    let naturalWidth = (percentCrop.width / 100) * loadedImage.naturalWidth;
+    let naturalHeight = (percentCrop.height / 100) * loadedImage.naturalHeight;
+    let width = naturalWidth;
+    let height = naturalHeight;
+
+    const maxAllowedScale = maxOutputWidth ? maxOutputWidth / width : 1;
+    if (maxAllowedScale < 1) {
+      width *= maxAllowedScale;
+      height *= maxAllowedScale;
+    }
+
+    console.log({ maxOutputWidth, maxAllowedScale, width, height });
+
     canvas.width = width;
     canvas.height = height;
-    const ctx: any = canvas.getContext("2d");
+    const ctx: CanvasRenderingContext2D = canvas.getContext("2d")!;
 
     const pixelRatio = window.devicePixelRatio;
     canvas.width *= pixelRatio;
@@ -120,11 +134,33 @@ export const EditImageModal = ({
     ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     ctx.imageSmoothingQuality = "high";
 
-    ctx.drawImage(loadedImage, x, y, width, height, 0, 0, width, height);
+    ctx.drawImage(
+      loadedImage,
+      x,
+      y,
+      naturalWidth,
+      naturalHeight,
+      0,
+      0,
+      width,
+      height
+    );
 
-    const base64Image = canvas.toDataURL("image/jpeg");
-    onSubmit(base64Image);
-    setShouldClose(true);
+    // scale it down (or up) to 300px
+    // const scale = 300 / width;
+    // canvas.width *= scale;
+    // canvas.height *= scale;
+
+    // ctx.setTransform(scale, 0, 0, scale, 0, 0);
+
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const file = new File([blob], "image.jpg", {
+        type: "image/jpeg",
+      });
+      onSubmit(file);
+      setShouldClose(true);
+    }, "image/jpeg");
   }, [percentCrop, loadedImage]);
 
   useEffect(() => {

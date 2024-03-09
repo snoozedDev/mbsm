@@ -21,6 +21,7 @@ const envVariables = [
   "RESEND_API_KEY",
   "DEV_VERIFICATION_CODE",
   "REUSABLE_INVITE_CODE",
+  "NGROK_DOMAIN",
 ] as const;
 
 type EnvVariablesType = {

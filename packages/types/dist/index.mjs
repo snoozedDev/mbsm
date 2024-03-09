@@ -3803,8 +3803,8 @@ var ImageSchema = z.object({
   id: z.string(),
   url: z.string(),
   hotspot: HotspotSchema.nullable(),
-  height: z.number().min(1),
-  width: z.number().min(1)
+  height: z.number().min(1).nullable(),
+  width: z.number().min(1).nullable()
 });
 var isImage = getZodTypeGuard(ImageSchema);
 

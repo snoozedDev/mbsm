@@ -45,25 +45,25 @@ export const SiteHeader = () => {
 
   return (
     <header className="supports-backdrop-blur:bg-background/80 sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur">
-      <div className="px-4 flex h-16 items-center max-w-5xl container">
+      <div className="p-4 flex items-center container">
         <h1 className="text-xl font-bold select-none max-sm:hidden mr-4">
           MBSM
         </h1>
         <NavigationMenu className="max-xs:hidden">
           <NavigationMenuList className="space-x-4 px-4 font-medium">
             {navigation.map(({ name, href }, i) => (
-              <NavigationMenuItem
-                key={name}
-                className={cn(
-                  "transition-colors",
-                  pathname === href
-                    ? ""
-                    : "text-foreground/40 hover:text-foreground"
-                )}
-              >
-                <Link href={href} className="py-2 px-4 text-sm">
-                  {name}
-                </Link>
+              <NavigationMenuItem key={name} asChild>
+                <Button
+                  className={cn(
+                    pathname === href
+                      ? ""
+                      : "text-foreground/40 hover:text-foreground"
+                  )}
+                  variant="ghost"
+                  asChild
+                >
+                  <Link href={href}>{name}</Link>
+                </Button>
               </NavigationMenuItem>
             ))}
           </NavigationMenuList>

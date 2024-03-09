@@ -59,22 +59,34 @@ export const Modal = ({
   return (
     <>
       <portals.InPortal node={portalNode}>{children}</portals.InPortal>
-      <Wrapper open={open} onOpenChange={setOpen} dismissible={dismissable}>
+      <Wrapper
+        open={true}
+        onClose={() => {}}
+        onOpenChange={setOpen}
+        dismissible={dismissable}
+      >
         <ContentWrapper
+          onEscapeKeyDown={(e) => {
+            if (dismissable) setOpen(false);
+            else e.preventDefault();
+          }}
+          hideX={!dismissable}
           onFocusOutside={(e) => e.preventDefault()}
           onInteractOutside={(e) => e.preventDefault()}
           onPointerDownOutside={(e) => e.preventDefault()}
-          className={cn("px-6 pb-6 flex flex-col items-stretch")}
+          className={cn("p-6 flex flex-col items-stretch")}
         >
-          <Header>
-            {title && <Title className="mb-4 text-2xl">{title}</Title>}
-            {description && (
-              <Description className="text-base text-center">
-                {description}
-              </Description>
-            )}
-          </Header>
-          <div>
+          {(title || description) && (
+            <Header>
+              {title && <Title className="mb-4 text-2xl">{title}</Title>}
+              {description && (
+                <Description className="text-base text-center">
+                  {description}
+                </Description>
+              )}
+            </Header>
+          )}
+          <div className={cn(dismissable && "mt-6")}>
             <portals.OutPortal node={portalNode} />
           </div>
         </ContentWrapper>

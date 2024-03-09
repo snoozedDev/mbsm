@@ -13,7 +13,7 @@ const shapeToken = (user: InferSelectModel<typeof schema.user>): Token => ({
 
 const generateAccessToken = (token: Token) =>
   jwt.sign(token, getEnvAsStr("SECRET_ATOKEN"), {
-    expiresIn: "15m",
+    expiresIn: "15s",
   });
 
 const generateRefreshToken = (token: Token) =>
@@ -24,8 +24,8 @@ const generateRefreshToken = (token: Token) =>
 const accessTokenCookieOptions: Partial<CookieSerializeOptions> = {
   httpOnly: true,
   path: "/api",
-  maxAge: 60 * 15, // 15 minutes
-  expires: new Date(Date.now() + 1000 * 60 * 15), // 15 minutes
+  maxAge: 15, // 15 minutes
+  expires: new Date(Date.now() + 1000 * 15), // 15 minutes
   secure: getEnvAsBool("IS_PROD"),
 };
 

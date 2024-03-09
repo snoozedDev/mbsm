@@ -118,6 +118,7 @@ __export(src_exports, {
   insertUser: () => insertUser,
   redis: () => redis,
   schema: () => models_exports,
+  updateAccount: () => updateAccount,
   updateAuthenticator: () => updateAuthenticator,
   updateInviteCode: () => updateInviteCode,
   updateUser: () => updateUser
@@ -330,32 +331,37 @@ var isVercelConnection = (connection2) => !("END" in connection2);
 var db = isVercelConnection(connection) ? (0, import_vercel_postgres.drizzle)(connection, { schema: models_exports }) : (0, import_postgres_js.drizzle)(connection, { schema: models_exports });
 
 // src/db/prepared/account/accountMutations.ts
+var import_drizzle_orm7 = require("drizzle-orm");
 var insertAccount = async (values) => db.insert(models_exports.account).values(values);
+var updateAccount = async ({
+  id,
+  fields
+}) => db.update(models_exports.account).set(fields).where((0, import_drizzle_orm7.eq)(models_exports.account.id, id));
 
 // src/db/prepared/authenticator/authenticatorMutations.ts
-var import_drizzle_orm7 = require("drizzle-orm");
+var import_drizzle_orm8 = require("drizzle-orm");
 var updateAuthenticator = async ({
   id,
   fields
-}) => db.update(models_exports.authenticator).set(fields).where((0, import_drizzle_orm7.eq)(models_exports.authenticator.id, id));
+}) => db.update(models_exports.authenticator).set(fields).where((0, import_drizzle_orm8.eq)(models_exports.authenticator.id, id));
 var insertAuthenticator = async (fields) => db.insert(models_exports.authenticator).values(fields);
 
 // src/db/prepared/authenticator/authenticatorQueries.ts
 var getAuthenticatorsForUser = async (userId) => db.query.authenticator.findMany({
-  where: (model, { eq: eq4, and, isNull }) => and(eq4(model.userId, userId), isNull(model.deletedAt))
+  where: (model, { eq: eq5, and, isNull }) => and(eq5(model.userId, userId), isNull(model.deletedAt))
 });
 var getAuthenticatorByCredentialId = async (credentialId) => db.query.authenticator.findFirst({
-  where: (model, { eq: eq4, and, isNull }) => and(eq4(model.credentialId, credentialId), isNull(model.deletedAt))
+  where: (model, { eq: eq5, and, isNull }) => and(eq5(model.credentialId, credentialId), isNull(model.deletedAt))
 });
 var getAuthenticatorAndUserByCredentialId = async (credentialId) => db.query.authenticator.findFirst({
-  where: (model, { eq: eq4, and, isNull }) => and(eq4(model.credentialId, credentialId), isNull(model.deletedAt)),
+  where: (model, { eq: eq5, and, isNull }) => and(eq5(model.credentialId, credentialId), isNull(model.deletedAt)),
   with: {
     user: true
   }
 });
 
 // src/db/prepared/inviteCode/inviteCodeMutations.ts
-var import_drizzle_orm8 = require("drizzle-orm");
+var import_drizzle_orm9 = require("drizzle-orm");
 var insertInviteCodes = async ({
   inviteCodes,
   userId
@@ -369,28 +375,28 @@ var insertInviteCodes = async ({
 var updateInviteCode = async ({
   code,
   fields
-}) => db.update(models_exports.inviteCode).set(fields).where((0, import_drizzle_orm8.eq)(models_exports.inviteCode.code, code));
+}) => db.update(models_exports.inviteCode).set(fields).where((0, import_drizzle_orm9.eq)(models_exports.inviteCode.code, code));
 
 // src/db/prepared/inviteCode/inviteCodeQueries.ts
 var getUserInviteCodes = async (userId) => db.query.inviteCode.findMany({
-  where: (model, { eq: eq4, and }) => eq4(model.userId, userId)
+  where: (model, { eq: eq5, and }) => eq5(model.userId, userId)
 });
 var getUnredeemedInviteCode = async (inviteCode2) => db.query.inviteCode.findFirst({
-  where: (model, { eq: eq4, and }) => and(eq4(model.code, inviteCode2), eq4(model.redeemed, false))
+  where: (model, { eq: eq5, and }) => and(eq5(model.code, inviteCode2), eq5(model.redeemed, false))
 });
 
 // src/db/prepared/user/userMutations.ts
-var import_drizzle_orm9 = require("drizzle-orm");
-var clearCurrentUserChallenge = async (userId) => db.update(models_exports.user).set({ currentRegChallenge: null }).where((0, import_drizzle_orm9.eq)(models_exports.user.id, userId));
+var import_drizzle_orm10 = require("drizzle-orm");
+var clearCurrentUserChallenge = async (userId) => db.update(models_exports.user).set({ currentRegChallenge: null }).where((0, import_drizzle_orm10.eq)(models_exports.user.id, userId));
 var updateUser = async ({
   id,
   fields
-}) => db.update(models_exports.user).set(fields).where((0, import_drizzle_orm9.eq)(models_exports.user.id, id));
+}) => db.update(models_exports.user).set(fields).where((0, import_drizzle_orm10.eq)(models_exports.user.id, id));
 var insertUser = async (fields) => db.insert(models_exports.user).values(fields);
 
 // src/db/prepared/user/userQueries.ts
-var getUserByEmail = async (email) => db.query.user.findFirst({ where: (user2, { eq: eq4 }) => eq4(user2.email, email) });
-var getUserById = async (id) => db.query.user.findFirst({ where: (user2, { eq: eq4 }) => eq4(user2.id, id) });
+var getUserByEmail = async (email) => db.query.user.findFirst({ where: (user2, { eq: eq5 }) => eq5(user2.email, email) });
+var getUserById = async (id) => db.query.user.findFirst({ where: (user2, { eq: eq5 }) => eq5(user2.id, id) });
 
 // src/db/redis.ts
 var import_kv = require("@vercel/kv");
@@ -413,6 +419,7 @@ var redis = import_kv.kv;
   insertUser,
   redis,
   schema,
+  updateAccount,
   updateAuthenticator,
   updateInviteCode,
   updateUser

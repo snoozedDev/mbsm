@@ -1,1 +1,5 @@
-You were porting everything but refresh to trpc, you have to test signup now, but first delete db records for authenticators and users
+- Make the process of avatar uploading more typesafe
+  - Create proper types for the JSON parsed payloads and extract file uploading logic out of the modal.
+- Add filesize & format checks on the server.
+- Create cronjob which deletes all images with no references (https://vercel.com/docs/storage/vercel-blob/using-blob-sdk#del)
+- Create "ratelimiters" for userIds -> their sum of filesizes

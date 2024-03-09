@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently \"pnpm dev:web\" \"pnpm dev:ngrok\"",
+    "dev:web": "next dev",
+    "dev:ngrok": "ngrok http 3000 --domain $NGROK_DOMAIN",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -94,7 +96,6 @@
     "encoding": "^0.1.13",
     "eslint": "^8",
     "eslint-config-next": "14.1.0",
-    "ngrok": "5.0.0-beta.2",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.5",
     "typescript": "^5"
