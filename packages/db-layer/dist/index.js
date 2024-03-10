@@ -120,6 +120,7 @@ __export(src_exports, {
   schema: () => models_exports,
   updateAccount: () => updateAccount,
   updateAuthenticator: () => updateAuthenticator,
+  updateFile: () => updateFile,
   updateInviteCode: () => updateInviteCode,
   updateUser: () => updateUser
 });
@@ -142,7 +143,8 @@ __export(models_exports, {
   accountRelations: () => accountRelations,
   authenticator: () => authenticator,
   authenticatorRelations: () => authenticatorRelations,
-  image: () => image,
+  file: () => file,
+  fileRelations: () => fileRelations,
   inviteCode: () => inviteCode,
   inviteCodeRelations: () => inviteCodeRelations,
   roleEnum: () => roleEnum,
@@ -154,18 +156,16 @@ __export(models_exports, {
 });
 
 // src/db/models/account.ts
-var import_drizzle_orm5 = require("drizzle-orm");
-var import_pg_core6 = require("drizzle-orm/pg-core");
+var import_drizzle_orm6 = require("drizzle-orm");
+var import_pg_core7 = require("drizzle-orm/pg-core");
 
 // src/db/utils.ts
 var import_utils = __toESM(require_dist());
-var import_drizzle_orm = require("drizzle-orm");
 var import_pg_core = require("drizzle-orm/pg-core");
-var CURRENT_TIMESTAMP = import_drizzle_orm.sql`CURRENT_TIMESTAMP`;
 var getTimestampColumns = () => ({
-  deletedAt: (0, import_pg_core.timestamp)("deleted_at"),
-  createdAt: (0, import_pg_core.timestamp)("created_at").default(CURRENT_TIMESTAMP).notNull().defaultNow(),
-  updatedAt: (0, import_pg_core.timestamp)("updated_at").default(CURRENT_TIMESTAMP).notNull().defaultNow()
+  deletedAt: (0, import_pg_core.timestamp)("deleted_at", { mode: "string" }),
+  createdAt: (0, import_pg_core.timestamp)("created_at", { mode: "string" }).notNull().defaultNow(),
+  updatedAt: (0, import_pg_core.timestamp)("updated_at", { mode: "string" }).notNull().defaultNow()
 });
 var getIndexFor = (column, unique) => ({
   [(0, import_utils.snakeToCamel)(column.name)]: (unique ? import_pg_core.uniqueIndex : import_pg_core.index)(
@@ -173,16 +173,17 @@ var getIndexFor = (column, unique) => ({
   ).on(column)
 });
 
-// src/db/models/image.ts
-var import_pg_core5 = require("drizzle-orm/pg-core");
+// src/db/models/file.ts
+var import_drizzle_orm5 = require("drizzle-orm");
+var import_pg_core6 = require("drizzle-orm/pg-core");
 
 // src/db/models/user.ts
 var import_drizzle_orm4 = require("drizzle-orm");
-var import_pg_core4 = require("drizzle-orm/pg-core");
+var import_pg_core5 = require("drizzle-orm/pg-core");
 var import_drizzle_zod = require("drizzle-zod");
 
 // src/db/models/authenticator.ts
-var import_drizzle_orm2 = require("drizzle-orm");
+var import_drizzle_orm = require("drizzle-orm");
 var import_pg_core2 = require("drizzle-orm/pg-core");
 var authenticator = (0, import_pg_core2.pgTable)(
   "authenticator",
@@ -205,7 +206,7 @@ var authenticator = (0, import_pg_core2.pgTable)(
     ...getIndexFor(authenticator2.userId)
   })
 );
-var authenticatorRelations = (0, import_drizzle_orm2.relations)(authenticator, ({ one }) => ({
+var authenticatorRelations = (0, import_drizzle_orm.relations)(authenticator, ({ one }) => ({
   user: one(user, {
     fields: [authenticator.userId],
     references: [user.id]
@@ -213,7 +214,7 @@ var authenticatorRelations = (0, import_drizzle_orm2.relations)(authenticator, (
 }));
 
 // src/db/models/inviteCode.ts
-var import_drizzle_orm3 = require("drizzle-orm");
+var import_drizzle_orm2 = require("drizzle-orm");
 var import_pg_core3 = require("drizzle-orm/pg-core");
 var inviteCode = (0, import_pg_core3.pgTable)(
   "invite_codes",
@@ -226,23 +227,50 @@ var inviteCode = (0, import_pg_core3.pgTable)(
     ...getIndexFor(inviteCode2.userId)
   })
 );
-var inviteCodeRelations = (0, import_drizzle_orm3.relations)(inviteCode, ({ one }) => ({
+var inviteCodeRelations = (0, import_drizzle_orm2.relations)(inviteCode, ({ one }) => ({
   user: one(user, {
     fields: [inviteCode.userId],
     references: [user.id]
   })
 }));
 
+// src/db/models/userPreferences.ts
+var import_drizzle_orm3 = require("drizzle-orm");
+var import_pg_core4 = require("drizzle-orm/pg-core");
+var userPreferences = (0, import_pg_core4.pgTable)(
+  "user_preferences",
+  {
+    userId: (0, import_pg_core4.uuid)("user_id").references(() => user.id).primaryKey(),
+    data: (0, import_pg_core4.json)("data").default({ theme: "system", nsfw: "hidden" })
+  },
+  (userPreferences2) => ({
+    ...getIndexFor(userPreferences2.userId, true)
+  })
+);
+var userPreferencesRelations = (0, import_drizzle_orm3.relations)(
+  userPreferences,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [userPreferences.userId],
+      references: [user.id]
+    })
+  })
+);
+
 // src/db/models/user.ts
-var roleEnum = (0, import_pg_core4.pgEnum)("role", ["user", "mod", "admin", "foru"]);
-var user = (0, import_pg_core4.pgTable)(
+var roleEnum = (0, import_pg_core5.pgEnum)("role", ["user", "mod", "admin", "foru"]);
+var user = (0, import_pg_core5.pgTable)(
   "user",
   {
-    id: (0, import_pg_core4.uuid)("id").defaultRandom().primaryKey(),
-    email: (0, import_pg_core4.varchar)("email", { length: 254 }).notNull(),
-    emailVerified: (0, import_pg_core4.boolean)("email_verified").notNull().default(false),
-    protected: (0, import_pg_core4.boolean)("protected").notNull().default(false),
-    currentRegChallenge: (0, import_pg_core4.varchar)("current_challenge", { length: 256 }),
+    id: (0, import_pg_core5.uuid)("id").defaultRandom().primaryKey(),
+    email: (0, import_pg_core5.varchar)("email", { length: 254 }).notNull(),
+    emailVerified: (0, import_pg_core5.boolean)("email_verified").notNull().default(false),
+    protected: (0, import_pg_core5.boolean)("protected").notNull().default(false),
+    storageLimitMB: (0, import_pg_core5.integer)("storage_limit_MB").notNull().default(
+      1024
+      // 1GB
+    ),
+    currentRegChallenge: (0, import_pg_core5.varchar)("current_challenge", { length: 256 }),
     role: roleEnum("user").notNull(),
     ...getTimestampColumns()
   },
@@ -253,36 +281,47 @@ var user = (0, import_pg_core4.pgTable)(
 var userRelations = (0, import_drizzle_orm4.relations)(user, ({ one, many }) => ({
   authenticators: many(authenticator),
   inviteCodes: many(inviteCode),
-  accounts: many(account)
+  accounts: many(account),
+  files: many(file),
+  preferences: one(userPreferences, {
+    fields: [user.id],
+    references: [userPreferences.userId]
+  })
 }));
 var userSchema = (0, import_drizzle_zod.createSelectSchema)(user);
 
-// src/db/models/image.ts
-var image = (0, import_pg_core5.pgTable)(
-  "image",
-  {
-    id: (0, import_pg_core5.uuid)("id").defaultRandom().primaryKey(),
-    userId: (0, import_pg_core5.uuid)("user_id").references(() => user.id).notNull(),
-    url: (0, import_pg_core5.varchar)("url", { length: 256 }).notNull(),
-    hotspot: (0, import_pg_core5.json)("hotspot").$type(),
-    height: (0, import_pg_core5.integer)("height").notNull(),
-    width: (0, import_pg_core5.integer)("width").notNull(),
-    ...getTimestampColumns()
-  },
-  (image2) => ({
-    ...getIndexFor(image2.userId)
-  })
-);
-
-// src/db/models/account.ts
-var account = (0, import_pg_core6.pgTable)(
-  "account",
+// src/db/models/file.ts
+var file = (0, import_pg_core6.pgTable)(
+  "file",
   {
     id: (0, import_pg_core6.uuid)("id").defaultRandom().primaryKey(),
     userId: (0, import_pg_core6.uuid)("user_id").references(() => user.id).notNull(),
-    handle: (0, import_pg_core6.varchar)("handle", { length: 16 }).notNull(),
-    profileData: (0, import_pg_core6.json)("profile_data").$type().notNull().default({ links: [] }),
-    avatarId: (0, import_pg_core6.uuid)("avatar_id").references(() => image.id),
+    url: (0, import_pg_core6.varchar)("url", { length: 256 }),
+    sizeKB: (0, import_pg_core6.integer)("size_kb").notNull(),
+    uploadedAt: (0, import_pg_core6.timestamp)("uploaded_at", { mode: "string" }),
+    metadata: (0, import_pg_core6.json)("metadata").$type(),
+    ...getTimestampColumns()
+  },
+  (file2) => ({
+    ...getIndexFor(file2.userId)
+  })
+);
+var fileRelations = (0, import_drizzle_orm5.relations)(file, ({ one }) => ({
+  user: one(user, {
+    fields: [file.userId],
+    references: [user.id]
+  })
+}));
+
+// src/db/models/account.ts
+var account = (0, import_pg_core7.pgTable)(
+  "account",
+  {
+    id: (0, import_pg_core7.uuid)("id").defaultRandom().primaryKey(),
+    userId: (0, import_pg_core7.uuid)("user_id").references(() => user.id).notNull(),
+    handle: (0, import_pg_core7.varchar)("handle", { length: 16 }).notNull(),
+    profileData: (0, import_pg_core7.json)("profile_data").$type().notNull().default({ links: [] }),
+    avatarId: (0, import_pg_core7.uuid)("avatar_id").references(() => file.id),
     ...getTimestampColumns()
   },
   (account2) => ({
@@ -290,39 +329,16 @@ var account = (0, import_pg_core6.pgTable)(
     ...getIndexFor(account2.userId)
   })
 );
-var accountRelations = (0, import_drizzle_orm5.relations)(account, ({ one }) => ({
+var accountRelations = (0, import_drizzle_orm6.relations)(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
     references: [user.id]
   }),
-  avatar: one(image, {
+  avatar: one(file, {
     fields: [account.avatarId],
-    references: [image.id]
+    references: [file.id]
   })
 }));
-
-// src/db/models/userPreferences.ts
-var import_drizzle_orm6 = require("drizzle-orm");
-var import_pg_core7 = require("drizzle-orm/pg-core");
-var userPreferences = (0, import_pg_core7.pgTable)(
-  "user_preferences",
-  {
-    userId: (0, import_pg_core7.uuid)("user_id").references(() => user.id).primaryKey(),
-    data: (0, import_pg_core7.json)("data").$type().default({ theme: "system", nsfw: "hidden" })
-  },
-  (userPreferences2) => ({
-    ...getIndexFor(userPreferences2.userId, true)
-  })
-);
-var userPreferencesRelations = (0, import_drizzle_orm6.relations)(
-  userPreferences,
-  ({ one }) => ({
-    user: one(user, {
-      fields: [userPreferences.userId],
-      references: [user.id]
-    })
-  })
-);
 
 // src/db/db.ts
 var IS_PROD = (0, import_utils8.getEnvAsBool)("IS_PROD");
@@ -348,55 +364,56 @@ var insertAuthenticator = async (fields) => db.insert(models_exports.authenticat
 
 // src/db/prepared/authenticator/authenticatorQueries.ts
 var getAuthenticatorsForUser = async (userId) => db.query.authenticator.findMany({
-  where: (model, { eq: eq5, and, isNull }) => and(eq5(model.userId, userId), isNull(model.deletedAt))
+  where: (model, { eq: eq6, and, isNull }) => and(eq6(model.userId, userId), isNull(model.deletedAt))
 });
 var getAuthenticatorByCredentialId = async (credentialId) => db.query.authenticator.findFirst({
-  where: (model, { eq: eq5, and, isNull }) => and(eq5(model.credentialId, credentialId), isNull(model.deletedAt))
+  where: (model, { eq: eq6, and, isNull }) => and(eq6(model.credentialId, credentialId), isNull(model.deletedAt))
 });
 var getAuthenticatorAndUserByCredentialId = async (credentialId) => db.query.authenticator.findFirst({
-  where: (model, { eq: eq5, and, isNull }) => and(eq5(model.credentialId, credentialId), isNull(model.deletedAt)),
+  where: (model, { eq: eq6, and, isNull }) => and(eq6(model.credentialId, credentialId), isNull(model.deletedAt)),
   with: {
     user: true
   }
 });
 
-// src/db/prepared/inviteCode/inviteCodeMutations.ts
+// src/db/prepared/file/fileMutations.ts
 var import_drizzle_orm9 = require("drizzle-orm");
+var updateFile = async ({
+  id,
+  fields
+}) => db.update(models_exports.file).set(fields).where((0, import_drizzle_orm9.eq)(models_exports.file.id, id));
+
+// src/db/prepared/inviteCode/inviteCodeMutations.ts
+var import_drizzle_orm10 = require("drizzle-orm");
 var insertInviteCodes = async ({
   inviteCodes,
   userId
-}) => db.insert(models_exports.inviteCode).values(
-  inviteCodes.map((input) => ({
-    code: input.code,
-    redeemed: false,
-    userId
-  }))
-);
+}) => db.insert(models_exports.inviteCode).values(inviteCodes);
 var updateInviteCode = async ({
   code,
   fields
-}) => db.update(models_exports.inviteCode).set(fields).where((0, import_drizzle_orm9.eq)(models_exports.inviteCode.code, code));
+}) => db.update(models_exports.inviteCode).set(fields).where((0, import_drizzle_orm10.eq)(models_exports.inviteCode.code, code));
 
 // src/db/prepared/inviteCode/inviteCodeQueries.ts
 var getUserInviteCodes = async (userId) => db.query.inviteCode.findMany({
-  where: (model, { eq: eq5, and }) => eq5(model.userId, userId)
+  where: (model, { eq: eq6, and }) => eq6(model.userId, userId)
 });
 var getUnredeemedInviteCode = async (inviteCode2) => db.query.inviteCode.findFirst({
-  where: (model, { eq: eq5, and }) => and(eq5(model.code, inviteCode2), eq5(model.redeemed, false))
+  where: (model, { eq: eq6, and }) => and(eq6(model.code, inviteCode2), eq6(model.redeemed, false))
 });
 
 // src/db/prepared/user/userMutations.ts
-var import_drizzle_orm10 = require("drizzle-orm");
-var clearCurrentUserChallenge = async (userId) => db.update(models_exports.user).set({ currentRegChallenge: null }).where((0, import_drizzle_orm10.eq)(models_exports.user.id, userId));
+var import_drizzle_orm11 = require("drizzle-orm");
+var clearCurrentUserChallenge = async (userId) => db.update(models_exports.user).set({ currentRegChallenge: null }).where((0, import_drizzle_orm11.eq)(models_exports.user.id, userId));
 var updateUser = async ({
   id,
   fields
-}) => db.update(models_exports.user).set(fields).where((0, import_drizzle_orm10.eq)(models_exports.user.id, id));
+}) => db.update(models_exports.user).set(fields).where((0, import_drizzle_orm11.eq)(models_exports.user.id, id));
 var insertUser = async (fields) => db.insert(models_exports.user).values(fields);
 
 // src/db/prepared/user/userQueries.ts
-var getUserByEmail = async (email) => db.query.user.findFirst({ where: (user2, { eq: eq5 }) => eq5(user2.email, email) });
-var getUserById = async (id) => db.query.user.findFirst({ where: (user2, { eq: eq5 }) => eq5(user2.id, id) });
+var getUserByEmail = async (email) => db.query.user.findFirst({ where: (user2, { eq: eq6 }) => eq6(user2.email, email) });
+var getUserById = async (id) => db.query.user.findFirst({ where: (user2, { eq: eq6 }) => eq6(user2.id, id) });
 
 // src/db/redis.ts
 var import_kv = require("@vercel/kv");
@@ -421,6 +438,7 @@ var redis = import_kv.kv;
   schema,
   updateAccount,
   updateAuthenticator,
+  updateFile,
   updateInviteCode,
   updateUser
 });

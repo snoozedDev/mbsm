@@ -114,7 +114,8 @@ __export(models_exports, {
   accountRelations: () => accountRelations,
   authenticator: () => authenticator,
   authenticatorRelations: () => authenticatorRelations,
-  image: () => image,
+  file: () => file,
+  fileRelations: () => fileRelations,
   inviteCode: () => inviteCode,
   inviteCodeRelations: () => inviteCodeRelations,
   roleEnum: () => roleEnum,
@@ -126,22 +127,20 @@ __export(models_exports, {
 });
 
 // src/db/models/account.ts
-import { relations as relations4 } from "drizzle-orm";
-import { json as json2, pgTable as pgTable5, uuid as uuid5, varchar as varchar5 } from "drizzle-orm/pg-core";
+import { relations as relations6 } from "drizzle-orm";
+import { json as json3, pgTable as pgTable6, uuid as uuid6, varchar as varchar5 } from "drizzle-orm/pg-core";
 
 // src/db/utils.ts
 var import_utils = __toESM(require_dist());
-import { sql } from "drizzle-orm";
 import {
   index,
   timestamp,
   uniqueIndex
 } from "drizzle-orm/pg-core";
-var CURRENT_TIMESTAMP = sql`CURRENT_TIMESTAMP`;
 var getTimestampColumns = () => ({
-  deletedAt: timestamp("deleted_at"),
-  createdAt: timestamp("created_at").default(CURRENT_TIMESTAMP).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").default(CURRENT_TIMESTAMP).notNull().defaultNow()
+  deletedAt: timestamp("deleted_at", { mode: "string" }),
+  createdAt: timestamp("created_at", { mode: "string" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "string" }).notNull().defaultNow()
 });
 var getIndexFor = (column, unique) => ({
   [(0, import_utils.snakeToCamel)(column.name)]: (unique ? uniqueIndex : index)(
@@ -149,12 +148,27 @@ var getIndexFor = (column, unique) => ({
   ).on(column)
 });
 
-// src/db/models/image.ts
-import { integer as integer2, json, pgTable as pgTable4, uuid as uuid4, varchar as varchar4 } from "drizzle-orm/pg-core";
+// src/db/models/file.ts
+import { relations as relations5 } from "drizzle-orm";
+import {
+  integer as integer3,
+  json as json2,
+  pgTable as pgTable5,
+  timestamp as timestamp2,
+  uuid as uuid5,
+  varchar as varchar4
+} from "drizzle-orm/pg-core";
 
 // src/db/models/user.ts
-import { relations as relations3 } from "drizzle-orm";
-import { boolean as boolean3, pgEnum, pgTable as pgTable3, uuid as uuid3, varchar as varchar3 } from "drizzle-orm/pg-core";
+import { relations as relations4 } from "drizzle-orm";
+import {
+  boolean as boolean3,
+  integer as integer2,
+  pgEnum,
+  pgTable as pgTable4,
+  uuid as uuid4,
+  varchar as varchar3
+} from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 
 // src/db/models/authenticator.ts
@@ -217,88 +231,20 @@ var inviteCodeRelations = relations2(inviteCode, ({ one }) => ({
   })
 }));
 
-// src/db/models/user.ts
-var roleEnum = pgEnum("role", ["user", "mod", "admin", "foru"]);
-var user = pgTable3(
-  "user",
-  {
-    id: uuid3("id").defaultRandom().primaryKey(),
-    email: varchar3("email", { length: 254 }).notNull(),
-    emailVerified: boolean3("email_verified").notNull().default(false),
-    protected: boolean3("protected").notNull().default(false),
-    currentRegChallenge: varchar3("current_challenge", { length: 256 }),
-    role: roleEnum("user").notNull(),
-    ...getTimestampColumns()
-  },
-  (user2) => ({
-    ...getIndexFor(user2.email, true)
-  })
-);
-var userRelations = relations3(user, ({ one, many }) => ({
-  authenticators: many(authenticator),
-  inviteCodes: many(inviteCode),
-  accounts: many(account)
-}));
-var userSchema = createSelectSchema(user);
-
-// src/db/models/image.ts
-var image = pgTable4(
-  "image",
-  {
-    id: uuid4("id").defaultRandom().primaryKey(),
-    userId: uuid4("user_id").references(() => user.id).notNull(),
-    url: varchar4("url", { length: 256 }).notNull(),
-    hotspot: json("hotspot").$type(),
-    height: integer2("height").notNull(),
-    width: integer2("width").notNull(),
-    ...getTimestampColumns()
-  },
-  (image2) => ({
-    ...getIndexFor(image2.userId)
-  })
-);
-
-// src/db/models/account.ts
-var account = pgTable5(
-  "account",
-  {
-    id: uuid5("id").defaultRandom().primaryKey(),
-    userId: uuid5("user_id").references(() => user.id).notNull(),
-    handle: varchar5("handle", { length: 16 }).notNull(),
-    profileData: json2("profile_data").$type().notNull().default({ links: [] }),
-    avatarId: uuid5("avatar_id").references(() => image.id),
-    ...getTimestampColumns()
-  },
-  (account2) => ({
-    ...getIndexFor(account2.handle, true),
-    ...getIndexFor(account2.userId)
-  })
-);
-var accountRelations = relations4(account, ({ one }) => ({
-  user: one(user, {
-    fields: [account.userId],
-    references: [user.id]
-  }),
-  avatar: one(image, {
-    fields: [account.avatarId],
-    references: [image.id]
-  })
-}));
-
 // src/db/models/userPreferences.ts
-import { relations as relations5 } from "drizzle-orm";
-import { json as json3, pgTable as pgTable6, uuid as uuid6 } from "drizzle-orm/pg-core";
-var userPreferences = pgTable6(
+import { relations as relations3 } from "drizzle-orm";
+import { json, pgTable as pgTable3, uuid as uuid3 } from "drizzle-orm/pg-core";
+var userPreferences = pgTable3(
   "user_preferences",
   {
-    userId: uuid6("user_id").references(() => user.id).primaryKey(),
-    data: json3("data").$type().default({ theme: "system", nsfw: "hidden" })
+    userId: uuid3("user_id").references(() => user.id).primaryKey(),
+    data: json("data").default({ theme: "system", nsfw: "hidden" })
   },
   (userPreferences2) => ({
     ...getIndexFor(userPreferences2.userId, true)
   })
 );
-var userPreferencesRelations = relations5(
+var userPreferencesRelations = relations3(
   userPreferences,
   ({ one }) => ({
     user: one(user, {
@@ -307,6 +253,89 @@ var userPreferencesRelations = relations5(
     })
   })
 );
+
+// src/db/models/user.ts
+var roleEnum = pgEnum("role", ["user", "mod", "admin", "foru"]);
+var user = pgTable4(
+  "user",
+  {
+    id: uuid4("id").defaultRandom().primaryKey(),
+    email: varchar3("email", { length: 254 }).notNull(),
+    emailVerified: boolean3("email_verified").notNull().default(false),
+    protected: boolean3("protected").notNull().default(false),
+    storageLimitMB: integer2("storage_limit_MB").notNull().default(
+      1024
+      // 1GB
+    ),
+    currentRegChallenge: varchar3("current_challenge", { length: 256 }),
+    role: roleEnum("user").notNull(),
+    ...getTimestampColumns()
+  },
+  (user2) => ({
+    ...getIndexFor(user2.email, true)
+  })
+);
+var userRelations = relations4(user, ({ one, many }) => ({
+  authenticators: many(authenticator),
+  inviteCodes: many(inviteCode),
+  accounts: many(account),
+  files: many(file),
+  preferences: one(userPreferences, {
+    fields: [user.id],
+    references: [userPreferences.userId]
+  })
+}));
+var userSchema = createSelectSchema(user);
+
+// src/db/models/file.ts
+var file = pgTable5(
+  "file",
+  {
+    id: uuid5("id").defaultRandom().primaryKey(),
+    userId: uuid5("user_id").references(() => user.id).notNull(),
+    url: varchar4("url", { length: 256 }),
+    sizeKB: integer3("size_kb").notNull(),
+    uploadedAt: timestamp2("uploaded_at", { mode: "string" }),
+    metadata: json2("metadata").$type(),
+    ...getTimestampColumns()
+  },
+  (file2) => ({
+    ...getIndexFor(file2.userId)
+  })
+);
+var fileRelations = relations5(file, ({ one }) => ({
+  user: one(user, {
+    fields: [file.userId],
+    references: [user.id]
+  })
+}));
+
+// src/db/models/account.ts
+var account = pgTable6(
+  "account",
+  {
+    id: uuid6("id").defaultRandom().primaryKey(),
+    userId: uuid6("user_id").references(() => user.id).notNull(),
+    handle: varchar5("handle", { length: 16 }).notNull(),
+    profileData: json3("profile_data").$type().notNull().default({ links: [] }),
+    avatarId: uuid6("avatar_id").references(() => file.id),
+    ...getTimestampColumns()
+  },
+  (account2) => ({
+    ...getIndexFor(account2.handle, true),
+    ...getIndexFor(account2.userId)
+  })
+);
+var accountRelations = relations6(account, ({ one }) => ({
+  user: one(user, {
+    fields: [account.userId],
+    references: [user.id]
+  }),
+  avatar: one(file, {
+    fields: [account.avatarId],
+    references: [file.id]
+  })
+}));
 
 // src/db/db.ts
 var IS_PROD = (0, import_utils8.getEnvAsBool)("IS_PROD");
@@ -332,55 +361,56 @@ var insertAuthenticator = async (fields) => db.insert(models_exports.authenticat
 
 // src/db/prepared/authenticator/authenticatorQueries.ts
 var getAuthenticatorsForUser = async (userId) => db.query.authenticator.findMany({
-  where: (model, { eq: eq5, and, isNull }) => and(eq5(model.userId, userId), isNull(model.deletedAt))
+  where: (model, { eq: eq6, and, isNull }) => and(eq6(model.userId, userId), isNull(model.deletedAt))
 });
 var getAuthenticatorByCredentialId = async (credentialId) => db.query.authenticator.findFirst({
-  where: (model, { eq: eq5, and, isNull }) => and(eq5(model.credentialId, credentialId), isNull(model.deletedAt))
+  where: (model, { eq: eq6, and, isNull }) => and(eq6(model.credentialId, credentialId), isNull(model.deletedAt))
 });
 var getAuthenticatorAndUserByCredentialId = async (credentialId) => db.query.authenticator.findFirst({
-  where: (model, { eq: eq5, and, isNull }) => and(eq5(model.credentialId, credentialId), isNull(model.deletedAt)),
+  where: (model, { eq: eq6, and, isNull }) => and(eq6(model.credentialId, credentialId), isNull(model.deletedAt)),
   with: {
     user: true
   }
 });
 
-// src/db/prepared/inviteCode/inviteCodeMutations.ts
+// src/db/prepared/file/fileMutations.ts
 import { eq as eq3 } from "drizzle-orm";
+var updateFile = async ({
+  id,
+  fields
+}) => db.update(models_exports.file).set(fields).where(eq3(models_exports.file.id, id));
+
+// src/db/prepared/inviteCode/inviteCodeMutations.ts
+import { eq as eq4 } from "drizzle-orm";
 var insertInviteCodes = async ({
   inviteCodes,
   userId
-}) => db.insert(models_exports.inviteCode).values(
-  inviteCodes.map((input) => ({
-    code: input.code,
-    redeemed: false,
-    userId
-  }))
-);
+}) => db.insert(models_exports.inviteCode).values(inviteCodes);
 var updateInviteCode = async ({
   code,
   fields
-}) => db.update(models_exports.inviteCode).set(fields).where(eq3(models_exports.inviteCode.code, code));
+}) => db.update(models_exports.inviteCode).set(fields).where(eq4(models_exports.inviteCode.code, code));
 
 // src/db/prepared/inviteCode/inviteCodeQueries.ts
 var getUserInviteCodes = async (userId) => db.query.inviteCode.findMany({
-  where: (model, { eq: eq5, and }) => eq5(model.userId, userId)
+  where: (model, { eq: eq6, and }) => eq6(model.userId, userId)
 });
 var getUnredeemedInviteCode = async (inviteCode2) => db.query.inviteCode.findFirst({
-  where: (model, { eq: eq5, and }) => and(eq5(model.code, inviteCode2), eq5(model.redeemed, false))
+  where: (model, { eq: eq6, and }) => and(eq6(model.code, inviteCode2), eq6(model.redeemed, false))
 });
 
 // src/db/prepared/user/userMutations.ts
-import { eq as eq4 } from "drizzle-orm";
-var clearCurrentUserChallenge = async (userId) => db.update(models_exports.user).set({ currentRegChallenge: null }).where(eq4(models_exports.user.id, userId));
+import { eq as eq5 } from "drizzle-orm";
+var clearCurrentUserChallenge = async (userId) => db.update(models_exports.user).set({ currentRegChallenge: null }).where(eq5(models_exports.user.id, userId));
 var updateUser = async ({
   id,
   fields
-}) => db.update(models_exports.user).set(fields).where(eq4(models_exports.user.id, id));
+}) => db.update(models_exports.user).set(fields).where(eq5(models_exports.user.id, id));
 var insertUser = async (fields) => db.insert(models_exports.user).values(fields);
 
 // src/db/prepared/user/userQueries.ts
-var getUserByEmail = async (email) => db.query.user.findFirst({ where: (user2, { eq: eq5 }) => eq5(user2.email, email) });
-var getUserById = async (id) => db.query.user.findFirst({ where: (user2, { eq: eq5 }) => eq5(user2.id, id) });
+var getUserByEmail = async (email) => db.query.user.findFirst({ where: (user2, { eq: eq6 }) => eq6(user2.email, email) });
+var getUserById = async (id) => db.query.user.findFirst({ where: (user2, { eq: eq6 }) => eq6(user2.id, id) });
 
 // src/db/redis.ts
 import { kv } from "@vercel/kv";
@@ -404,6 +434,7 @@ export {
   models_exports as schema,
   updateAccount,
   updateAuthenticator,
+  updateFile,
   updateInviteCode,
   updateUser
 };

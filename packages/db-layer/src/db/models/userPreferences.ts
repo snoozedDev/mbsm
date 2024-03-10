@@ -1,4 +1,3 @@
-import { UserPreferences } from "@mbsm/types";
 import { relations } from "drizzle-orm";
 import { json, pgTable, uuid } from "drizzle-orm/pg-core";
 import { getIndexFor } from "../utils";
@@ -10,9 +9,7 @@ export const userPreferences = pgTable(
     userId: uuid("user_id")
       .references(() => user.id)
       .primaryKey(),
-    data: json("data")
-      .$type<UserPreferences>()
-      .default({ theme: "system", nsfw: "hidden" }),
+    data: json("data").default({ theme: "system", nsfw: "hidden" }),
   },
   (userPreferences) => ({
     ...getIndexFor(userPreferences.userId, true),

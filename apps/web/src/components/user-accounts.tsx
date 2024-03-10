@@ -121,7 +121,7 @@ const LoadingAccount = () => {
   );
 };
 
-export const UserAccounts = () => {
+export const UserAccountsPage = () => {
   const { push } = useModals();
   const { isPending, data } = useUserMeQuery();
   const { activeAccount } = useAccountSwitcher();

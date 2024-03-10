@@ -1,5 +1,5 @@
 import { codeFormSchema } from "@/lib/shemas/forms/codeFormSchema";
-import { generateInviteCodes } from "@/utils/inviteCodeUtils";
+import { generateInviteCodesForUser } from "@/utils/inviteCodeUtils";
 import {
   getWebAuthnRegistrationOptions,
   getWebAuthnResponseForRegistration,
@@ -15,7 +15,7 @@ import {
   AccountCreationFormSchema,
   Authenticator,
   AuthenticatorSchema,
-  InviteCode,
+  FileSchema,
   InviteCodeSchema,
   UserAccountSchema,
 } from "@mbsm/types";
@@ -36,13 +36,14 @@ export const userRouter = router({
       z.object({
         email: z.string(),
         emailVerified: z.boolean(),
+        maxStorageMB: z.number(),
         accounts: UserAccountSchema.array(),
       })
     )
     .query(async ({ ctx }) => {
       const user = await db.query.user.findFirst({
         where: ({ id }, { eq }) => eq(id, ctx.token.user.id),
-        with: { accounts: { with: { avatar: true } } },
+        with: { accounts: { with: { avatar: true } }, files: true },
       });
 
       if (!user)
@@ -54,6 +55,7 @@ export const userRouter = router({
       return {
         email: user.email,
         emailVerified: user.emailVerified,
+        maxStorageMB: user.storageLimitMB,
         accounts: user.accounts,
       };
     }),
@@ -96,12 +98,13 @@ export const userRouter = router({
       z.object({
         authenticators: AuthenticatorSchema.array(),
         inviteCodes: InviteCodeSchema.array(),
+        files: FileSchema.array(),
       })
     )
     .query(async ({ ctx: { token } }) => {
       const user = await db.query.user.findFirst({
         where: ({ id }, { eq }) => eq(id, token.user.id),
-        with: { authenticators: true, inviteCodes: true },
+        with: { authenticators: true, inviteCodes: true, files: true },
       });
 
       if (!user) {
@@ -117,17 +120,14 @@ export const userRouter = router({
         (authenticator) => ({
           credentialId: authenticator.credentialId,
           name: authenticator.name,
-          addedAt: authenticator.createdAt.toISOString(),
+          addedAt: authenticator.createdAt,
         })
       );
 
-      let finalInviteCodes: InviteCode[] = inviteCodes.map((inviteCode) => ({
-        code: inviteCode.code,
-        redeemed: inviteCode.redeemed,
-      }));
+      let finalInviteCodes = inviteCodes;
 
-      if (finalInviteCodes.length === 0 && user.emailVerified) {
-        finalInviteCodes = generateInviteCodes(5);
+      if (inviteCodes.length === 0 && user.emailVerified) {
+        finalInviteCodes = generateInviteCodesForUser(user.id);
         try {
           await insertInviteCodes({
             inviteCodes: finalInviteCodes,
@@ -145,6 +145,7 @@ export const userRouter = router({
       return {
         authenticators: finalAuthenticators,
         inviteCodes: finalInviteCodes,
+        files: user.files,
       };
     }),
   updateAuthenticator: authedProcedure

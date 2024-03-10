@@ -2,7 +2,7 @@ import { AccountProfileData } from "@mbsm/types";
 import { relations } from "drizzle-orm";
 import { json, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
 import { getIndexFor, getTimestampColumns } from "../utils";
-import { image } from "./image";
+import { file } from "./file";
 import { user } from "./user";
 
 export const account = pgTable(
@@ -17,7 +17,7 @@ export const account = pgTable(
       .$type<AccountProfileData>()
       .notNull()
       .default({ links: [] }),
-    avatarId: uuid("avatar_id").references(() => image.id),
+    avatarId: uuid("avatar_id").references(() => file.id),
     ...getTimestampColumns(),
   },
   (account) => ({
@@ -31,8 +31,8 @@ export const accountRelations = relations(account, ({ one }) => ({
     fields: [account.userId],
     references: [user.id],
   }),
-  avatar: one(image, {
+  avatar: one(file, {
     fields: [account.avatarId],
-    references: [image.id],
+    references: [file.id],
   }),
 }));

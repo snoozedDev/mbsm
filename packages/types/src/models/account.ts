@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ImageSchema } from "./image";
+import { FileSchema } from "./file";
 
 export const AccountProfileDataSchema = z.object({
   bio: z.string().optional(),
@@ -15,7 +15,8 @@ export const AccountProfileDataSchema = z.object({
 export type AccountProfileData = z.infer<typeof AccountProfileDataSchema>;
 
 export const UserAccountSchema = z.object({
-  avatar: ImageSchema.nullable(),
+  id: z.string(),
+  avatar: FileSchema.nullable(),
   handle: z.string(),
 });
 

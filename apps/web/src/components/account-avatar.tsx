@@ -12,11 +12,13 @@ export const AccountAvatar = forwardRef<
 >(function AccountAvatar({ account, className, ...props }, ref) {
   return (
     <Avatar ref={ref} className={cn("rounded-lg", className)} {...props}>
-      <AvatarImage
-        className="rounded-lg"
-        src={account.avatar?.url}
-        alt={`@${account.handle}`}
-      />
+      {account.avatar?.url && (
+        <AvatarImage
+          className="rounded-lg"
+          src={account.avatar?.url}
+          alt={`@${account.handle}`}
+        />
+      )}
       {props.children ?? (
         <AvatarFallback className="rounded-lg">
           {account.handle[0]}

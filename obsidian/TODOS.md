@@ -1,5 +1,4 @@
-- Make the process of avatar uploading more typesafe
-  - Create proper types for the JSON parsed payloads and extract file uploading logic out of the modal.
-- Add filesize & format checks on the server.
-- Create cronjob which deletes all images with no references (https://vercel.com/docs/storage/vercel-blob/using-blob-sdk#del)
-- Create "ratelimiters" for userIds -> their sum of filesizes
+- Create cronjob which deletes all files with no references (https://vercel.com/docs/storage/vercel-blob/using-blob-sdk#del)
+- Create "ratelimiters" for monthly upload
+
+- Make types depend on db-layer, not the other way around

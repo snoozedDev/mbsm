@@ -1,6 +1,4 @@
-import { Post, User } from "@mbsm/types";
-
-const serverUsers: User[] = [
+const serverUsers = [
   {
     id: "rakMvxar4_Cg",
     username: "forurune",
@@ -28,7 +26,7 @@ const serverUsers: User[] = [
   },
 ];
 
-const serverPosts: Post[] = [
+const serverPosts = [
   {
     type: "text",
     id: "j_hJO_thNUhDlg92C63af",
@@ -68,6 +66,24 @@ const serverPosts: Post[] = [
     postedAt: "2023-07-12T04:29:24.000Z",
   },
 ];
+
+export type FakeImage = {
+  hotspot: {
+    x: number;
+    y: number;
+    height: number;
+    width: number;
+  };
+  id: string;
+  url: string;
+  height: number;
+  width: number;
+};
+export type FakePost = (typeof serverPosts)[number] & {
+  title?: string;
+  images?: FakeImage[];
+};
+export type FakeUser = (typeof serverUsers)[number];
 
 export const fakeGetUser = async (username: string) => {
   const user = serverUsers.find((user) => user.username === username);

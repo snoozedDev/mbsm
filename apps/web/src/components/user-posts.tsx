@@ -10,13 +10,7 @@ import {
 import { useCurrentNsfwParam } from "@/hooks/useCurrentNsfwParam";
 import { useUpdateParams } from "@/hooks/useUpdateParams";
 import { cn } from "@/lib/utils";
-import type {
-  ImagePost,
-  Post,
-  Image as PostImage,
-  TextPost,
-  User,
-} from "@mbsm/types";
+import { FakeImage, FakePost, FakeUser } from "@/tmp/fakeFetch";
 import { DateTime } from "luxon";
 import Image from "next/image";
 import Link from "next/link";
@@ -31,7 +25,7 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 
-const PostTimestamp = ({ post, user }: { post: Post; user: User }) => {
+const PostTimestamp = ({ post, user }: { post: FakePost; user: FakeUser }) => {
   const dateTime = DateTime.fromISO(post.postedAt);
 
   const absolute = dateTime.toFormat("LLL d, yyyy");
@@ -67,7 +61,7 @@ const PostTimestamp = ({ post, user }: { post: Post; user: User }) => {
   );
 };
 
-const PostTag = ({ tag, user }: { tag: string; user: User }) => {
+const PostTag = ({ tag, user }: { tag: string; user: FakeUser }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -90,7 +84,7 @@ const PostTag = ({ tag, user }: { tag: string; user: User }) => {
   );
 };
 
-const PostTags = ({ post, user }: { post: Post; user: User }) => {
+const PostTags = ({ post, user }: { post: FakePost; user: FakeUser }) => {
   return post.tags ? (
     <ul className="flex flex-wrap text-sm text-muted-foreground/80">
       {post.tags.map((tag) => (
@@ -105,20 +99,22 @@ const PostImage = ({
   maxHeight,
   maxWidth,
 }: {
-  image: PostImage;
+  image: FakeImage;
   maxHeight?: number;
   maxWidth?: number;
 }) => {
   return (
-    <div className="relative">
-      <Image
-        layout="responsive"
-        src={image.url}
-        alt={image.id}
-        width={image.width}
-        height={image.height}
-      />
-    </div>
+    image && (
+      <div className="relative">
+        <Image
+          layout="responsive"
+          src={image.url}
+          alt={image.id}
+          width={image.width ?? undefined}
+          height={image.height ?? undefined}
+        />
+      </div>
+    )
   );
 };
 
@@ -126,7 +122,7 @@ const UserAvatar = ({
   user,
   className,
 }: {
-  user?: User;
+  user?: FakeUser;
   isLoading?: boolean;
   className?: HtmlHTMLAttributes<HTMLDivElement>["className"];
 }) => {
@@ -136,8 +132,8 @@ const UserAvatar = ({
         <Image
           className="absolute inset-0 z-10"
           src={user.avatar.url}
-          height={user.avatar.height}
-          width={user.avatar.width}
+          height={user.avatar.height ?? undefined}
+          width={user.avatar.width ?? undefined}
           alt={`${user.displayName}' avatar`}
         />
       )}
@@ -151,8 +147,8 @@ const PostContainer = ({
   user,
   children,
 }: {
-  post: Post;
-  user: User;
+  post: FakePost;
+  user: FakeUser;
   children: React.ReactNode;
 }) => (
   <article className="flex relative">
@@ -184,20 +180,22 @@ const PostContainer = ({
   </article>
 );
 
-const ImagePostContent = ({ post }: { post: ImagePost }) => {
+const ImagePostContent = ({ post }: { post: FakePost }) => {
   return (
     <React.Fragment>
       <CardContent className="mt-6">
         {post.body && <p>{post.body}</p>}
       </CardContent>
       <CardContent className="px-0">
-        <PostImage image={post.images[0]} maxHeight={200} maxWidth={400} />
+        {post.images && (
+          <PostImage image={post.images[0]} maxHeight={200} maxWidth={400} />
+        )}
       </CardContent>
     </React.Fragment>
   );
 };
 
-const TextPostContent = ({ post }: { post: TextPost }) => {
+const TextPostContent = ({ post }: { post: FakePost }) => {
   return (
     <React.Fragment>
       {post.title && (
@@ -214,7 +212,14 @@ const TextPostContent = ({ post }: { post: TextPost }) => {
   );
 };
 
-const PostMapper = ({ post, user, ...props }: { post: Post; user: User }) => {
+const PostMapper = ({
+  post,
+  user,
+  ...props
+}: {
+  post: FakePost;
+  user: FakeUser;
+}) => {
   let content = null;
 
   if (post.type === "image") content = <ImagePostContent post={post} />;
@@ -232,8 +237,8 @@ export function UserPosts({
   tag,
   user,
 }: {
-  user: User;
-  posts: Post[];
+  user: FakeUser;
+  posts: FakePost[];
   tag?: string;
 }) {
   const filteredPosts = tag

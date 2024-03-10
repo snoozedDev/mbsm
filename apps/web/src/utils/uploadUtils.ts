@@ -1,10 +1,42 @@
-const allowedUploadReasons = ["avatar", "post"] as const;
+import { getZodTypeGuard } from "@mbsm/types";
+import { z } from "zod";
 
-export type UploadReason = (typeof allowedUploadReasons)[number];
+const uploadTypes = ["avatar", "post"] as const;
 
-export const isUploadReason = (reason: string): reason is UploadReason =>
-  allowedUploadReasons.includes(reason as any);
+const UploadTypeSchema = z.enum(uploadTypes);
 
-export type UploadPayload<T extends UploadReason> = T extends "avatar"
-  ? { handle: string }
-  : {};
+const FileSchema = z.object({
+  sizeKB: z.number(),
+});
+
+const UploadClientPayloadBaseSchema = z.object({
+  type: UploadTypeSchema,
+  fileDetails: FileSchema,
+});
+
+const AvatarUploadClientPayloadSchema = UploadClientPayloadBaseSchema.extend({
+  type: z.literal("avatar"),
+  accountId: z.string(),
+});
+
+const PostUploadClientPayloadSchema = UploadClientPayloadBaseSchema.extend({
+  type: z.literal("post"),
+});
+
+export const UploadClientPayloadSchema = z.union([
+  AvatarUploadClientPayloadSchema,
+  PostUploadClientPayloadSchema,
+]);
+
+export const isUploadClientPayload = getZodTypeGuard(UploadClientPayloadSchema);
+
+export type UploadClientPayload = z.infer<typeof UploadClientPayloadSchema>;
+
+export const UploadTokenPayloadSchema = z.object({
+  clientPayload: UploadClientPayloadSchema,
+  fileId: z.string(),
+});
+
+export const isUploadTokenPayload = getZodTypeGuard(UploadTokenPayloadSchema);
+
+export type UploadTokenPayload = z.infer<typeof UploadTokenPayloadSchema>;

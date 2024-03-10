@@ -35,9 +35,9 @@ export async function generateMetadata({
   }
 
   const description = post.body || user.bio;
-  const title = post.title || user.displayName;
+  const title = user.displayName;
   const images =
-    post.type === "image" ? post.images.map((i) => i.url) : [user.avatar.url];
+    post.type === "image" ? post.images?.map((i) => i.url) : [user.avatar.url];
   const card = post.type === "image" ? "summary_large_image" : "summary";
 
   return {
@@ -49,7 +49,7 @@ export async function generateMetadata({
       siteName: "mbsm",
       authors: [user.username],
       publishedTime: post.postedAt,
-      tags: post.tags,
+      tags: [...post.tags],
       title,
       description,
     },

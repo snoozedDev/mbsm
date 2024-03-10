@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { useUserMeQuery } from "@/queries/userQueries";
-import { UploadPayload, UploadReason } from "@/utils/uploadUtils";
+import { UploadClientPayload } from "@/utils/uploadUtils";
 import { BlobError } from "@vercel/blob";
 import { upload } from "@vercel/blob/client";
 import axios from "axios";
@@ -16,20 +16,21 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { EditImageModal } from "./EditImageModal";
 
-const uploadFile = async <T extends UploadReason>({
+const uploadFile = async ({
   file,
-  route,
   payload,
+  contentType,
 }: {
   file: File;
-  route: T;
-  payload: UploadPayload<T>;
+  payload: UploadClientPayload;
+  contentType?: string;
 }) => {
   const blobUpload = () =>
     upload(file.name, file, {
       access: "public",
-      handleUploadUrl: "/api/upload/" + route,
+      handleUploadUrl: "/api/upload",
       clientPayload: JSON.stringify(payload),
+      contentType,
     });
 
   try {
@@ -82,12 +83,17 @@ export const ManageAccountModal = ({
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    if (newAvatarFile) {
+    if (newAvatarFile && account) {
       try {
         const newBlob = await uploadFile({
           file: newAvatarFile,
-          route: "avatar",
-          payload: { handle },
+          payload: {
+            type: "avatar",
+            accountId: account.id,
+            fileDetails: {
+              sizeKB: newAvatarFile.size / 1024,
+            },
+          },
         });
         if (newBlob) {
           utils.user.me.setData(undefined, (data) =>
@@ -99,11 +105,11 @@ export const ManageAccountModal = ({
                       ? {
                           ...a,
                           avatar: {
-                            id: newBlob.url,
+                            sizeKB: newAvatarFile.size / 1024,
                             url: newBlob.url,
-                            height: null,
-                            width: null,
-                            hotspot: null,
+                            createdAt: new Date().toISOString(),
+                            id: newBlob.url,
+                            metadata: null,
                           },
                         }
                       : a

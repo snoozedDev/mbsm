@@ -1,6 +1,5 @@
-import { InviteCode } from "@mbsm/types";
 import { eq } from "drizzle-orm";
-import { PgUpdateSetSource } from "drizzle-orm/pg-core";
+import { PgInsertValue, PgUpdateSetSource } from "drizzle-orm/pg-core";
 import { db } from "../../db";
 import { schema } from "../../schemaModels";
 
@@ -8,16 +7,9 @@ export const insertInviteCodes = async ({
   inviteCodes,
   userId,
 }: {
-  inviteCodes: InviteCode[];
+  inviteCodes: PgInsertValue<typeof schema.inviteCode>[];
   userId: string;
-}) =>
-  db.insert(schema.inviteCode).values(
-    inviteCodes.map((input) => ({
-      code: input.code,
-      redeemed: false,
-      userId,
-    }))
-  );
+}) => db.insert(schema.inviteCode).values(inviteCodes);
 
 export const updateInviteCode = async ({
   code,

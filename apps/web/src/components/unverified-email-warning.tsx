@@ -1,3 +1,4 @@
+"use client";
 import { cn } from "@/lib/utils";
 import { useSignedInStatus } from "@/queries/authQueries";
 import { useEmailVerificationMutation } from "@/queries/userQueries";

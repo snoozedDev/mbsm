@@ -236,7 +236,7 @@ const SingleAuthenticator = ({
   );
 };
 
-export const UserPasskeys = () => {
+export const UserSecurityPage = () => {
   const { isPending: isUserMePending } = useUserMeQuery();
   const { isPending: isUserSettingsPending, data } = useUserSettingsQuery();
   const {

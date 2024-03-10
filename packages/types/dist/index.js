@@ -23,22 +23,24 @@ __export(src_exports, {
   AccountCreationFormSchema: () => AccountCreationFormSchema,
   AccountProfileDataSchema: () => AccountProfileDataSchema,
   AuthenticatorSchema: () => AuthenticatorSchema,
+  AvatarFileMetadataSchema: () => AvatarFileMetadataSchema,
   EmailVerificationCodeFormSchema: () => EmailVerificationCodeFormSchema,
   EmptyResponseSchema: () => EmptyResponseSchema,
   ErrorResponseSchema: () => ErrorResponseSchema,
+  FileMetadataSchema: () => FileMetadataSchema,
+  FileSchema: () => FileSchema,
   GetAuthSignInResponseSchema: () => GetAuthSignInResponseSchema,
   GetUserAuthenticatorResponseSchema: () => GetUserAuthenticatorResponseSchema,
   GetUserMeResponseSchema: () => GetUserMeResponseSchema,
   GetUserSettingsResponseSchema: () => GetUserSettingsResponseSchema,
-  HotspotSchema: () => HotspotSchema,
   ImagePostSchema: () => ImagePostSchema,
-  ImageSchema: () => ImageSchema,
   InviteCodeSchema: () => InviteCodeSchema,
   PatchUserAuthenticatorCredentialIdBodySchema: () => PatchUserAuthenticatorCredentialIdBodySchema,
   PostAuthSignInVerifyBodySchema: () => PostAuthSignInVerifyBodySchema,
   PostAuthSignupBodySchema: () => PostAuthSignupBodySchema,
   PostAuthSignupResponseSchema: () => PostAuthSignupResponseSchema,
   PostAuthSignupVerifyBodySchema: () => PostAuthSignupVerifyBodySchema,
+  PostFileMetadataSchema: () => PostFileMetadataSchema,
   PostPrimitiveSchema: () => PostPrimitiveSchema,
   PostSchema: () => PostSchema,
   PostUserEmailVerifyBodySchema: () => PostUserEmailVerifyBodySchema,
@@ -47,13 +49,11 @@ __export(src_exports, {
   TextPostSchema: () => TextPostSchema,
   TokenSchema: () => TokenSchema,
   UserAccountSchema: () => UserAccountSchema,
-  UserPreferencesSchema: () => UserPreferencesSchema,
-  UserSchema: () => UserSchema,
   generateActionResponse: () => generateActionResponse,
   getFormattedZodError: () => getFormattedZodError,
   getZodTypeGuard: () => getZodTypeGuard,
   isAuthenticator: () => isAuthenticator,
-  isImage: () => isImage,
+  isFileMetadata: () => isFileMetadata,
   isImagePost: () => isImagePost,
   isInviteCode: () => isInviteCode,
   isPatchUserAuthenticatorCredentialIdBody: () => isPatchUserAuthenticatorCredentialIdBody,
@@ -62,9 +62,7 @@ __export(src_exports, {
   isPostAuthSignupBody: () => isPostAuthSignupBody,
   isPostAuthSignupVerifyBody: () => isPostAuthSignupVerifyBody,
   isTextPost: () => isTextPost,
-  isToken: () => isToken,
-  isUser: () => isUser,
-  isUserPreferences: () => isUserPreferences
+  isToken: () => isToken
 });
 module.exports = __toCommonJS(src_exports);
 
@@ -3862,21 +3860,27 @@ var AccountCreationFormSchema = z.object({
   )
 });
 
-// src/models/image.ts
-var HotspotSchema = z.object({
-  x: z.number().min(0).max(1),
-  y: z.number().min(0).max(1),
-  height: z.number().min(0).max(1),
-  width: z.number().min(0).max(1)
+// src/models/file.ts
+var AvatarFileMetadataSchema = z.object({
+  type: z.literal("avatar"),
+  accountId: z.string()
 });
-var ImageSchema = z.object({
+var PostFileMetadataSchema = z.object({
+  type: z.literal("post"),
+  postId: z.string()
+});
+var FileMetadataSchema = z.union([
+  AvatarFileMetadataSchema,
+  PostFileMetadataSchema
+]);
+var isFileMetadata = (obj) => FileMetadataSchema.safeParse(obj).success;
+var FileSchema = z.object({
   id: z.string(),
-  url: z.string(),
-  hotspot: HotspotSchema.nullable(),
-  height: z.number().min(1).nullable(),
-  width: z.number().min(1).nullable()
+  metadata: FileMetadataSchema.nullable(),
+  url: z.string().nullable(),
+  sizeKB: z.number(),
+  createdAt: z.string()
 });
-var isImage = getZodTypeGuard(ImageSchema);
 
 // src/models/account.ts
 var AccountProfileDataSchema = z.object({
@@ -3891,7 +3895,8 @@ var AccountProfileDataSchema = z.object({
   // ISO date string
 });
 var UserAccountSchema = z.object({
-  avatar: ImageSchema.nullable(),
+  id: z.string(),
+  avatar: FileSchema.nullable(),
   handle: z.string()
 });
 
@@ -3921,7 +3926,7 @@ var PostPrimitiveSchema = z.object({
 });
 var ImagePostSchema = PostPrimitiveSchema.extend({
   type: z.literal("image"),
-  images: z.array(ImageSchema).nonempty()
+  images: z.array(FileSchema).nonempty()
 });
 var TextPostSchema = PostPrimitiveSchema.extend({
   type: z.literal("text")
@@ -3938,32 +3943,6 @@ var TokenSchema = z.object({
   })
 });
 var isToken = getZodTypeGuard(TokenSchema);
-
-// src/models/user.ts
-var UserSchema = z.object({
-  id: z.string(),
-  displayName: z.string(),
-  username: z.string(),
-  avatar: ImageSchema,
-  bio: z.string().optional(),
-  links: z.object({
-    name: z.string(),
-    url: z.string()
-  }).array().optional(),
-  nsfw: z.boolean().optional(),
-  joinedAt: z.string()
-});
-var UserPreferencesSchema = z.object({
-  theme: z.union([z.literal("light"), z.literal("dark"), z.literal("system")]),
-  nsfw: z.union([
-    z.literal("removed"),
-    z.literal("hidden"),
-    z.literal("shown")
-  ]),
-  currentAccount: z.string().optional()
-});
-var isUser = getZodTypeGuard(UserSchema);
-var isUserPreferences = getZodTypeGuard(UserPreferencesSchema);
 
 // src/api/user.ts
 var GetUserMeResponseSchema = generateActionResponse({
@@ -3992,22 +3971,24 @@ var isPatchUserAuthenticatorCredentialIdBody = getZodTypeGuard(
   AccountCreationFormSchema,
   AccountProfileDataSchema,
   AuthenticatorSchema,
+  AvatarFileMetadataSchema,
   EmailVerificationCodeFormSchema,
   EmptyResponseSchema,
   ErrorResponseSchema,
+  FileMetadataSchema,
+  FileSchema,
   GetAuthSignInResponseSchema,
   GetUserAuthenticatorResponseSchema,
   GetUserMeResponseSchema,
   GetUserSettingsResponseSchema,
-  HotspotSchema,
   ImagePostSchema,
-  ImageSchema,
   InviteCodeSchema,
   PatchUserAuthenticatorCredentialIdBodySchema,
   PostAuthSignInVerifyBodySchema,
   PostAuthSignupBodySchema,
   PostAuthSignupResponseSchema,
   PostAuthSignupVerifyBodySchema,
+  PostFileMetadataSchema,
   PostPrimitiveSchema,
   PostSchema,
   PostUserEmailVerifyBodySchema,
@@ -4016,13 +3997,11 @@ var isPatchUserAuthenticatorCredentialIdBody = getZodTypeGuard(
   TextPostSchema,
   TokenSchema,
   UserAccountSchema,
-  UserPreferencesSchema,
-  UserSchema,
   generateActionResponse,
   getFormattedZodError,
   getZodTypeGuard,
   isAuthenticator,
-  isImage,
+  isFileMetadata,
   isImagePost,
   isInviteCode,
   isPatchUserAuthenticatorCredentialIdBody,
@@ -4031,7 +4010,5 @@ var isPatchUserAuthenticatorCredentialIdBody = getZodTypeGuard(
   isPostAuthSignupBody,
   isPostAuthSignupVerifyBody,
   isTextPost,
-  isToken,
-  isUser,
-  isUserPreferences
+  isToken
 });

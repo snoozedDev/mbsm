@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { getZodTypeGuard } from "../zodUtils";
-import { ImageSchema } from "./image";
+import { FileSchema } from "./file";
 
 // SCHEMAS
 
@@ -15,7 +15,7 @@ export const PostPrimitiveSchema = z.object({
 
 export const ImagePostSchema = PostPrimitiveSchema.extend({
   type: z.literal("image"),
-  images: z.array(ImageSchema).nonempty(),
+  images: z.array(FileSchema).nonempty(),
 });
 
 export const TextPostSchema = PostPrimitiveSchema.extend({

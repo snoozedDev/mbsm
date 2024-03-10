@@ -1,6 +1,6 @@
 "use client";
 import { useCurrentNsfwParam } from "@/hooks/useCurrentNsfwParam";
-import { User } from "@mbsm/types";
+import { FakeUser } from "@/tmp/fakeFetch";
 import { CalendarIcon, LinkIcon, TwitterIcon } from "lucide-react";
 import { DateTime } from "luxon";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 
-export const UserCard = ({ user }: { user: User }) => {
+export const UserCard = ({ user }: { user: FakeUser }) => {
   const nsfwParam = useCurrentNsfwParam();
 
   return (
