@@ -96,34 +96,21 @@ export const ManageAccountModal = ({
           },
         });
         if (newBlob) {
-          utils.user.me.setData(undefined, (data) =>
-            data
-              ? {
-                  ...data,
-                  accounts: data.accounts.map((a) =>
-                    a.handle === handle
-                      ? {
-                          ...a,
-                          avatar: {
-                            sizeKB: newAvatarFile.size / 1024,
-                            url: newBlob.url,
-                            createdAt: new Date().toISOString(),
-                            id: newBlob.url,
-                            metadata: null,
-                          },
-                        }
-                      : a
-                  ),
-                }
-              : data
-          );
+          setTimeout(() => {
+            utils.user.me.refetch();
+            utils.user.settings.reset();
+            setIsLoading(false);
+            setShouldClose(true);
+          }, 1500);
+        } else {
+          throw new Error("Failed to upload avatar");
         }
       } catch (e) {
         console.error({ e });
+        setIsLoading(false);
+        setShouldClose(true);
       }
     }
-    setIsLoading(false);
-    setShouldClose(true);
   };
 
   const hasChanges = useMemo(() => {

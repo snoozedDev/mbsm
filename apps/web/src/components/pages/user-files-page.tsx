@@ -10,7 +10,8 @@ import {
 import { MoreHorizontal } from "lucide-react";
 import { DateTime } from "luxon";
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { FadeFromBelow } from "../containers/fade-from-below";
 import { Button } from "../ui/button";
@@ -38,6 +39,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Separator } from "../ui/separator";
+import { Skeleton } from "../ui/skeleton";
 
 function humanFileSize(bytes: number, si = false, dp = 1) {
   const thresh = si ? 1000 : 1024;
@@ -75,9 +77,10 @@ const fileSorts = [
 ];
 
 export const UserFilesPage = () => {
-  const { data: user } = useUserMeQuery();
-  const { data: settings } = useUserSettingsQuery();
+  const { data: user, isLoading: userLoading } = useUserMeQuery();
+  const { data: settings, isLoading: settingsLoading } = useUserSettingsQuery();
   const [sort, setSort] = useState(fileSorts[0].value);
+  const isLoading = userLoading || settingsLoading;
 
   const fileSorter = useCallback(
     (a: z.infer<typeof FileSchema>, b: z.infer<typeof FileSchema>) => {
@@ -135,7 +138,8 @@ export const UserFilesPage = () => {
       <Card className="px-6 py-4 mb-4">
         <h2 className="text-2xl font-medium tracking-wide">Storage</h2>
         <fieldset className="text-sm text-muted-foreground mt-2 mb-6 space-y-2">
-          <p>{`You have a maximum amount of storage available to you.`}</p>
+          <p>{`You have a certain amount of storage available to you, which will grow as your
+          accounts age.`}</p>
           <p>
             {`When you reach the limit, you won't be able to upload any more files
             until you delete some. Storage is shared across all your accounts.
@@ -177,6 +181,9 @@ export const UserFilesPage = () => {
             delete files that are in use and will inform about what is using
             them.`}
           </p>
+          <p>
+            {`Unused files will eventually get deleted by an automated system.`}
+          </p>
         </fieldset>
         <Separator />
         <div className="mt-4 flex justify-end">
@@ -194,9 +201,11 @@ export const UserFilesPage = () => {
           </Select>
         </div>
         <div className="mt-4 grid grid-cols-1 @sm:grid-cols-2 @xl:grid-cols-3 gap-4">
-          {settings?.files
-            .sort(fileSorter)
-            .map((file) => <SingleFile key={file.id} file={file} />)}
+          {isLoading
+            ? [...Array(9).keys()].map((i) => <LoadingFile key={i} />)
+            : settings?.files
+                .sort(fileSorter)
+                .map((file) => <SingleFile key={file.id} file={file} />)}
         </div>
       </div>
       <Pagination>
@@ -219,23 +228,37 @@ export const UserFilesPage = () => {
   );
 };
 
+const LoadingFile = () => {
+  return (
+    <Card className="overflow-hidden">
+      <div className="pt-1 px-1 border-b">
+        <div className="rounded-t-lg h-28 w-full bg-gradient-to-t to-muted/50 from-background" />
+      </div>
+      <div className="py-4 px-2">
+        <Skeleton className="h-6 w-2/3" />
+        <Skeleton className="h-4 w-1/3 mt-2" />
+      </div>
+    </Card>
+  );
+};
+
 const SingleFile = ({ file }: { file: z.infer<typeof FileSchema> }) => {
-  const { data } = useUserMeQuery();
-  const account = useMemo(() => {
-    if (!file.metadata || !data) return undefined;
-    const { metadata } = file;
-    switch (metadata.type) {
-      case "avatar":
-        return data.accounts.find((a) => a.id === metadata.accountId);
-    }
-    return undefined;
-  }, [data, file]);
+  //   const { data } = useUserMeQuery();
+  //   const account = useMemo(() => {
+  //     if (!file.metadata || !data) return undefined;
+  //     const { metadata } = file;
+  //     switch (metadata.type) {
+  //       case "avatar":
+  //         return data.accounts.find((a) => a.id === metadata.accountId);
+  //     }
+  //     return undefined;
+  //   }, [data, file]);
 
   const getTitle = () => {
-    if (!file.metadata) return "File";
-    switch (file.metadata.type) {
+    const { metadata } = file;
+    if (!metadata) return "File";
+    switch (metadata.type) {
       case "avatar":
-        if (account) return `Avatar for @${account.handle}`;
         return "Avatar";
       default:
         return "File";
@@ -243,16 +266,15 @@ const SingleFile = ({ file }: { file: z.infer<typeof FileSchema> }) => {
   };
 
   const renderImage = () => {
-    if (!file.url || !file.metadata) return null;
     const { metadata } = file;
+    if (!metadata || !file.url) return null;
     switch (metadata.type) {
       case "avatar":
-        const account = data?.accounts.find((a) => a.id === metadata.accountId);
         return (
           <Image
             className="object-contain h-full w-full"
             src={file.url}
-            alt={`Avatar for @${account?.handle}`}
+            alt={`Avatar image`}
             width={200}
             height={200}
           />
@@ -262,6 +284,27 @@ const SingleFile = ({ file }: { file: z.infer<typeof FileSchema> }) => {
         break;
     }
     return null;
+  };
+
+  const download = (url: string) => {
+    if (!url) {
+      throw new Error("Resource URL not provided! You need to provide one");
+    }
+    const a = document.createElement("a");
+    fetch(url)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const blobURL = URL.createObjectURL(blob);
+        a.href = blobURL;
+        a.download = "";
+        a.style.display = "none";
+        document.body.appendChild(a);
+
+        a.click();
+      })
+      .finally(() => {
+        document.body.removeChild(a);
+      });
   };
 
   return (
@@ -287,11 +330,19 @@ const SingleFile = ({ file }: { file: z.infer<typeof FileSchema> }) => {
               <MoreHorizontal />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            side="bottom"
-            align="end"
-            className="flex flex-col items-stretch"
-          >
+          <DropdownMenuContent side="bottom" align="end">
+            {file.url && (
+              <DropdownMenuItem asChild>
+                <Link href={file.url} target="_blank">
+                  View file
+                </Link>
+              </DropdownMenuItem>
+            )}
+            {file.url && (
+              <DropdownMenuItem onSelect={() => download(file.url ?? "")}>
+                Download file
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onSelect={() => console.log("delete")}>
               Delete
             </DropdownMenuItem>

@@ -4,6 +4,7 @@ import { useSignedInStatus } from "@/queries/authQueries";
 import { useEmailVerificationMutation } from "@/queries/userQueries";
 import { getErrorMessage } from "@/utils/stringUtils";
 import { PostUserEmailVerifyBody } from "@mbsm/types";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { MailWarning } from "lucide-react";
 import { useVerificationCodeForm } from "./hooks/forms/useVerificationCodeForm";
 import { useIsEmailVerified } from "./hooks/useIsEmailVerified";
@@ -18,7 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import { Input } from "./ui/input";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
 
 export const UnverifiedEmailWarning = () => {
   const { isSignedIn } = useSignedInStatus();
@@ -59,7 +60,24 @@ export const UnverifiedEmailWarning = () => {
                     Confirmation Code
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="123456" {...field} />
+                    <InputOTP
+                      {...field}
+                      pattern={REGEXP_ONLY_DIGITS}
+                      maxLength={6}
+                      render={({ slots }) => (
+                        <>
+                          <InputOTPGroup>
+                            {slots.map((slot, index) => (
+                              <InputOTPSlot
+                                className="bg-background"
+                                key={index}
+                                {...slot}
+                              />
+                            ))}{" "}
+                          </InputOTPGroup>
+                        </>
+                      )}
+                    />
                   </FormControl>
                   {fieldState.error && <FormMessage />}
                 </FormItem>

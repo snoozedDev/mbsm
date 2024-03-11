@@ -171,6 +171,7 @@ export const UserAccountsPage = () => {
               {`You can't post or comment without an account.`}
             </p>
             <Button
+              className="mt-4"
               onClick={() => push(({ id }) => <CreateAccountModal id={id} />)}
             >
               Create Account

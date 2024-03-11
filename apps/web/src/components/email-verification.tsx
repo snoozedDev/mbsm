@@ -12,7 +12,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
@@ -23,8 +22,10 @@ import {
   useEmailVerificationMutation,
   useUserMeQuery,
 } from "@/queries/userQueries";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
 
 export const EmailVerification = () => {
   const [emailConcealed, setEmailConcealed] = useState(true);
@@ -91,7 +92,20 @@ export const EmailVerification = () => {
                 <FormItem>
                   <FormLabel>Confirmation Code</FormLabel>
                   <FormControl>
-                    <Input placeholder="123456" {...field} />
+                    <InputOTP
+                      {...field}
+                      pattern={REGEXP_ONLY_DIGITS}
+                      maxLength={6}
+                      render={({ slots }) => (
+                        <>
+                          <InputOTPGroup>
+                            {slots.map((slot, index) => (
+                              <InputOTPSlot key={index} {...slot} />
+                            ))}{" "}
+                          </InputOTPGroup>
+                        </>
+                      )}
+                    />
                   </FormControl>
                   {fieldState.error && <FormMessage />}
                 </FormItem>

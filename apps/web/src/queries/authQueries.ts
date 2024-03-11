@@ -20,6 +20,7 @@ export const useSignOutMutation = () => {
     onSuccess: () => {
       toast("You have been logged out.");
       utils.user.me.reset();
+      utils.user.settings.reset();
       router.push("/");
     },
     retry: false,
