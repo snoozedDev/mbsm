@@ -293,6 +293,7 @@ var file = pgTable5(
   {
     id: uuid5("id").defaultRandom().primaryKey(),
     userId: uuid5("user_id").references(() => user.id).notNull(),
+    key: varchar4("key", { length: 256 }).notNull(),
     url: varchar4("url", { length: 256 }),
     sizeKB: integer3("size_kb").notNull(),
     uploadedAt: timestamp2("uploaded_at", { mode: "string" }),

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/s3-request-presigner": "^3.529.1",
     "@hookform/resolvers": "^3.3.4",
     "@mbsm/db-layer": "workspace:*",
     "@mbsm/utils": "workspace:*",
@@ -49,6 +50,7 @@
     "@types/three": "^0.155.0",
     "@vercel/blob": "^0.19.0",
     "@vercel/edge-config": "^0.4.1",
+    "aws-sdk": "^2.1576.0",
     "axios": "^1.4.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^1.2.1",
@@ -84,6 +86,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@aws-sdk/types": "^3.523.0",
     "@mbsm/types": "workspace:*",
     "@simplewebauthn/types": "9.0.1",
     "@types/cookie": "^0.6.0",

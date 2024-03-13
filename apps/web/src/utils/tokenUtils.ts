@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 import { nanoid } from "nanoid";
 
 const shapeToken = (user: InferSelectModel<typeof schema.user>): Token => ({
-  user: { id: user.id },
+  user: { id: user.id, emailVerified: user.emailVerified },
 });
 
 const generateAccessToken = (token: Token) =>

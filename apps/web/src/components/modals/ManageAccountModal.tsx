@@ -1,63 +1,18 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { useUserMeQuery } from "@/queries/userQueries";
-import { UploadClientPayload } from "@/utils/uploadUtils";
-import { BlobError } from "@vercel/blob";
-import { upload } from "@vercel/blob/client";
-import axios from "axios";
-import { Upload } from "lucide-react";
-import { useId, useMemo, useRef, useState } from "react";
+import { useUploadFileMutation, useUserMeQuery } from "@/queries/userQueries";
+import { ExternalLink, Info, Upload } from "lucide-react";
+import Image from "next/image";
+import { forwardRef, useId, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { AccountAvatar } from "../account-avatar";
+import { AvatarPrimitive } from "../account-avatar";
 import { Modal } from "../modal";
 import { useModals } from "../modals-layer";
 import { trpc } from "../query-layout";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { EditImageModal } from "./EditImageModal";
-
-const uploadFile = async ({
-  file,
-  payload,
-  contentType,
-}: {
-  file: File;
-  payload: UploadClientPayload;
-  contentType?: string;
-}) => {
-  const blobUpload = () =>
-    upload(file.name, file, {
-      access: "public",
-      handleUploadUrl: "/api/upload",
-      clientPayload: JSON.stringify(payload),
-      contentType,
-    });
-
-  try {
-    const blob = await blobUpload();
-    return blob;
-  } catch (e) {
-    if (e instanceof BlobError) {
-      const refresh = await axios.get("/api/auth/refresh", {
-        withCredentials: true,
-        validateStatus: () => true,
-      });
-
-      if (refresh.status !== 200) {
-        toast.error("Failed to authenticate user, are you logged in?");
-        return undefined;
-      }
-
-      try {
-        const blob = await blobUpload();
-        return blob;
-      } catch (e) {
-        toast.error("Failed to upload file");
-      }
-    }
-  }
-  return undefined;
-};
 
 export const ManageAccountModal = ({
   handle,
@@ -71,44 +26,42 @@ export const ManageAccountModal = ({
   const [shouldClose, setShouldClose] = useState(false);
   const [fileInputActive, setFileInputActive] = useState(false);
   const avatarInputId = useId();
-  const { data, refetch } = useUserMeQuery();
+  const { data } = useUserMeQuery();
   const account = data?.accounts.find((a) => a.handle === handle);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [newAvatarFile, setNewAvatarFile] = useState<File | undefined>(
     undefined
   );
   const [shouldRemoveAvatar, setShouldRemoveAvatar] = useState(false);
+  const { uploadFile } = useUploadFileMutation();
   const utils = trpc.useUtils();
+  const isNewAvatarGif = useMemo(() => {
+    return newAvatarFile?.type.includes("gif");
+  }, [newAvatarFile]);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     if (newAvatarFile && account) {
       try {
-        const newBlob = await uploadFile({
+        await uploadFile({
           file: newAvatarFile,
-          payload: {
+          options: {
             type: "avatar",
             accountId: account.id,
             fileDetails: {
+              type: newAvatarFile.type,
               sizeKB: newAvatarFile.size / 1024,
             },
           },
         });
-        if (newBlob) {
-          setTimeout(() => {
-            utils.user.me.refetch();
-            utils.user.settings.reset();
-            setIsLoading(false);
-            setShouldClose(true);
-          }, 1500);
-        } else {
-          throw new Error("Failed to upload avatar");
-        }
+        utils.user.me.refetch();
+        utils.user.settings.refetch();
+        setShouldClose(true);
       } catch (e) {
         console.error({ e });
+      } finally {
         setIsLoading(false);
-        setShouldClose(true);
       }
     }
   };
@@ -128,21 +81,20 @@ export const ManageAccountModal = ({
           <div className="flex flex-col @sm:flex-row">
             <div className="flex w-20 self-center flex-col items-center">
               {newAvatarFile ? (
-                <img
+                <Image
+                  unoptimized
+                  alt="New avatar"
                   src={URL.createObjectURL(newAvatarFile)}
                   className="h-20 w-20 rounded-lg"
+                  width={80}
+                  height={80}
                 />
               ) : (
-                <AccountAvatar
-                  className="h-20 w-20 text-3xl"
-                  account={
-                    shouldRemoveAvatar
-                      ? {
-                          ...account,
-                          avatar: null,
-                        }
-                      : account
-                  }
+                <AvatarPrimitive
+                  src={shouldRemoveAvatar ? null : account.avatar?.url}
+                  alt={`Avatar for @${account.handle}`}
+                  fallback={account.handle.substring(0, 2)}
+                  size="lg"
                 />
               )}
               {newAvatarFile ? (
@@ -216,6 +168,10 @@ export const ManageAccountModal = ({
                       toast.error("Invalid file type");
                       return;
                     }
+                    if (image.type.includes("gif")) {
+                      setNewAvatarFile(image);
+                      return;
+                    }
                     e.target.value = "";
                     push(({ id }) => (
                       <EditImageModal
@@ -235,6 +191,24 @@ export const ManageAccountModal = ({
               </div>
             </div>
           </div>
+          {isNewAvatarGif && (
+            <Alert className="mt-4">
+              <Info className="h-4 w-4" />
+              <AlertTitle>About gifs</AlertTitle>
+              <AlertDescription>
+                Gifs will be uploaded as-is and will not be cropped or resized.
+                If you want to please use a tool like{" "}
+                <OutsideLink
+                  href="https://ezgif.com/crop"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline"
+                >
+                  ezgif
+                </OutsideLink>
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="flex justify-between mt-4">
             <Button
               variant="secondary"
@@ -255,3 +229,21 @@ export const ManageAccountModal = ({
     </Modal>
   );
 };
+
+const OutsideLink = forwardRef<
+  HTMLAnchorElement,
+  React.AnchorHTMLAttributes<HTMLAnchorElement>
+>(function OutsideLink({ children, ...props }, ref) {
+  return (
+    <a
+      ref={ref}
+      target="_blank"
+      rel="noreferrer"
+      className="text-primary underline"
+      {...props}
+    >
+      <span>{children}</span>
+      <ExternalLink className="w-[1em] h-[1em] align-text-top ml-[.25em] inline" />
+    </a>
+  );
+});

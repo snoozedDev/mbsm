@@ -1,29 +1,76 @@
 import { cn } from "@/lib/utils";
 import { UserAccount } from "@mbsm/types";
-import { ReactNode, forwardRef } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import Image from "next/image";
+import { useState } from "react";
+import { Skeleton } from "./ui/skeleton";
 
-export const AccountAvatar = forwardRef<
-  HTMLSpanElement,
-  {
-    account: UserAccount;
-    children?: ReactNode;
-  } & React.ComponentProps<typeof Avatar>
->(function AccountAvatar({ account, className, ...props }, ref) {
+export const AccountAvatar = ({
+  account,
+  ...props
+}: Omit<AvatarProps, "alt" | "src" | "fallback"> & {
+  account: UserAccount;
+}) => (
+  <AvatarPrimitive
+    src={account.avatar?.url}
+    alt={`Avatar for @${account.handle}`}
+    fallback={account.handle.substring(0, 2)}
+    {...props}
+  />
+);
+
+type AvatarProps = {
+  src?: string | null;
+  alt: string;
+  fallback: string;
+  loading?: boolean;
+  size: "sm" | "md" | "lg";
+};
+
+export const AvatarPrimitive = ({
+  src,
+  alt,
+  fallback,
+  loading,
+  size,
+}: AvatarProps) => {
+  const [hasError, setHasError] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const sizePx = size === "sm" ? 40 : size === "md" ? 56 : 80;
+
   return (
-    <Avatar ref={ref} className={cn("rounded-lg", className)} {...props}>
-      {account.avatar?.url && (
-        <AvatarImage
-          className="rounded-lg"
-          src={account.avatar?.url}
-          alt={`@${account.handle}`}
-        />
+    <div
+      className={cn(
+        "relative rounded-lg overflow-hidden flex items-center justify-center",
+        size === "sm" ? "h-10 w-10" : size === "md" ? "h-14 w-14" : "h-20 w-20"
       )}
-      {props.children ?? (
-        <AvatarFallback className="rounded-lg">
-          {account.handle[0]}
-        </AvatarFallback>
+    >
+      {loading ? (
+        <Skeleton className="h-full w-full" />
+      ) : src && !hasError ? (
+        <>
+          {!hasLoaded && <Skeleton className={cn("h-full w-full absolute")} />}
+          <Image
+            alt={alt}
+            src={src}
+            width={sizePx}
+            height={sizePx}
+            onLoad={() => setHasLoaded(true)}
+            onError={() => setHasError(true)}
+            className={cn(
+              "object-cover w-full h-full",
+              hasLoaded ? "opacity-100" : "opacity-0"
+            )}
+          />
+        </>
+      ) : (
+        <span
+          className={cn(
+            size === "sm" ? "text-2xl" : size === "md" ? "text-3xl" : "text-4xl"
+          )}
+        >
+          {fallback}
+        </span>
       )}
-    </Avatar>
+    </div>
   );
-});
+};

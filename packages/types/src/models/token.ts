@@ -4,6 +4,7 @@ import { getZodTypeGuard } from "../zodUtils";
 export const TokenSchema = z.object({
   user: z.object({
     id: z.string(),
+    emailVerified: z.boolean(),
   }),
 });
 

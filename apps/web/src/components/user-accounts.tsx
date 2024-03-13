@@ -65,7 +65,7 @@ const SingleAccount = ({
   return (
     <div className="flex">
       <div className="flex-1 flex items-center">
-        <AccountAvatar account={account} />
+        <AccountAvatar account={account} size="sm" />
         <span className="text-muted-foreground ml-2">
           <span className="text-muted-foreground/40 mr-0.5 select-none">@</span>
           {account.handle}

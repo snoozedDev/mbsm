@@ -1,8 +1,10 @@
 // import { renameAuthenticator } from "@/actions/authActions";
 // import { getUserSettings } from "@/actions/userActions";
 import { trpc } from "@/components/query-layout";
+import { UploadClientPayload } from "@/utils/uploadUtils";
 import { getErrorMessage } from "@mbsm/utils";
 import { startRegistration } from "@simplewebauthn/browser";
+import axios from "axios";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -36,6 +38,47 @@ export const useEmailVerificationMutation = () => {
       toast("Your email has been verified.");
     },
   });
+};
+
+export const useUploadFileMutation = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const presign = trpc.user.presign.useMutation();
+  const verifyUpload = trpc.user.verifyUpload.useMutation();
+
+  const uploadFile = async ({
+    file,
+    options,
+  }: {
+    file: File;
+    options: UploadClientPayload;
+  }) => {
+    setIsLoading(true);
+    try {
+      const { url, fileId } = await presign.mutateAsync(options);
+
+      const res = await axios.put(url, file, {
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      if (res.status !== 200) {
+        throw new Error("Failed to upload file");
+      }
+
+      await verifyUpload.mutateAsync({ fileId });
+
+      return res.data;
+    } catch (err) {
+      toast.error("Failed to upload file", {
+        description: getErrorMessage(err),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { uploadFile, isLoading };
 };
 
 export const useAddAuthenticatorMutation = () => {

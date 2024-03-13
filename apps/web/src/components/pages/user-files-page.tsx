@@ -7,13 +7,15 @@ import {
   useMotionTemplate,
   useMotionValue,
 } from "framer-motion";
-import { MoreHorizontal } from "lucide-react";
+import { Info, MoreHorizontal } from "lucide-react";
 import { DateTime } from "luxon";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { FadeFromBelow } from "../containers/fade-from-below";
+import { useModals } from "../modals-layer";
+import { InfoModal } from "../modals/InfoModal";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import {
@@ -25,7 +27,6 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -41,11 +42,19 @@ import {
 import { Separator } from "../ui/separator";
 import { Skeleton } from "../ui/skeleton";
 
-function humanFileSize(bytes: number, si = false, dp = 1) {
+function humanFileSize({
+  bytes,
+  si = false,
+  dp = 1,
+}: {
+  bytes: number;
+  si?: boolean;
+  dp?: number;
+}) {
   const thresh = si ? 1000 : 1024;
 
   if (Math.abs(bytes) < thresh) {
-    return bytes + " B";
+    return bytes.toFixed(dp) + " B";
   }
 
   const units = si
@@ -79,7 +88,15 @@ const fileSorts = [
 export const UserFilesPage = () => {
   const { data: user, isLoading: userLoading } = useUserMeQuery();
   const { data: settings, isLoading: settingsLoading } = useUserSettingsQuery();
+  const { push } = useModals();
   const [sort, setSort] = useState(fileSorts[0].value);
+  const [currentPage, setCurrentPage] = useState(1);
+  const perPage = 9;
+  const pages = useMemo(
+    () => Math.ceil((settings?.files.length ?? 0) / perPage),
+    [settings]
+  );
+
   const isLoading = userLoading || settingsLoading;
 
   const fileSorter = useCallback(
@@ -121,8 +138,8 @@ export const UserFilesPage = () => {
       duration: 1,
       ease: "easeOut",
       onUpdate(value) {
-        kbNode.textContent = `${humanFileSize(value * 1024)} / ${humanFileSize(
-          user.maxStorageMB * 1024 * 1024
+        kbNode.textContent = `${humanFileSize({ bytes: value * 1024 })} / ${humanFileSize(
+          { bytes: user.maxStorageMB * 1024 * 1024 }
         )}`;
       },
     });
@@ -136,22 +153,40 @@ export const UserFilesPage = () => {
   return (
     <FadeFromBelow className="@container">
       <Card className="px-6 py-4 mb-4">
-        <h2 className="text-2xl font-medium tracking-wide">Storage</h2>
-        <fieldset className="text-sm text-muted-foreground mt-2 mb-6 space-y-2">
-          <p>{`You have a certain amount of storage available to you, which will grow as your
-          accounts age.`}</p>
-          <p>
-            {`When you reach the limit, you won't be able to upload any more files
-            until you delete some. Storage is shared across all your accounts.
-            It is not possible to increase the limit at this time, but it may be
-            possible in the future.`}
-          </p>
-          <p>
-            {`Storage and bandwidth are one of the most obscurely priced
-            resources. I'll be monitoring usage to see if the current limits are
-            fair and will adjust them accordingly.`}
-          </p>
-        </fieldset>
+        <h2 className="text-2xl font-medium tracking-wide flex items-center">
+          <span>Storage</span>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="ml-2"
+            onClick={() =>
+              push(({ id }) => (
+                <InfoModal id={id} title="About Storage">
+                  <fieldset className="text-base mb-6 text-foreground/80 space-y-3">
+                    <p>
+                      {`You have a certain amount of storage available to you, which will grow as your
+                        accounts age.`}
+                    </p>
+                    <p>
+                      {`When you reach the limit, you won't be able to upload any more files
+                        until you delete some. Storage is shared across all your accounts.
+                        It is not possible to increase the limit at this time, but it may be
+                        possible in the future.`}
+                    </p>
+                    <p>
+                      {`Storage and bandwidth are one of the most obscurely priced
+                        resources. I'll be monitoring usage to see if the current limits are
+                        fair and will adjust them accordingly.`}
+                    </p>
+                  </fieldset>
+                </InfoModal>
+              ))
+            }
+          >
+            <Info className="h-5 w-5" />
+          </Button>
+        </h2>
+        <p className="text-sm text-muted-foreground mt-2 mb-6 space-y-2">{`You can keep track of your used storage here.`}</p>
         <div className="w-full flex flex-col">
           <div className="flex justify-between mb-1 tracking-wide">
             <span>Storage used</span>
@@ -205,25 +240,43 @@ export const UserFilesPage = () => {
             ? [...Array(9).keys()].map((i) => <LoadingFile key={i} />)
             : settings?.files
                 .sort(fileSorter)
+                .slice((currentPage - 1) * perPage, currentPage * perPage)
                 .map((file) => <SingleFile key={file.id} file={file} />)}
         </div>
       </div>
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious href="#" />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">1</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext href="#" />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      {pages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            {currentPage > 1 && (
+              <PaginationItem>
+                <PaginationPrevious
+                  className="cursor-pointer"
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                />
+              </PaginationItem>
+            )}
+            {Array.from({ length: pages }).map((_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink
+                  className="cursor-pointer"
+                  onClick={() => setCurrentPage(i + 1)}
+                  isActive={currentPage === i + 1}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            {currentPage < pages && (
+              <PaginationItem>
+                <PaginationNext
+                  className="cursor-pointer"
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                />
+              </PaginationItem>
+            )}
+          </PaginationContent>
+        </Pagination>
+      )}
     </FadeFromBelow>
   );
 };
@@ -243,17 +296,6 @@ const LoadingFile = () => {
 };
 
 const SingleFile = ({ file }: { file: z.infer<typeof FileSchema> }) => {
-  //   const { data } = useUserMeQuery();
-  //   const account = useMemo(() => {
-  //     if (!file.metadata || !data) return undefined;
-  //     const { metadata } = file;
-  //     switch (metadata.type) {
-  //       case "avatar":
-  //         return data.accounts.find((a) => a.id === metadata.accountId);
-  //     }
-  //     return undefined;
-  //   }, [data, file]);
-
   const getTitle = () => {
     const { metadata } = file;
     if (!metadata) return "File";
@@ -319,7 +361,7 @@ const SingleFile = ({ file }: { file: z.infer<typeof FileSchema> }) => {
           <h3 className="text-sm font-medium tracking-wide">{getTitle()}</h3>
           <div className="flex justify-between">
             <p className="text-sm text-muted-foreground mt-2">
-              {file.sizeKB} KB |{" "}
+              {humanFileSize({ bytes: file.sizeKB * 1024 })} |{" "}
               {DateTime.fromISO(file.createdAt, { zone: "utc" }).toRelative()}
             </p>
           </div>

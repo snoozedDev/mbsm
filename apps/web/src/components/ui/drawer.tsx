@@ -51,7 +51,9 @@ const DrawerContent = React.forwardRef<
       {...props}
     >
       {!hideX && (
-        <div className="mx-auto h-2 w-[100px] rounded-full bg-muted" />
+        <div className="absolute bg-background/80 flex w-full backdrop-blur-sm">
+          <div className="my-6 self-center mx-auto h-2 w-[100px] rounded-full bg-muted" />
+        </div>
       )}
       {children}
     </DrawerPrimitive.Content>

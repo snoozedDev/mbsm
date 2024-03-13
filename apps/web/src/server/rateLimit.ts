@@ -33,4 +33,11 @@ export const signInLimiter = createRateLimiter({
   prefix: "@mbsm/signIn",
 });
 
+export const uploadLimiter = createRateLimiter({
+  redis,
+  limiter: Ratelimit.slidingWindow(25, "1 h"),
+  analytics: true,
+  prefix: "@mbsm/upload",
+});
+
 export type RateLimiter = ReturnType<typeof createRateLimiter>;

@@ -25,7 +25,10 @@ export const limiterMiddleware = (limiter: RateLimiter) =>
 
     const success = await limiter.middleware(req);
     if (!success) {
-      throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded, please try again later",
+      });
     }
 
     return opts.next();

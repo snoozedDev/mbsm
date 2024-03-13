@@ -200,13 +200,19 @@ export const authRouter = router({
       });
 
       if (!authenticator) {
-        throw new TRPCError({ code: "NOT_FOUND" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "That authenticator is not associated with any user.",
+        });
       }
 
       const { user } = authenticator;
 
       if (!user) {
-        throw new TRPCError({ code: "NOT_FOUND" });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "That authenticator is not associated with any user.",
+        });
       }
 
       await db

@@ -344,6 +344,18 @@ declare const file: drizzle_orm_pg_core.PgTableWithColumns<{
             enumValues: undefined;
             baseColumn: never;
         }, {}, {}>;
+        key: drizzle_orm_pg_core.PgColumn<{
+            name: "key";
+            tableName: "file";
+            dataType: "string";
+            columnType: "PgVarchar";
+            data: string;
+            driverParam: string;
+            notNull: true;
+            hasDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+        }, {}, {}>;
         url: drizzle_orm_pg_core.PgColumn<{
             name: "url";
             tableName: "file";

@@ -6,8 +6,7 @@ import { useUserMeQuery } from "@/queries/userQueries";
 import { SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AccountAvatar } from "./account-avatar";
-import { LoadingDots } from "./loading-dots";
+import { AccountAvatar, AvatarPrimitive } from "./account-avatar";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -70,14 +69,19 @@ export const SiteHeader = () => {
         </NavigationMenu>
         <div className="flex-grow" />
         {isLoading ? (
-          <LoadingDots />
+          <AvatarPrimitive
+            fallback="L"
+            size="sm"
+            loading
+            alt="Loading Avatar"
+          />
         ) : user.data ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               {activeAccount ? (
-                <button>
-                  <AccountAvatar account={activeAccount} />
-                </button>
+                <Button variant="ghost" className="p-0">
+                  <AccountAvatar account={activeAccount} size="sm" />
+                </Button>
               ) : (
                 <Button variant="outline" className="relative">
                   {/* {hasWarnings && (

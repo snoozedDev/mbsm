@@ -296,6 +296,7 @@ var file = (0, import_pg_core6.pgTable)(
   {
     id: (0, import_pg_core6.uuid)("id").defaultRandom().primaryKey(),
     userId: (0, import_pg_core6.uuid)("user_id").references(() => user.id).notNull(),
+    key: (0, import_pg_core6.varchar)("key", { length: 256 }).notNull(),
     url: (0, import_pg_core6.varchar)("url", { length: 256 }),
     sizeKB: (0, import_pg_core6.integer)("size_kb").notNull(),
     uploadedAt: (0, import_pg_core6.timestamp)("uploaded_at", { mode: "string" }),

@@ -10,7 +10,6 @@ const envVariables = [
   "KV_REST_API_URL",
   "KV_REST_API_TOKEN",
   "KV_REST_API_READ_ONLY_TOKEN",
-  "BLOB_READ_WRITE_TOKEN",
   "EDGE_CONFIG",
   "ORIGIN",
   "RP_NAME",
@@ -21,7 +20,12 @@ const envVariables = [
   "RESEND_API_KEY",
   "DEV_VERIFICATION_CODE",
   "REUSABLE_INVITE_CODE",
+  "AWS_ACCESS_KEY_ID",
+  "AWS_SECRET_ACCESS_KEY",
+  "AWS_REGION",
+  "AWS_S3_BUCKET",
   "NGROK_DOMAIN",
+  "NGROK_AUTHTOKEN",
 ] as const;
 
 type EnvVariablesType = {

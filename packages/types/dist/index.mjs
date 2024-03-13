@@ -3871,7 +3871,8 @@ var isPost = getZodTypeGuard(PostSchema);
 // src/models/token.ts
 var TokenSchema = z.object({
   user: z.object({
-    id: z.string()
+    id: z.string(),
+    emailVerified: z.boolean()
   })
 });
 var isToken = getZodTypeGuard(TokenSchema);

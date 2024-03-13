@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "ngrok http 3000 --domain $NGROK_DOMAIN"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
+    "ngrok": "^5.0.0-beta.2"
   }
 }

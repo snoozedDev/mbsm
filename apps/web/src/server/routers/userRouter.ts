@@ -1,20 +1,31 @@
 import { codeFormSchema } from "@/lib/shemas/forms/codeFormSchema";
 import { generateInviteCodesForUser } from "@/utils/inviteCodeUtils";
+import { UploadClientPayloadSchema } from "@/utils/uploadUtils";
 import {
   getWebAuthnRegistrationOptions,
   getWebAuthnResponseForRegistration,
 } from "@/utils/webAuthnUtils";
 import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import {
   db,
   getUserById,
   insertInviteCodes,
   schema,
+  updateAccount,
   updateAuthenticator,
+  updateFile,
 } from "@mbsm/db-layer";
 import {
   AccountCreationFormSchema,
   Authenticator,
   AuthenticatorSchema,
+  FileMetadata,
   FileSchema,
   InviteCodeSchema,
   UserAccountSchema,
@@ -22,13 +33,29 @@ import {
 import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
+import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
 import { z } from "zod";
+import { uploadLimiter } from "../rateLimit";
 import {
   deleteEmailVerificationCode,
   getEmailVerificationCodeForUser,
 } from "../serverUtils";
-import { authedProcedure, router } from "../trpc";
+import { authedProcedure, limiterMiddleware, router } from "../trpc";
+
+const getTotalFilesSizeKB = (files: (typeof schema.file.$inferSelect)[]) =>
+  files.filter((f) => f.uploadedAt).reduce((acc, f) => acc + f.sizeKB, 0);
+
+const s3 = new S3Client({
+  region: getEnvAsStr("AWS_REGION"),
+  credentials: {
+    accessKeyId: getEnvAsStr("AWS_ACCESS_KEY_ID"),
+    secretAccessKey: getEnvAsStr("AWS_SECRET_ACCESS_KEY"),
+  },
+  // old as shit
+  // https://awsdocs.s3.amazonaws.com/S3/20060301/s3-dg-20060301.pdf
+  apiVersion: "2006-03-01",
+});
 
 export const userRouter = router({
   me: authedProcedure
@@ -43,7 +70,7 @@ export const userRouter = router({
     .query(async ({ ctx }) => {
       const user = await db.query.user.findFirst({
         where: ({ id }, { eq }) => eq(id, ctx.token.user.id),
-        with: { accounts: { with: { avatar: true } }, files: true },
+        with: { accounts: { with: { avatar: true } } },
       });
 
       if (!user)
@@ -104,7 +131,14 @@ export const userRouter = router({
     .query(async ({ ctx: { token } }) => {
       const user = await db.query.user.findFirst({
         where: ({ id }, { eq }) => eq(id, token.user.id),
-        with: { authenticators: true, inviteCodes: true, files: true },
+        with: {
+          authenticators: true,
+          inviteCodes: true,
+          files: {
+            where: (files, { and, isNotNull, isNull }) =>
+              and(isNull(files.deletedAt), isNotNull(files.uploadedAt)),
+          },
+        },
       });
 
       if (!user) {
@@ -158,7 +192,12 @@ export const userRouter = router({
     .mutation(async ({ input: { name, credentialId }, ctx: { token } }) => {
       const user = await db.query.user.findFirst({
         where: ({ id }, { eq }) => eq(id, token.user.id),
-        with: { authenticators: true },
+        with: {
+          authenticators: {
+            where: (authenticators, { isNotNull }) =>
+              isNotNull(authenticators.deletedAt),
+          },
+        },
       });
 
       if (!user)
@@ -187,7 +226,12 @@ export const userRouter = router({
     .mutation(async ({ ctx: { token } }) => {
       const user = await db.query.user.findFirst({
         where: ({ id }, { eq }) => eq(id, token.user.id),
-        with: { authenticators: true },
+        with: {
+          authenticators: {
+            where: (authenticators, { isNotNull }) =>
+              isNotNull(authenticators.deletedAt),
+          },
+        },
       });
 
       if (!user) throw new TRPCError({ code: "NOT_FOUND" });
@@ -270,6 +314,12 @@ export const userRouter = router({
   createAccount: authedProcedure
     .input(AccountCreationFormSchema)
     .mutation(async ({ input, ctx: { token } }) => {
+      if (token.user.emailVerified === false) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Email not verified",
+        });
+      }
       try {
         await db.insert(schema.account).values({
           ...input,
@@ -287,5 +337,178 @@ export const userRouter = router({
           message: "Failed to create account",
         });
       }
+    }),
+  presign: authedProcedure
+    .use(limiterMiddleware(uploadLimiter))
+    .input(UploadClientPayloadSchema)
+    .output(z.object({ url: z.string(), fileId: z.string() }))
+    .mutation(async ({ input, ctx: { token } }) => {
+      const user = await db.query.user.findFirst({
+        where: ({ id }, { eq }) => eq(id, token.user.id),
+        with: {
+          files: {
+            where: (files, { and, isNotNull, isNull }) =>
+              and(isNull(files.deletedAt), isNotNull(files.uploadedAt)),
+          },
+          accounts: {
+            where: (accounts, { isNull }) => isNull(accounts.deletedAt),
+          },
+        },
+      });
+
+      if (!user) throw new Error("User not found");
+
+      const totalSizeKB = getTotalFilesSizeKB(user.files);
+      const totalSizeMB = totalSizeKB / 1024;
+
+      if (user.storageLimitMB < totalSizeMB + input.fileDetails.sizeKB / 1024) {
+        throw new Error("Storage limit exceeded");
+      }
+
+      const filesToDelete = user.files.filter(
+        (f) => !f.uploadedAt && !f.deletedAt
+      );
+
+      await Promise.all([
+        ...filesToDelete.map(async (f) => {
+          const res = await s3.send(
+            new DeleteObjectCommand({
+              Bucket: getEnvAsStr("AWS_S3_BUCKET"),
+              Key: `${f.key}`,
+            })
+          );
+          console.log("deleted", res);
+          await updateFile({
+            id: f.id,
+            fields: {
+              deletedAt: DateTime.utc().toISO(),
+            },
+          });
+        }),
+      ]);
+
+      const allowedContentTypes: string[] = [];
+      let metadata: FileMetadata | null = null;
+
+      switch (input.type) {
+        case "avatar":
+          allowedContentTypes.push("image/png", "image/jpeg", "image/gif");
+          console.log("user", user);
+          if (!user.accounts.find((a) => a.id === input.accountId)) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Account not found",
+            });
+          }
+          metadata = {
+            type: "avatar",
+            accountId: input.accountId,
+          };
+          break;
+        case "post":
+          break;
+      }
+
+      if (!allowedContentTypes.includes(input.fileDetails.type)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "File type not allowed",
+        });
+      }
+
+      const roundedSizeKB = Math.ceil(input.fileDetails.sizeKB);
+
+      const extension = input.fileDetails.type.split("/")[1];
+
+      const key = `${input.type}/${user.id}/${nanoid()}.${extension}`;
+
+      const [file] = await db
+        .insert(schema.file)
+        .values({
+          sizeKB: roundedSizeKB,
+          key,
+          userId: user.id,
+          url: `https://cdn.mbsm.io/${key}`,
+          metadata,
+        })
+        .returning();
+
+      if (!file) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to insert file",
+        });
+      }
+
+      const command = new PutObjectCommand({
+        Bucket: getEnvAsStr("AWS_S3_BUCKET"),
+        Key: key,
+        ContentType: input.fileDetails.type,
+        StorageClass: "INTELLIGENT_TIERING",
+      });
+
+      const url = await getSignedUrl(s3, command, {
+        expiresIn: 20,
+      });
+
+      return { url, fileId: file.id };
+    }),
+  verifyUpload: authedProcedure
+    .input(z.object({ fileId: z.string() }))
+    .mutation(async ({ input: { fileId }, ctx: { token } }) => {
+      const user = await db.query.user.findFirst({
+        where: ({ id }, { eq }) => eq(id, token.user.id),
+        with: { files: true },
+      });
+
+      if (!user) throw new Error("User not found");
+
+      const file = user.files.find((f) => f.id === fileId);
+
+      if (!file) throw new Error("File not found");
+
+      const command = new GetObjectCommand({
+        Bucket: getEnvAsStr("AWS_S3_BUCKET"),
+        Key: file.key,
+      });
+
+      try {
+        await s3.send(command);
+      } catch (e) {
+        console.error(e);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to verify upload.",
+        });
+      }
+
+      let promises: Promise<unknown>[] = [];
+
+      switch (file.metadata?.type) {
+        case "avatar":
+          promises.push(
+            updateAccount({
+              id: file.metadata.accountId,
+              fields: {
+                avatarId: file.id,
+              },
+            })
+          );
+          break;
+        default:
+          throw new TRPCError({
+            code: "METHOD_NOT_SUPPORTED",
+            message: "Type not supported",
+          });
+      }
+
+      await Promise.all([...promises]);
+
+      await updateFile({
+        id: fileId,
+        fields: {
+          uploadedAt: DateTime.utc().toISO(),
+        },
+      });
     }),
 });

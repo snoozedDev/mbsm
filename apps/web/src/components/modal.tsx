@@ -60,33 +60,42 @@ export const Modal = ({
     <>
       <portals.InPortal node={portalNode}>{children}</portals.InPortal>
       <Wrapper
-        open={true}
+        open={Boolean(open)}
         onClose={() => {}}
         onOpenChange={setOpen}
         dismissible={dismissable}
       >
         <ContentWrapper
-          onEscapeKeyDown={(e) => {
-            if (dismissable) setOpen(false);
-            else e.preventDefault();
-          }}
-          hideX={!dismissable}
-          onFocusOutside={(e) => e.preventDefault()}
-          onInteractOutside={(e) => e.preventDefault()}
-          onPointerDownOutside={(e) => e.preventDefault()}
-          className={cn("p-6 flex flex-col items-stretch")}
+          className={cn("p-0 overflow-hidden flex flex-col items-stretch")}
+          {...(dismissable
+            ? {
+                onEscapeKeyDown: () => setOpen(false),
+              }
+            : {
+                hideX: true,
+                onFocusOutside: (e) => e.preventDefault(),
+                onInteractOutside: (e) => e.preventDefault(),
+                onPointerDownOutside: (e) => e.preventDefault(),
+                onEscapeKeyDown: (e) => e.preventDefault(),
+              })}
         >
           {(title || description) && (
             <Header>
-              {title && <Title className="mb-4 text-2xl">{title}</Title>}
+              {title && <Title className="text-2xl">{title}</Title>}
               {description && (
-                <Description className="text-base text-center">
+                <Description className="text-base text-center mt-4">
                   {description}
                 </Description>
               )}
             </Header>
           )}
-          <div className={cn(dismissable && "mt-6")}>
+          <div
+            className={cn(
+              "overflow-y-auto px-6 py-6",
+              dismissable && (isDesktop ? "pt-12" : "pt-16"),
+              isDesktop ? "max-h-[60vh]" : "max-h-[60vh]"
+            )}
+          >
             <portals.OutPortal node={portalNode} />
           </div>
         </ContentWrapper>

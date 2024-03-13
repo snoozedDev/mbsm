@@ -6,6 +6,7 @@ const uploadTypes = ["avatar", "post"] as const;
 const UploadTypeSchema = z.enum(uploadTypes);
 
 const FileSchema = z.object({
+  type: z.string(),
   sizeKB: z.number(),
 });
 

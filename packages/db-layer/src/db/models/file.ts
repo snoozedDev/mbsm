@@ -18,6 +18,7 @@ export const file = pgTable(
     userId: uuid("user_id")
       .references(() => user.id)
       .notNull(),
+    key: varchar("key", { length: 256 }).notNull(),
     url: varchar("url", { length: 256 }),
     sizeKB: integer("size_kb").notNull(),
     uploadedAt: timestamp("uploaded_at", { mode: "string" }),

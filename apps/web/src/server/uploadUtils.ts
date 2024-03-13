@@ -39,6 +39,7 @@ export const generateFileToken = async ({
     .insert(schema.file)
     .values({
       sizeKB: roundedSizeKB,
+      key: `${payload.type}/${user.id}/${DateTime.utc().toISO()}`,
       userId: user.id,
     })
     .returning();

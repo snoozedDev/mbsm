@@ -156,11 +156,11 @@ export const EditImageModal = ({
     canvas.toBlob((blob) => {
       if (!blob) return;
       const file = new File([blob], "image.jpg", {
-        type: "image/jpeg",
+        type: "image/png",
       });
       onSubmit(file);
       setShouldClose(true);
-    }, "image/jpeg");
+    }, "image/png");
   }, [percentCrop, loadedImage]);
 
   useEffect(() => {
