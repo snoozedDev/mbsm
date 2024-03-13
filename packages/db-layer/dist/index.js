@@ -105,6 +105,7 @@ __export(src_exports, {
   Ratelimit: () => import_ratelimit.Ratelimit,
   clearCurrentUserChallenge: () => clearCurrentUserChallenge,
   db: () => db,
+  getAccountByHandle: () => getAccountByHandle,
   getAuthenticatorAndUserByCredentialId: () => getAuthenticatorAndUserByCredentialId,
   getAuthenticatorByCredentialId: () => getAuthenticatorByCredentialId,
   getAuthenticatorsForUser: () => getAuthenticatorsForUser,
@@ -355,6 +356,11 @@ var updateAccount = async ({
   fields
 }) => db.update(models_exports.account).set(fields).where((0, import_drizzle_orm7.eq)(models_exports.account.id, id));
 
+// src/db/prepared/account/accountQueries.ts
+var getAccountByHandle = async (handle) => db.query.account.findFirst({
+  where: (model, { eq: eq6, and, isNull }) => and(eq6(model.handle, handle), isNull(model.deletedAt))
+});
+
 // src/db/prepared/authenticator/authenticatorMutations.ts
 var import_drizzle_orm8 = require("drizzle-orm");
 var updateAuthenticator = async ({
@@ -424,6 +430,7 @@ var redis = import_kv.kv;
   Ratelimit,
   clearCurrentUserChallenge,
   db,
+  getAccountByHandle,
   getAuthenticatorAndUserByCredentialId,
   getAuthenticatorByCredentialId,
   getAuthenticatorsForUser,

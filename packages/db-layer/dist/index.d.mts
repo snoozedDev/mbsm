@@ -695,6 +695,24 @@ declare const updateAccount: ({ id, fields, }: {
     fields: PgUpdateSetSource<typeof account>;
 }) => Promise<pg.QueryResult<never> | postgres.RowList<never[]>>;
 
+declare const getAccountByHandle: (handle: string) => Promise<{
+    id: string;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    handle: string;
+    profileData: {
+        links: {
+            url: string;
+            title: string;
+        }[];
+        bio?: string | undefined;
+        birthday?: string | undefined;
+    };
+    avatarId: string | null;
+} | undefined>;
+
 declare const updateAuthenticator: ({ id, fields, }: {
     id: number;
     fields: PgUpdateSetSource<typeof authenticator>;
@@ -815,4 +833,4 @@ declare const getUserById: (id: string) => Promise<{
 
 declare const redis: _vercel_kv.VercelKV;
 
-export { clearCurrentUserChallenge, db, getAuthenticatorAndUserByCredentialId, getAuthenticatorByCredentialId, getAuthenticatorsForUser, getUnredeemedInviteCode, getUserByEmail, getUserById, getUserInviteCodes, insertAccount, insertAuthenticator, insertInviteCodes, insertUser, redis, schema, updateAccount, updateAuthenticator, updateFile, updateInviteCode, updateUser };
+export { clearCurrentUserChallenge, db, getAccountByHandle, getAuthenticatorAndUserByCredentialId, getAuthenticatorByCredentialId, getAuthenticatorsForUser, getUnredeemedInviteCode, getUserByEmail, getUserById, getUserInviteCodes, insertAccount, insertAuthenticator, insertInviteCodes, insertUser, redis, schema, updateAccount, updateAuthenticator, updateFile, updateInviteCode, updateUser };

@@ -1,4 +1,5 @@
 export * from "./account/accountMutations";
+export * from "./account/accountQueries";
 export * from "./authenticator/authenticatorMutations";
 export * from "./authenticator/authenticatorQueries";
 export * from "./file/fileMutations";

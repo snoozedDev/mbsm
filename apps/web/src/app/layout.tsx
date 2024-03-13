@@ -1,7 +1,6 @@
 import { MainLayout } from "@/components/main-layout";
 import { RootLayout } from "@/components/root-layout";
-import { cn } from "@/lib/utils";
-import { GeistSans } from "geist/font";
+import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 
 const IS_PROD = process.env.NODE_ENV === "production";
@@ -19,8 +18,8 @@ export default async function Layout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body
-        suppressHydrationWarning={true}
-        className={cn("min-h-screen bg-background font-sans antialiased")}
+        suppressHydrationWarning
+        className="bg-background font-sans antialiased flex flex-col min-h-screen"
       >
         <RootLayout>
           <MainLayout>{children}</MainLayout>

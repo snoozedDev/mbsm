@@ -1,3 +1,5 @@
+"use client";
+
 import { CommandShortcut } from "./command-shortcut";
 import { ThemeSwitcher } from "./theme-switcher";
 

@@ -352,6 +352,11 @@ var updateAccount = async ({
   fields
 }) => db.update(models_exports.account).set(fields).where(eq(models_exports.account.id, id));
 
+// src/db/prepared/account/accountQueries.ts
+var getAccountByHandle = async (handle) => db.query.account.findFirst({
+  where: (model, { eq: eq6, and, isNull }) => and(eq6(model.handle, handle), isNull(model.deletedAt))
+});
+
 // src/db/prepared/authenticator/authenticatorMutations.ts
 import { eq as eq2 } from "drizzle-orm";
 var updateAuthenticator = async ({
@@ -420,6 +425,7 @@ export {
   Ratelimit,
   clearCurrentUserChallenge,
   db,
+  getAccountByHandle,
   getAuthenticatorAndUserByCredentialId,
   getAuthenticatorByCredentialId,
   getAuthenticatorsForUser,
