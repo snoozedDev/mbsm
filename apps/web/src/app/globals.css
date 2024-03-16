@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  padding-right: calc(100% - 100vw);
-}
-
 @layer base {
   :root {
     --background: 0 0% 3.9%;

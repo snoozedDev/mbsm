@@ -327,8 +327,9 @@ var account = (0, import_pg_core7.pgTable)(
     ...getTimestampColumns()
   },
   (account2) => ({
-    ...getIndexFor(account2.handle, true),
-    ...getIndexFor(account2.userId)
+    ...getIndexFor(account2.handle),
+    ...getIndexFor(account2.userId),
+    ...getIndexFor(account2.deletedAt)
   })
 );
 var accountRelations = (0, import_drizzle_orm6.relations)(account, ({ one }) => ({

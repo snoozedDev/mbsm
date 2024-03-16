@@ -66,7 +66,7 @@ const faq: {
         <p>{`Get an invite code from someone who's already using the site.`}</p>
         <p>
           {`Please understand that allowing anyone to join would involve a lot of
-          technical work, moderation and cost management.`}
+          technical work, moderation and cost.`}
         </p>
       </React.Fragment>
     ),

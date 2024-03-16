@@ -63,13 +63,21 @@ export const AvatarPrimitive = ({
           />
         </>
       ) : (
-        <span
-          className={cn(
-            size === "sm" ? "text-2xl" : size === "md" ? "text-3xl" : "text-4xl"
-          )}
-        >
-          {fallback}
-        </span>
+        <>
+          <span
+            className={cn(
+              size === "sm"
+                ? "text-lg"
+                : size === "md"
+                  ? "text-2xl"
+                  : "text-3xl",
+              "text-primary z-10"
+            )}
+          >
+            {fallback}
+          </span>
+          <div className="absolute w-full h-full bg-muted" />
+        </>
       )}
     </div>
   );

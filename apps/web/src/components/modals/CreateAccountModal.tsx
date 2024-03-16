@@ -1,3 +1,4 @@
+import { useAccountSwitcher } from "@/hooks/useAccountSwitcher";
 import { useCreateAccountMutation } from "@/queries/userQueries";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AccountCreationForm, AccountCreationFormSchema } from "@mbsm/types";
@@ -18,6 +19,7 @@ import {
 import { Input } from "../ui/input";
 
 export const CreateAccountModal = ({ id }: { id: string }) => {
+  const { activeAccount, onSwitchActiveAccount } = useAccountSwitcher();
   const [shouldClose, setShouldClose] = useState(false);
   const form = useForm<AccountCreationForm>({
     resolver: zodResolver(AccountCreationFormSchema),
@@ -36,7 +38,10 @@ export const CreateAccountModal = ({ id }: { id: string }) => {
       form.setError("handle", {
         message: error.message,
       });
-    if (isSuccess) close();
+    if (isSuccess) {
+      !activeAccount && onSwitchActiveAccount(form.getValues("handle"));
+      close();
+    }
   }, [error, isSuccess]);
 
   const onSubmit = (values: AccountCreationForm) => {

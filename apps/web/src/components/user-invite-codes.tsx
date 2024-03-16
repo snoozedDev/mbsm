@@ -63,7 +63,7 @@ const Code = ({
         ) : (
           <Button
             variant="ghost"
-            className={cn("p-2 mr-2", redeemed && "opacity-50 touch")}
+            className={cn("p-2 -mx-2 mr-2", redeemed && "opacity-50 touch")}
             onClick={() => setVisible(!visible)}
           >
             {visible ? (
@@ -105,8 +105,8 @@ const Code = ({
                 {redeemed
                   ? "This code has been redeemed."
                   : copied
-                  ? "Copied!"
-                  : "Click to copy."}
+                    ? "Copied!"
+                    : "Click to copy."}
               </p>
             </TooltipContent>
           </Tooltip>

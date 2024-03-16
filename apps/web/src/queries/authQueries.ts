@@ -45,6 +45,7 @@ export const useSignInMutation = () => {
       const attRes = await startAuthentication(options);
       await verifySignIn.mutateAsync({ attRes });
       utils.user.me.reset();
+      utils.user.settings.reset();
     } catch (err) {
       toast("Login failed", { description: getErrorMessage(err) });
     } finally {

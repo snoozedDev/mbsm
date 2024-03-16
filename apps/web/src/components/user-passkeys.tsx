@@ -1,5 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
+import { useSignedInStatus } from "@/queries/authQueries";
 import {
   useAddAuthenticatorMutation,
   useUpdateAuthenticatorMutation,
@@ -18,7 +19,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { FadeFromBelow } from "./containers/fade-from-below";
 import { LoadingDots } from "./loading-dots";
 import {
   AlertDialog,
@@ -237,6 +237,7 @@ const SingleAuthenticator = ({
 };
 
 export const UserSecurityPage = () => {
+  const { isSignedIn } = useSignedInStatus();
   const { isPending: isUserMePending } = useUserMeQuery();
   const { isPending: isUserSettingsPending, data } = useUserSettingsQuery();
   const {
@@ -244,28 +245,26 @@ export const UserSecurityPage = () => {
     requestAddAuthenticator: addAuthenticator,
   } = useAddAuthenticatorMutation();
 
-  const isPending = isUserMePending || isUserSettingsPending;
+  const isPending = isUserMePending || isUserSettingsPending || !isSignedIn;
 
   return (
-    <FadeFromBelow>
-      <Card className="overflow-hidden">
-        <div className="py-4 px-6">
-          <h3 className="text-2xl font-medium tracking-wide">Passkeys</h3>
-          <p className="text-sm text-muted-foreground mt-2 mb-4">
-            These are individual passkeys that you have set up for your
-            accounts.
-          </p>
-          <ul className="flex flex-col items-stretch">
-            {isPending
-              ? Array.from({ length: 3 }).map((_, i) => (
-                  <Fragment key={i}>
-                    <li key={i} className="flex flex-1">
-                      <SingleAuthenticatorSkeleton />
-                    </li>
-                    {i !== 2 && <Separator />}
-                  </Fragment>
-                ))
-              : data
+    <Card className="overflow-hidden">
+      <div className="py-4 px-6">
+        <h3 className="text-2xl font-medium tracking-wide">Passkeys</h3>
+        <p className="text-sm text-muted-foreground mt-2 mb-4">
+          These are individual passkeys that you have set up for your accounts.
+        </p>
+        <ul className="flex flex-col items-stretch">
+          {isPending
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <Fragment key={i}>
+                  <li key={i} className="flex flex-1">
+                    <SingleAuthenticatorSkeleton />
+                  </li>
+                  {i !== 2 && <Separator />}
+                </Fragment>
+              ))
+            : data
               ? data.authenticators
                   .sort(
                     (a, b) =>
@@ -285,18 +284,17 @@ export const UserSecurityPage = () => {
                     </Fragment>
                   ))
               : null}
-          </ul>
-        </div>
+        </ul>
+      </div>
 
-        <div className="bg-muted/50 p-4 flex flex-row-reverse">
-          <Button
-            disabled={addingAuthenticator || isPending}
-            onClick={() => addAuthenticator()}
-          >
-            {addingAuthenticator ? <LoadingDots /> : "Add New"}
-          </Button>
-        </div>
-      </Card>
-    </FadeFromBelow>
+      <div className="bg-muted/50 p-4 flex flex-row-reverse">
+        <Button
+          disabled={addingAuthenticator || isPending}
+          onClick={() => addAuthenticator()}
+        >
+          {addingAuthenticator ? <LoadingDots /> : "Add New"}
+        </Button>
+      </div>
+    </Card>
   );
 };

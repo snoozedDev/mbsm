@@ -1,23 +1,11 @@
-import { UserFilesPage } from "@/components/pages/user-files-page";
-import UserSettingsPage from "@/components/pages/user-settings-page";
 import { SettingsNavigator } from "@/components/settings-navigator";
+import { settingsPageMap } from "@/components/settings-page-map";
 import { Separator } from "@/components/ui/separator";
-import { UnverifiedEmailWarning } from "@/components/unverified-email-warning";
-import { UserAccountsPage } from "@/components/user-accounts";
-import { UserSecurityPage } from "@/components/user-passkeys";
+import { typedObjectKeys } from "@/lib/utils";
 import { Metadata } from "next";
-
-const settingsPageMap = {
-  user: <UserSettingsPage />,
-  accounts: <UserAccountsPage />,
-  security: <UserSecurityPage />,
-  files: <UserFilesPage />,
-} as const;
+import { redirect } from "next/navigation";
 
 type Props = { params: { slug: keyof typeof settingsPageMap } };
-
-const typedObjectKeys = <T extends Record<string, unknown>>(obj: T) =>
-  Object.keys(obj) as (keyof T)[];
 
 export const generateMetadata = async ({
   params: { slug },
@@ -27,7 +15,8 @@ export const generateMetadata = async ({
   };
 };
 
-const SettingsPage = ({ params: { slug } }: Props) => {
+const SettingsPage = async ({ params: { slug } }: Props) => {
+  if (!typedObjectKeys(settingsPageMap).includes(slug)) return redirect("/404");
   return (
     <div className="flex flex-col self-center p-4 max-w-5xl w-full">
       <div className="space-y-0.5">
@@ -43,7 +32,6 @@ const SettingsPage = ({ params: { slug } }: Props) => {
           value={slug}
         />
         <main className="flex-grow space-y-4 flex flex-col md:ml-4">
-          <UnverifiedEmailWarning />
           {settingsPageMap[slug]}
         </main>
       </div>

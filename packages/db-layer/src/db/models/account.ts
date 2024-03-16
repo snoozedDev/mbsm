@@ -21,8 +21,9 @@ export const account = pgTable(
     ...getTimestampColumns(),
   },
   (account) => ({
-    ...getIndexFor(account.handle, true),
+    ...getIndexFor(account.handle),
     ...getIndexFor(account.userId),
+    ...getIndexFor(account.deletedAt),
   })
 );
 

@@ -1,4 +1,5 @@
 "use client";
+import { useSignedInStatus } from "@/queries/authQueries";
 import { useUserMeQuery, useUserSettingsQuery } from "@/queries/userQueries";
 import { FileSchema } from "@mbsm/types";
 import {
@@ -13,7 +14,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
-import { FadeFromBelow } from "../containers/fade-from-below";
 import { useModals } from "../modals-layer";
 import { InfoModal } from "../modals/InfoModal";
 import { Button } from "../ui/button";
@@ -86,6 +86,7 @@ const fileSorts = [
 ];
 
 export const UserFilesPage = () => {
+  const { isSignedIn } = useSignedInStatus();
   const { data: user, isLoading: userLoading } = useUserMeQuery();
   const { data: settings, isLoading: settingsLoading } = useUserSettingsQuery();
   const { push } = useModals();
@@ -97,7 +98,7 @@ export const UserFilesPage = () => {
     [settings]
   );
 
-  const isLoading = userLoading || settingsLoading;
+  const isLoading = userLoading || settingsLoading || !isSignedIn;
 
   const fileSorter = useCallback(
     (a: z.infer<typeof FileSchema>, b: z.infer<typeof FileSchema>) => {
@@ -151,7 +152,7 @@ export const UserFilesPage = () => {
   }, [settings, user]);
 
   return (
-    <FadeFromBelow className="@container">
+    <div className="@container">
       <Card className="px-6 py-4 mb-4">
         <h2 className="text-2xl font-medium tracking-wide flex items-center">
           <span>Storage</span>
@@ -164,18 +165,13 @@ export const UserFilesPage = () => {
                 <InfoModal id={id} title="About Storage">
                   <fieldset className="text-base mb-6 text-foreground/80 space-y-3">
                     <p>
-                      {`You have a certain amount of storage available to you, which will grow as your
-                        accounts age.`}
+                      {`You have a certain amount of storage available to you which is
+                        shared across all your accounts. All files you upload contribute to
+                        this limit.`}
                     </p>
                     <p>
-                      {`When you reach the limit, you won't be able to upload any more files
-                        until you delete some. Storage is shared across all your accounts.
-                        It is not possible to increase the limit at this time, but it may be
-                        possible in the future.`}
-                    </p>
-                    <p>
-                      {`Storage and bandwidth are one of the most obscurely priced
-                        resources. I'll be monitoring usage to see if the current limits are
+                      {`Storage and content delivery are one of the most obscurely priced
+                        resources. I'll be monitoring usage/cost to see if the current limits are
                         fair and will adjust them accordingly.`}
                     </p>
                   </fieldset>
@@ -223,7 +219,7 @@ export const UserFilesPage = () => {
         <Separator />
         <div className="mt-4 flex justify-end">
           <Select value={sort} onValueChange={setSort}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger aria-controls="file-list-sort" className="w-[180px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -277,7 +273,7 @@ export const UserFilesPage = () => {
           </PaginationContent>
         </Pagination>
       )}
-    </FadeFromBelow>
+    </div>
   );
 };
 
@@ -296,6 +292,9 @@ const LoadingFile = () => {
 };
 
 const SingleFile = ({ file }: { file: z.infer<typeof FileSchema> }) => {
+  const [date] = useState(() =>
+    DateTime.fromISO(file.createdAt, { zone: "utc" }).toRelative()
+  );
   const getTitle = () => {
     const { metadata } = file;
     if (!metadata) return "File";
@@ -361,8 +360,7 @@ const SingleFile = ({ file }: { file: z.infer<typeof FileSchema> }) => {
           <h3 className="text-sm font-medium tracking-wide">{getTitle()}</h3>
           <div className="flex justify-between">
             <p className="text-sm text-muted-foreground mt-2">
-              {humanFileSize({ bytes: file.sizeKB * 1024 })} |{" "}
-              {DateTime.fromISO(file.createdAt, { zone: "utc" }).toRelative()}
+              {humanFileSize({ bytes: file.sizeKB * 1024 })} | {date}
             </p>
           </div>
         </div>

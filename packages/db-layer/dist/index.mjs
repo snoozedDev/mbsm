@@ -323,8 +323,9 @@ var account = pgTable6(
     ...getTimestampColumns()
   },
   (account2) => ({
-    ...getIndexFor(account2.handle, true),
-    ...getIndexFor(account2.userId)
+    ...getIndexFor(account2.handle),
+    ...getIndexFor(account2.userId),
+    ...getIndexFor(account2.deletedAt)
   })
 );
 var accountRelations = relations6(account, ({ one }) => ({

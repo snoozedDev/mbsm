@@ -320,23 +320,23 @@ export const userRouter = router({
           message: "Email not verified",
         });
       }
-      try {
-        await db.insert(schema.account).values({
-          ...input,
-          userId: token.user.id,
-        });
-      } catch (e) {
-        if (e instanceof Error && "code" in e && e.code === "23505") {
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "Handle already in use",
-          });
-        }
+
+      const existingAccount = await db.query.account.findFirst({
+        where: ({ handle, deletedAt }, { and, eq, isNotNull }) =>
+          and(eq(handle, input.handle), isNotNull(deletedAt)),
+      });
+
+      if (existingAccount) {
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create account",
+          code: "CONFLICT",
+          message: "Handle already in use",
         });
       }
+
+      await db.insert(schema.account).values({
+        ...input,
+        userId: token.user.id,
+      });
     }),
   presign: authedProcedure
     .use(limiterMiddleware(uploadLimiter))
