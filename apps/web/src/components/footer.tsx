@@ -1,5 +1,3 @@
-"use client";
-
 import { CommandShortcut } from "./command-shortcut";
 import { ThemeSwitcher } from "./theme-switcher";
 
@@ -10,7 +8,6 @@ export const Footer = () => {
         <p className="text-sm text-muted-foreground">
           built by me © {new Date().getFullYear()}
         </p>
-
         <div className="flex space-x-4">
           <CommandShortcut />
           <ThemeSwitcher />

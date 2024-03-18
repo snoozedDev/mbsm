@@ -1,7 +1,7 @@
 "use client";
 import { useSignedInStatus } from "@/queries/authQueries";
 import { useUserMeQuery, useUserSettingsQuery } from "@/queries/userQueries";
-import { FileSchema } from "@mbsm/types";
+import { UserFacingFile } from "@mbsm/types";
 import {
   animate,
   motion,
@@ -13,7 +13,6 @@ import { DateTime } from "luxon";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { z } from "zod";
 import { useModals } from "../modals-layer";
 import { InfoModal } from "../modals/InfoModal";
 import { Button } from "../ui/button";
@@ -87,7 +86,7 @@ const fileSorts = [
 
 export const UserFilesPage = () => {
   const { isSignedIn } = useSignedInStatus();
-  const { data: user, isLoading: userLoading } = useUserMeQuery();
+  const { data: me, isLoading: userLoading } = useUserMeQuery();
   const { data: settings, isLoading: settingsLoading } = useUserSettingsQuery();
   const { push } = useModals();
   const [sort, setSort] = useState(fileSorts[0].value);
@@ -101,7 +100,7 @@ export const UserFilesPage = () => {
   const isLoading = userLoading || settingsLoading || !isSignedIn;
 
   const fileSorter = useCallback(
-    (a: z.infer<typeof FileSchema>, b: z.infer<typeof FileSchema>) => {
+    (a: UserFacingFile, b: UserFacingFile) => {
       switch (sort) {
         case "date":
           return (
@@ -124,9 +123,9 @@ export const UserFilesPage = () => {
   useEffect(() => {
     const percentNode = percentRef.current;
     const kbNode = kbRef.current;
-    if (!settings || !user || !percentNode || !kbNode) return;
+    if (!settings || !me || !percentNode || !kbNode) return;
     const usedKB = settings.files.reduce((acc, file) => acc + file.sizeKB, 0);
-    const to = Math.round((usedKB / user.maxStorageMB / 1024) * 100);
+    const to = Math.round((usedKB / me.user.storageLimitMB / 1024) * 100);
 
     const percentAnim = animate(percent, to, {
       duration: 1,
@@ -140,7 +139,7 @@ export const UserFilesPage = () => {
       ease: "easeOut",
       onUpdate(value) {
         kbNode.textContent = `${humanFileSize({ bytes: value * 1024 })} / ${humanFileSize(
-          { bytes: user.maxStorageMB * 1024 * 1024 }
+          { bytes: me.user.storageLimitMB * 1024 * 1024 }
         )}`;
       },
     });
@@ -149,7 +148,7 @@ export const UserFilesPage = () => {
       percentAnim.stop();
       kbAnim.stop();
     };
-  }, [settings, user]);
+  }, [settings, me]);
 
   return (
     <div className="@container">
@@ -217,20 +216,31 @@ export const UserFilesPage = () => {
           </p>
         </fieldset>
         <Separator />
-        <div className="mt-4 flex justify-end">
-          <Select value={sort} onValueChange={setSort}>
-            <SelectTrigger aria-controls="file-list-sort" className="w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              {fileSorts.map((sort) => (
-                <SelectItem key={sort.value} value={sort.value}>
-                  {sort.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {settings?.files.length ? (
+          <div className="mt-4 flex justify-end">
+            <Select value={sort} onValueChange={setSort}>
+              <SelectTrigger
+                aria-controls="file-list-sort"
+                className="w-[180px]"
+              >
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                {fileSorts.map((sort) => (
+                  <SelectItem key={sort.value} value={sort.value}>
+                    {sort.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : (
+          <div className="flex justify-center mt-4">
+            <p className="text-muted-foreground mt-4">
+              You haven't uploaded any files yet.
+            </p>
+          </div>
+        )}
         <div className="mt-4 grid grid-cols-1 @sm:grid-cols-2 @xl:grid-cols-3 gap-4">
           {isLoading
             ? [...Array(9).keys()].map((i) => <LoadingFile key={i} />)
@@ -291,7 +301,7 @@ const LoadingFile = () => {
   );
 };
 
-const SingleFile = ({ file }: { file: z.infer<typeof FileSchema> }) => {
+const SingleFile = ({ file }: { file: UserFacingFile }) => {
   const [date] = useState(() =>
     DateTime.fromISO(file.createdAt, { zone: "utc" }).toRelative()
   );

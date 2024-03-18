@@ -19,16 +19,13 @@
             pkgs.nodejs_20
             pkgs.bun
             pkgs.docker
-            pkgs.rustc
-            pkgs.rustup
-            pkgs.cargo
-            pkgs.wasm-pack
           ];
+
+          RUSTFLAGS="-C linker=lld";
 
           shellHook = ''
             # run docker in the background
             docker compose --env-file .env -f _infrastructure/docker-compose.yml up -d
-            echo "Hello, Nix!"
             # stop docker when exiting the shell
             trap "docker compose --env-file .env -f _infrastructure/docker-compose.yml down" EXIT
           '';

@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@mbsm/tsconfig": "workspace:*",
+    "@mbsm/db-layer": "workspace:*",
     "@mbsm/types": "workspace:*",
     "@types/node": "^20.8.3",
     "eslint": "^8.51.0",

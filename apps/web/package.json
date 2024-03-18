@@ -9,10 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@aws-sdk/s3-request-presigner": "^3.529.1",
-    "@hookform/resolvers": "^3.3.4",
     "@mbsm/db-layer": "workspace:*",
     "@mbsm/utils": "workspace:*",
+    "@aws-sdk/s3-request-presigner": "^3.529.1",
+    "@hookform/resolvers": "^3.3.4",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.3",
@@ -86,8 +86,9 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@aws-sdk/types": "^3.523.0",
     "@mbsm/types": "workspace:*",
+    "@mbsm/eslint-config": "workspace:*",
+    "@aws-sdk/types": "^3.523.0",
     "@simplewebauthn/types": "9.0.1",
     "@types/cookie": "^0.6.0",
     "@types/jsonwebtoken": "^9.0.2",

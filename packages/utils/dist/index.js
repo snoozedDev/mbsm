@@ -25,7 +25,12 @@ __export(src_exports, {
   getEnvAsStr: () => getEnvAsStr,
   getErrorMessage: () => getErrorMessage,
   getFormattedZodError: () => getFormattedZodError,
-  snakeToCamel: () => snakeToCamel
+  snakeToCamel: () => snakeToCamel,
+  toUserFacingAccount: () => toUserFacingAccount,
+  toUserFacingAuthenticator: () => toUserFacingAuthenticator,
+  toUserFacingFile: () => toUserFacingFile,
+  toUserFacingInviteCode: () => toUserFacingInviteCode,
+  toUserFacingUser: () => toUserFacingUser
 });
 module.exports = __toCommonJS(src_exports);
 
@@ -52,6 +57,56 @@ var getEnvAsBool = (key) => {
   throw new Error(`Environment variable ${key} is not a boolean`);
 };
 
+// src/mappers/account.ts
+var toUserFacingAccount = ({
+  account,
+  avatar
+}) => ({
+  id: account.id,
+  handle: account.handle,
+  avatarUrl: (avatar == null ? void 0 : avatar.url) ?? void 0,
+  profileData: account.profileData ?? void 0,
+  joinedAt: account.createdAt.toISOString()
+});
+
+// src/mappers/authenticator.ts
+var toUserFacingAuthenticator = ({
+  authenticator
+}) => ({
+  credentialId: authenticator.credentialId,
+  name: authenticator.name,
+  addedAt: authenticator.createdAt.toISOString()
+});
+
+// src/mappers/file.ts
+var toUserFacingFile = ({
+  file
+}) => ({
+  id: file.id,
+  url: file.url ?? null,
+  sizeKB: file.sizeKB,
+  createdAt: file.createdAt.toISOString()
+});
+
+// src/mappers/inviteCode.ts
+var toUserFacingInviteCode = ({
+  inviteCode
+}) => ({
+  code: inviteCode.code,
+  redeemed: inviteCode.redeemed
+});
+
+// src/mappers/user.ts
+var toUserFacingUser = ({
+  user
+}) => ({
+  email: user.email,
+  emailVerified: user.emailVerified,
+  joinedAt: user.createdAt.toISOString(),
+  storageLimitMB: user.storageLimitMB,
+  role: user.role
+});
+
 // src/string.ts
 var snakeToCamel = (str) => str.toLowerCase().replace(
   /([-_][a-z])/g,
@@ -76,5 +131,10 @@ var getFormattedZodError = (error) => error.issues.map((i) => i.message).join(",
   getEnvAsStr,
   getErrorMessage,
   getFormattedZodError,
-  snakeToCamel
+  snakeToCamel,
+  toUserFacingAccount,
+  toUserFacingAuthenticator,
+  toUserFacingFile,
+  toUserFacingInviteCode,
+  toUserFacingUser
 });

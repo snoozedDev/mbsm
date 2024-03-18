@@ -7,9 +7,9 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const getTimestampColumns = () => ({
-  deletedAt: timestamp("deleted_at", { mode: "string" }),
-  createdAt: timestamp("created_at", { mode: "string" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "string" }).notNull().defaultNow(),
+  deletedAt: timestamp("deleted_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const getIndexFor = (column: AnyPgColumn, unique?: boolean) => ({

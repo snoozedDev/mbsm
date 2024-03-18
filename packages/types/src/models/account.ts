@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { FileSchema } from "./file";
 
 export const AccountProfileDataSchema = z.object({
+  name: z.string().optional(),
   bio: z.string().optional(),
   links: z.array(
     z.object({
@@ -14,10 +14,12 @@ export const AccountProfileDataSchema = z.object({
 
 export type AccountProfileData = z.infer<typeof AccountProfileDataSchema>;
 
-export const UserAccountSchema = z.object({
+export const UserFacingAccountSchema = z.object({
   id: z.string(),
-  avatar: FileSchema.nullable(),
   handle: z.string(),
+  avatarUrl: z.string().optional(),
+  profileData: AccountProfileDataSchema.optional(),
+  joinedAt: z.string(),
 });
 
-export type UserAccount = z.infer<typeof UserAccountSchema>;
+export type UserFacingAccount = z.infer<typeof UserFacingAccountSchema>;

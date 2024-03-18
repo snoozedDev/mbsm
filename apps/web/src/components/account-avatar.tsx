@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { UserAccount } from "@mbsm/types";
+import { UserFacingAccount } from "@mbsm/types";
 import Image from "next/image";
 import { useState } from "react";
 import { Skeleton } from "./ui/skeleton";
@@ -8,10 +8,10 @@ export const AccountAvatar = ({
   account,
   ...props
 }: Omit<AvatarProps, "alt" | "src" | "fallback"> & {
-  account: UserAccount;
+  account: UserFacingAccount;
 }) => (
   <AvatarPrimitive
-    src={account.avatar?.url}
+    src={account.avatarUrl}
     alt={`Avatar for @${account.handle}`}
     fallback={account.handle.substring(0, 2)}
     {...props}

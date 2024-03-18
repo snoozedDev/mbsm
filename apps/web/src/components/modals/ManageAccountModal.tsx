@@ -91,7 +91,7 @@ export const ManageAccountModal = ({
                 />
               ) : (
                 <AvatarPrimitive
-                  src={shouldRemoveAvatar ? null : account.avatar?.url}
+                  src={shouldRemoveAvatar ? null : account.avatarUrl}
                   alt={`Avatar for @${account.handle}`}
                   fallback={account.handle.substring(0, 2)}
                   size="lg"
@@ -107,7 +107,7 @@ export const ManageAccountModal = ({
                 >
                   Clear
                 </Button>
-              ) : account.avatar && !shouldRemoveAvatar ? (
+              ) : account.avatarUrl && !shouldRemoveAvatar ? (
                 <Button
                   variant="outline"
                   className="mt-4"

@@ -1,3 +1,4 @@
+import { userRoles } from "@mbsm/types";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -15,7 +16,7 @@ import { file } from "./file";
 import { inviteCode } from "./inviteCode";
 import { userPreferences } from "./userPreferences";
 
-export const roleEnum = pgEnum("role", ["user", "mod", "admin", "foru"]);
+export const roleEnum = pgEnum("role", userRoles);
 
 export const user = pgTable(
   "user",
@@ -28,7 +29,7 @@ export const user = pgTable(
       1024 // 1GB
     ),
     currentRegChallenge: varchar("current_challenge", { length: 256 }),
-    role: roleEnum("user").notNull(),
+    role: roleEnum("role").notNull(),
     ...getTimestampColumns(),
   },
   (user) => ({

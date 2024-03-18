@@ -3731,6 +3731,80 @@ var z = /* @__PURE__ */ Object.freeze({
   ZodError
 });
 
+// src/forms/index.ts
+var EmailVerificationCodeFormSchema = z.object({
+  code: z.string().length(6, "Code must be 6 characters long")
+});
+var AccountCreationFormSchema = z.object({
+  handle: z.string().min(3, "Handle must be at least 3 characters long").max(16, "Handle must be at most 16 characters long").regex(
+    /^[a-zA-Z0-9_-]+$/,
+    "Handle must only contain letters, numbers, underscores, and hyphens"
+  )
+});
+
+// src/models/account.ts
+var AccountProfileDataSchema = z.object({
+  name: z.string().optional(),
+  bio: z.string().optional(),
+  links: z.array(
+    z.object({
+      url: z.string(),
+      title: z.string()
+    })
+  ),
+  birthday: z.string().optional()
+  // ISO date string
+});
+var UserFacingAccountSchema = z.object({
+  id: z.string(),
+  handle: z.string(),
+  avatarUrl: z.string().optional(),
+  profileData: AccountProfileDataSchema.optional(),
+  joinedAt: z.string()
+});
+
+// src/models/authenticator.ts
+var UserFacingAuthenticatorSchema = z.object({
+  credentialId: z.string(),
+  name: z.string(),
+  addedAt: z.string()
+});
+
+// src/models/file.ts
+var metadataTypes = ["avatar", "post"];
+var FileMetadataTypeSchema = z.enum(metadataTypes);
+var FileMetadataBaseSchema = z.object({
+  type: FileMetadataTypeSchema
+});
+var AvatarFileMetadataSchema = FileMetadataBaseSchema.extend({
+  type: z.literal("avatar"),
+  accountId: z.string()
+});
+var PostFileMetadataSchema = FileMetadataBaseSchema.extend({
+  type: z.literal("post"),
+  postId: z.string()
+});
+var FileMetadataSchema = z.union([
+  AvatarFileMetadataSchema,
+  PostFileMetadataSchema
+]);
+var isFileMetadata = (obj) => FileMetadataSchema.safeParse(obj).success;
+var UserFacingFileSchema = z.object({
+  id: z.string(),
+  url: z.string().nullable(),
+  sizeKB: z.number(),
+  createdAt: z.string(),
+  metadata: z.object({
+    type: FileMetadataTypeSchema
+  }).optional()
+});
+
+// src/models/inviteCode.ts
+var UserFacingInviteCodeSchema = z.object({
+  code: z.string(),
+  redeemed: z.boolean()
+});
+
 // src/zodUtils.ts
 var getZodTypeGuard = (schema) => (value) => {
   try {
@@ -3743,131 +3817,6 @@ var getZodTypeGuard = (schema) => (value) => {
 };
 var getFormattedZodError = (error) => error.issues.map((i) => i.message).join(", ");
 
-// src/api/common.ts
-var SuccessResponseSchema = z.object({
-  success: z.literal(true)
-});
-var ErrorResponseSchema = z.object({
-  success: z.literal(false),
-  error: z.string()
-});
-var generateActionResponse = (data) => z.union([SuccessResponseSchema.extend(data), ErrorResponseSchema]);
-var EmptyResponseSchema = generateActionResponse({});
-
-// src/api/auth.ts
-var GetAuthSignInResponseSchema = generateActionResponse({
-  options: z.any()
-});
-var PostAuthSignInVerifyBodySchema = z.object({
-  attRes: z.any()
-});
-var isPostAuthSignInVerifyBody = getZodTypeGuard(
-  PostAuthSignInVerifyBodySchema
-);
-var PostAuthSignupResponseSchema = generateActionResponse({
-  options: z.any()
-});
-var PostAuthSignupBodySchema = z.object({
-  email: z.string(),
-  inviteCode: z.string()
-});
-var isPostAuthSignupBody = getZodTypeGuard(PostAuthSignupBodySchema);
-var PostAuthSignupVerifyBodySchema = z.object({
-  attRes: z.any(),
-  email: z.string(),
-  inviteCode: z.string()
-});
-var isPostAuthSignupVerifyBody = getZodTypeGuard(
-  PostAuthSignupVerifyBodySchema
-);
-
-// src/forms/index.ts
-var EmailVerificationCodeFormSchema = z.object({
-  code: z.string().length(6, "Code must be 6 characters long")
-});
-var AccountCreationFormSchema = z.object({
-  handle: z.string().min(3, "Handle must be at least 3 characters long").max(16, "Handle must be at most 16 characters long").regex(
-    /^[a-zA-Z0-9_-]+$/,
-    "Handle must only contain letters, numbers, underscores, and hyphens"
-  )
-});
-
-// src/models/file.ts
-var AvatarFileMetadataSchema = z.object({
-  type: z.literal("avatar"),
-  accountId: z.string()
-});
-var PostFileMetadataSchema = z.object({
-  type: z.literal("post"),
-  postId: z.string()
-});
-var FileMetadataSchema = z.union([
-  AvatarFileMetadataSchema,
-  PostFileMetadataSchema
-]);
-var isFileMetadata = (obj) => FileMetadataSchema.safeParse(obj).success;
-var FileSchema = z.object({
-  id: z.string(),
-  metadata: FileMetadataSchema.nullable(),
-  url: z.string().nullable(),
-  sizeKB: z.number(),
-  createdAt: z.string()
-});
-
-// src/models/account.ts
-var AccountProfileDataSchema = z.object({
-  bio: z.string().optional(),
-  links: z.array(
-    z.object({
-      url: z.string(),
-      title: z.string()
-    })
-  ),
-  birthday: z.string().optional()
-  // ISO date string
-});
-var UserAccountSchema = z.object({
-  id: z.string(),
-  avatar: FileSchema.nullable(),
-  handle: z.string()
-});
-
-// src/models/authenticator.ts
-var AuthenticatorSchema = z.object({
-  credentialId: z.string(),
-  name: z.string(),
-  addedAt: z.string()
-});
-var isAuthenticator = getZodTypeGuard(AuthenticatorSchema);
-
-// src/models/inviteCode.ts
-var InviteCodeSchema = z.object({
-  code: z.string(),
-  redeemed: z.boolean()
-});
-var isInviteCode = getZodTypeGuard(InviteCodeSchema);
-
-// src/models/post.ts
-var PostPrimitiveSchema = z.object({
-  id: z.string(),
-  authorId: z.string(),
-  title: z.string().optional(),
-  body: z.string().optional(),
-  tags: z.string().array().nonempty().optional(),
-  postedAt: z.string()
-});
-var ImagePostSchema = PostPrimitiveSchema.extend({
-  type: z.literal("image"),
-  images: z.array(FileSchema).nonempty()
-});
-var TextPostSchema = PostPrimitiveSchema.extend({
-  type: z.literal("text")
-});
-var PostSchema = z.union([ImagePostSchema, TextPostSchema]);
-var isImagePost = getZodTypeGuard(ImagePostSchema);
-var isTextPost = getZodTypeGuard(TextPostSchema);
-var isPost = getZodTypeGuard(PostSchema);
-
 // src/models/token.ts
 var TokenSchema = z.object({
   user: z.object({
@@ -3877,70 +3826,36 @@ var TokenSchema = z.object({
 });
 var isToken = getZodTypeGuard(TokenSchema);
 
-// src/api/user.ts
-var GetUserMeResponseSchema = generateActionResponse({
+// src/models/user.ts
+var userRoles = ["user", "mod", "admin", "foru"];
+var UserRoleSchema = z.enum(userRoles);
+var UserFacingUserSchema = z.object({
   email: z.string(),
-  emailVerified: z.boolean()
+  emailVerified: z.boolean(),
+  joinedAt: z.string(),
+  storageLimitMB: z.number(),
+  role: UserRoleSchema
 });
-var GetUserSettingsResponseSchema = generateActionResponse({
-  authenticators: AuthenticatorSchema.array(),
-  inviteCodes: InviteCodeSchema.array()
-});
-var PostUserEmailVerifyBodySchema = EmailVerificationCodeFormSchema;
-var GetUserAuthenticatorResponseSchema = generateActionResponse({
-  regOptions: z.any()
-});
-var PutUserAuthenticatorResponseSchema = generateActionResponse({
-  authenticator: AuthenticatorSchema
-});
-var PatchUserAuthenticatorCredentialIdBodySchema = z.object({
-  name: z.string()
-});
-var isPatchUserAuthenticatorCredentialIdBody = getZodTypeGuard(
-  PatchUserAuthenticatorCredentialIdBodySchema
-);
 export {
   AccountCreationFormSchema,
   AccountProfileDataSchema,
-  AuthenticatorSchema,
   AvatarFileMetadataSchema,
   EmailVerificationCodeFormSchema,
-  EmptyResponseSchema,
-  ErrorResponseSchema,
+  FileMetadataBaseSchema,
   FileMetadataSchema,
-  FileSchema,
-  GetAuthSignInResponseSchema,
-  GetUserAuthenticatorResponseSchema,
-  GetUserMeResponseSchema,
-  GetUserSettingsResponseSchema,
-  ImagePostSchema,
-  InviteCodeSchema,
-  PatchUserAuthenticatorCredentialIdBodySchema,
-  PostAuthSignInVerifyBodySchema,
-  PostAuthSignupBodySchema,
-  PostAuthSignupResponseSchema,
-  PostAuthSignupVerifyBodySchema,
+  FileMetadataTypeSchema,
   PostFileMetadataSchema,
-  PostPrimitiveSchema,
-  PostSchema,
-  PostUserEmailVerifyBodySchema,
-  PutUserAuthenticatorResponseSchema,
-  SuccessResponseSchema,
-  TextPostSchema,
   TokenSchema,
-  UserAccountSchema,
-  generateActionResponse,
+  UserFacingAccountSchema,
+  UserFacingAuthenticatorSchema,
+  UserFacingFileSchema,
+  UserFacingInviteCodeSchema,
+  UserFacingUserSchema,
+  UserRoleSchema,
   getFormattedZodError,
   getZodTypeGuard,
-  isAuthenticator,
   isFileMetadata,
-  isImagePost,
-  isInviteCode,
-  isPatchUserAuthenticatorCredentialIdBody,
-  isPost,
-  isPostAuthSignInVerifyBody,
-  isPostAuthSignupBody,
-  isPostAuthSignupVerifyBody,
-  isTextPost,
-  isToken
+  isToken,
+  metadataTypes,
+  userRoles
 };

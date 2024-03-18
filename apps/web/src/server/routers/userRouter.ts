@@ -23,14 +23,23 @@ import {
 } from "@mbsm/db-layer";
 import {
   AccountCreationFormSchema,
-  Authenticator,
-  AuthenticatorSchema,
   FileMetadata,
-  FileSchema,
-  InviteCodeSchema,
-  UserAccountSchema,
+  UserFacingAccountSchema,
+  UserFacingAuthenticator,
+  UserFacingAuthenticatorSchema,
+  UserFacingFileSchema,
+  UserFacingInviteCodeSchema,
+  UserFacingUserSchema,
 } from "@mbsm/types";
-import { getEnvAsBool, getEnvAsStr } from "@mbsm/utils";
+import {
+  getEnvAsBool,
+  getEnvAsStr,
+  toUserFacingAccount,
+  toUserFacingAuthenticator,
+  toUserFacingFile,
+  toUserFacingInviteCode,
+  toUserFacingUser,
+} from "@mbsm/utils";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { DateTime } from "luxon";
@@ -61,29 +70,40 @@ export const userRouter = router({
   me: authedProcedure
     .output(
       z.object({
-        email: z.string(),
-        emailVerified: z.boolean(),
-        maxStorageMB: z.number(),
-        accounts: UserAccountSchema.array(),
+        user: UserFacingUserSchema,
+        accounts: UserFacingAccountSchema.array(),
       })
     )
     .query(async ({ ctx }) => {
-      const user = await db.query.user.findFirst({
+      const result = await db.query.user.findFirst({
         where: ({ id }, { eq }) => eq(id, ctx.token.user.id),
         with: { accounts: { with: { avatar: true } } },
       });
 
-      if (!user)
+      if (!result)
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "User not found",
         });
 
+      const { accounts, ...user } = result;
+
+      console.log({ accounts, user });
+
+      console.log({
+        response: {
+          user: toUserFacingUser({ user }),
+          accounts: accounts.map(({ avatar, ...account }) =>
+            toUserFacingAccount({ account, avatar })
+          ),
+        },
+      });
+
       return {
-        email: user.email,
-        emailVerified: user.emailVerified,
-        maxStorageMB: user.storageLimitMB,
-        accounts: user.accounts,
+        user: toUserFacingUser({ user }),
+        accounts: accounts.map(({ avatar, ...account }) =>
+          toUserFacingAccount({ account, avatar })
+        ),
       };
     }),
   verifyEmail: authedProcedure
@@ -123,13 +143,13 @@ export const userRouter = router({
   settings: authedProcedure
     .output(
       z.object({
-        authenticators: AuthenticatorSchema.array(),
-        inviteCodes: InviteCodeSchema.array(),
-        files: FileSchema.array(),
+        authenticators: UserFacingAuthenticatorSchema.array(),
+        inviteCodes: UserFacingInviteCodeSchema.array(),
+        files: UserFacingFileSchema.array(),
       })
     )
     .query(async ({ ctx: { token } }) => {
-      const user = await db.query.user.findFirst({
+      const result = await db.query.user.findFirst({
         where: ({ id }, { eq }) => eq(id, token.user.id),
         with: {
           authenticators: true,
@@ -141,22 +161,14 @@ export const userRouter = router({
         },
       });
 
-      if (!user) {
+      if (!result) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "User not found",
         });
       }
 
-      const { authenticators, inviteCodes } = user;
-
-      let finalAuthenticators: Authenticator[] = authenticators.map(
-        (authenticator) => ({
-          credentialId: authenticator.credentialId,
-          name: authenticator.name,
-          addedAt: authenticator.createdAt,
-        })
-      );
+      const { authenticators, inviteCodes, files, ...user } = result;
 
       let finalInviteCodes = inviteCodes;
 
@@ -177,9 +189,13 @@ export const userRouter = router({
       }
 
       return {
-        authenticators: finalAuthenticators,
-        inviteCodes: finalInviteCodes,
-        files: user.files,
+        authenticators: authenticators.map((authenticator) =>
+          toUserFacingAuthenticator({ authenticator })
+        ),
+        inviteCodes: finalInviteCodes.map((inviteCode) =>
+          toUserFacingInviteCode({ inviteCode })
+        ),
+        files: files.map((file) => toUserFacingFile({ file })),
       };
     }),
   updateAuthenticator: authedProcedure
@@ -194,8 +210,8 @@ export const userRouter = router({
         where: ({ id }, { eq }) => eq(id, token.user.id),
         with: {
           authenticators: {
-            where: (authenticators, { isNotNull }) =>
-              isNotNull(authenticators.deletedAt),
+            where: (authenticators, { isNull }) =>
+              isNull(authenticators.deletedAt),
           },
         },
       });
@@ -228,8 +244,8 @@ export const userRouter = router({
         where: ({ id }, { eq }) => eq(id, token.user.id),
         with: {
           authenticators: {
-            where: (authenticators, { isNotNull }) =>
-              isNotNull(authenticators.deletedAt),
+            where: (authenticators, { isNull }) =>
+              isNull(authenticators.deletedAt),
           },
         },
       });
@@ -251,7 +267,7 @@ export const userRouter = router({
       return { options };
     }),
   verifyAddAuthenticator: authedProcedure
-    .output(z.object({ authenticator: AuthenticatorSchema }))
+    .output(z.object({ authenticator: UserFacingAuthenticatorSchema }))
     .input(z.object({ attRes: z.any() }))
     .mutation(async ({ input: { attRes }, ctx: { token } }) => {
       const user = await getUserById(token.user.id);
@@ -287,23 +303,26 @@ export const userRouter = router({
 
       await Promise.all([
         db
+          .insert(schema.authenticator)
+          .values({
+            counter,
+            credentialBackedUp,
+            credentialDeviceType,
+            credentialId,
+            credentialPublicKey:
+              Buffer.from(credentialPublicKey).toString("base64url"),
+            name,
+            transports: [].join(","),
+            userId: user.id,
+          })
+          .returning(),
+        db
           .update(schema.user)
           .set({ currentRegChallenge: null })
           .where(eq(schema.user.id, user.id)),
-        db.insert(schema.authenticator).values({
-          counter,
-          credentialBackedUp,
-          credentialDeviceType,
-          credentialId,
-          credentialPublicKey:
-            Buffer.from(credentialPublicKey).toString("base64url"),
-          name,
-          transports: [].join(","),
-          userId: user.id,
-        }),
       ]);
 
-      const authenticator: Authenticator = {
+      const authenticator: UserFacingAuthenticator = {
         addedAt: now.toUTCString(),
         credentialId,
         name,
@@ -322,8 +341,8 @@ export const userRouter = router({
       }
 
       const existingAccount = await db.query.account.findFirst({
-        where: ({ handle, deletedAt }, { and, eq, isNotNull }) =>
-          and(eq(handle, input.handle), isNotNull(deletedAt)),
+        where: ({ handle, deletedAt }, { and, eq, isNull }) =>
+          and(eq(handle, input.handle), isNull(deletedAt)),
       });
 
       if (existingAccount) {
@@ -381,7 +400,7 @@ export const userRouter = router({
           await updateFile({
             id: f.id,
             fields: {
-              deletedAt: DateTime.utc().toISO(),
+              deletedAt: DateTime.utc().toJSDate(),
             },
           });
         }),

@@ -1,5 +1,6 @@
 export { Ratelimit, RatelimitConfig } from '@upstash/ratelimit';
 import * as drizzle_orm from 'drizzle-orm';
+import { InferSelectModel } from 'drizzle-orm';
 export { InferSelectModel } from 'drizzle-orm';
 import * as drizzle_orm_postgres_js from 'drizzle-orm/postgres-js';
 import * as drizzle_orm_vercel_postgres from 'drizzle-orm/vercel-postgres';
@@ -17,9 +18,9 @@ declare const account: drizzle_orm_pg_core.PgTableWithColumns<{
         deletedAt: drizzle_orm_pg_core.PgColumn<{
             name: "deleted_at";
             tableName: "account";
-            dataType: "string";
-            columnType: "PgTimestampString";
-            data: string;
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
             driverParam: string;
             notNull: false;
             hasDefault: false;
@@ -29,9 +30,9 @@ declare const account: drizzle_orm_pg_core.PgTableWithColumns<{
         createdAt: drizzle_orm_pg_core.PgColumn<{
             name: "created_at";
             tableName: "account";
-            dataType: "string";
-            columnType: "PgTimestampString";
-            data: string;
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -41,9 +42,9 @@ declare const account: drizzle_orm_pg_core.PgTableWithColumns<{
         updatedAt: drizzle_orm_pg_core.PgColumn<{
             name: "updated_at";
             tableName: "account";
-            dataType: "string";
-            columnType: "PgTimestampString";
-            data: string;
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -96,6 +97,7 @@ declare const account: drizzle_orm_pg_core.PgTableWithColumns<{
                     url: string;
                     title: string;
                 }[];
+                name?: string | undefined;
                 bio?: string | undefined;
                 birthday?: string | undefined;
             };
@@ -132,9 +134,9 @@ declare const authenticator: drizzle_orm_pg_core.PgTableWithColumns<{
         deletedAt: drizzle_orm_pg_core.PgColumn<{
             name: "deleted_at";
             tableName: "authenticator";
-            dataType: "string";
-            columnType: "PgTimestampString";
-            data: string;
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
             driverParam: string;
             notNull: false;
             hasDefault: false;
@@ -144,9 +146,9 @@ declare const authenticator: drizzle_orm_pg_core.PgTableWithColumns<{
         createdAt: drizzle_orm_pg_core.PgColumn<{
             name: "created_at";
             tableName: "authenticator";
-            dataType: "string";
-            columnType: "PgTimestampString";
-            data: string;
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -156,9 +158,9 @@ declare const authenticator: drizzle_orm_pg_core.PgTableWithColumns<{
         updatedAt: drizzle_orm_pg_core.PgColumn<{
             name: "updated_at";
             tableName: "authenticator";
-            dataType: "string";
-            columnType: "PgTimestampString";
-            data: string;
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -287,9 +289,9 @@ declare const file: drizzle_orm_pg_core.PgTableWithColumns<{
         deletedAt: drizzle_orm_pg_core.PgColumn<{
             name: "deleted_at";
             tableName: "file";
-            dataType: "string";
-            columnType: "PgTimestampString";
-            data: string;
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
             driverParam: string;
             notNull: false;
             hasDefault: false;
@@ -299,9 +301,9 @@ declare const file: drizzle_orm_pg_core.PgTableWithColumns<{
         createdAt: drizzle_orm_pg_core.PgColumn<{
             name: "created_at";
             tableName: "file";
-            dataType: "string";
-            columnType: "PgTimestampString";
-            data: string;
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -311,9 +313,9 @@ declare const file: drizzle_orm_pg_core.PgTableWithColumns<{
         updatedAt: drizzle_orm_pg_core.PgColumn<{
             name: "updated_at";
             tableName: "file";
-            dataType: "string";
-            columnType: "PgTimestampString";
-            data: string;
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -472,9 +474,9 @@ declare const user: drizzle_orm_pg_core.PgTableWithColumns<{
         deletedAt: drizzle_orm_pg_core.PgColumn<{
             name: "deleted_at";
             tableName: "user";
-            dataType: "string";
-            columnType: "PgTimestampString";
-            data: string;
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
             driverParam: string;
             notNull: false;
             hasDefault: false;
@@ -484,9 +486,9 @@ declare const user: drizzle_orm_pg_core.PgTableWithColumns<{
         createdAt: drizzle_orm_pg_core.PgColumn<{
             name: "created_at";
             tableName: "user";
-            dataType: "string";
-            columnType: "PgTimestampString";
-            data: string;
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -496,9 +498,9 @@ declare const user: drizzle_orm_pg_core.PgTableWithColumns<{
         updatedAt: drizzle_orm_pg_core.PgColumn<{
             name: "updated_at";
             tableName: "user";
-            dataType: "string";
-            columnType: "PgTimestampString";
-            data: string;
+            dataType: "date";
+            columnType: "PgTimestamp";
+            data: Date;
             driverParam: string;
             notNull: true;
             hasDefault: true;
@@ -578,7 +580,7 @@ declare const user: drizzle_orm_pg_core.PgTableWithColumns<{
             baseColumn: never;
         }, {}, {}>;
         role: drizzle_orm_pg_core.PgColumn<{
-            name: "user";
+            name: "role";
             tableName: "user";
             dataType: "string";
             columnType: "PgEnumColumn";
@@ -600,9 +602,9 @@ declare const userRelations: drizzle_orm.Relations<"user", {
     preferences: drizzle_orm.One<"user_preferences", true>;
 }>;
 declare const userSchema: zod.ZodObject<{
-    deletedAt: zod.ZodNullable<zod.ZodString>;
-    createdAt: zod.ZodString;
-    updatedAt: zod.ZodString;
+    deletedAt: zod.ZodNullable<zod.ZodDate>;
+    createdAt: zod.ZodDate;
+    updatedAt: zod.ZodDate;
     id: zod.ZodString;
     email: zod.ZodString;
     emailVerified: zod.ZodBoolean;
@@ -618,9 +620,9 @@ declare const userSchema: zod.ZodObject<{
     storageLimitMB: number;
     currentRegChallenge: string | null;
     role: "user" | "mod" | "admin" | "foru";
-    deletedAt: string | null;
-    createdAt: string;
-    updatedAt: string;
+    deletedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
 }, {
     id: string;
     email: string;
@@ -629,9 +631,9 @@ declare const userSchema: zod.ZodObject<{
     storageLimitMB: number;
     currentRegChallenge: string | null;
     role: "user" | "mod" | "admin" | "foru";
-    deletedAt: string | null;
-    createdAt: string;
-    updatedAt: string;
+    deletedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
 }>;
 
 declare const userPreferences: drizzle_orm_pg_core.PgTableWithColumns<{
@@ -707,6 +709,7 @@ declare const getAccountByHandle: (handle: string) => Promise<{
             url: string;
             title: string;
         }[];
+        name?: string | undefined;
         bio?: string | undefined;
         birthday?: string | undefined;
     };
@@ -833,4 +836,12 @@ declare const getUserById: (id: string) => Promise<{
 
 declare const redis: _vercel_kv.VercelKV;
 
-export { clearCurrentUserChallenge, db, getAccountByHandle, getAuthenticatorAndUserByCredentialId, getAuthenticatorByCredentialId, getAuthenticatorsForUser, getUnredeemedInviteCode, getUserByEmail, getUserById, getUserInviteCodes, insertAccount, insertAuthenticator, insertInviteCodes, insertUser, redis, schema, updateAccount, updateAuthenticator, updateFile, updateInviteCode, updateUser };
+type IsTable<T> = {
+    [K in keyof T]: T[K] extends {
+        getSQL: (arg: any) => any;
+    } ? K : never;
+}[keyof T];
+type TableKeys = IsTable<typeof schema>;
+type DbSchema<T extends TableKeys> = InferSelectModel<(typeof schema)[T]>;
+
+export { type DbSchema, clearCurrentUserChallenge, db, getAccountByHandle, getAuthenticatorAndUserByCredentialId, getAuthenticatorByCredentialId, getAuthenticatorsForUser, getUnredeemedInviteCode, getUserByEmail, getUserById, getUserInviteCodes, insertAccount, insertAuthenticator, insertInviteCodes, insertUser, redis, schema, updateAccount, updateAuthenticator, updateFile, updateInviteCode, updateUser };

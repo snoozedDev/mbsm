@@ -1,2 +1,2 @@
-- Create cronjob which deletes all files with no references (https://vercel.com/docs/storage/vercel-blob/using-blob-sdk#del)
-- Create "ratelimiters" for monthly upload
+- Create cronjob which deletes all files with no references
+- Create "ratelimiters" for a monthly and daily upload in KiB

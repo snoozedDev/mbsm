@@ -20,11 +20,12 @@
     "@vercel/kv": "1.0.1",
     "@vercel/postgres": "0.7.2",
     "drizzle-orm": "0.29.3",
-    "drizzle-zod": "^0.5.1",
     "postgres": "3.4.3"
   },
   "devDependencies": {
+    "@mbsm/types": "workspace:*",
     "@mbsm/tsconfig": "workspace:*",
+    "zod": "^3.22.4",
     "drizzle-kit": "0.20.14",
     "eslint": "8.51.0",
     "tsup": "8.0.1",
